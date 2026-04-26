@@ -6,6 +6,7 @@
 #include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QSurfaceFormat>
 #include <QUrl>
 
 #ifdef Q_OS_ANDROID
@@ -49,6 +50,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 #ifdef Q_OS_WIN32
     qputenv("QT_MULTIMEDIA_PREFERRED_PLUGINS", "w");
 #endif
+
+    QSurfaceFormat format;
+    format.setAlphaBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(format);
 
 #ifdef Q_OS_ANDROID
     QGuiApplication app(argc, argv);

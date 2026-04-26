@@ -19,7 +19,7 @@ Maui.Page
     property alias selectionBar: _selectionBar
     property alias currentTabIndex : _browserList.currentIndex
     property alias currentTab : _browserList.currentItem
-    property Browser currentSplit: currentTab.currentItem
+    property Browser currentSplit: currentTab ? currentTab.currentItem : null
     property alias browserList : _browserList
 
     floatingFooter: true
@@ -30,7 +30,7 @@ Maui.Page
     {
         id: _selectionBar
         anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.min(parent.width-(Maui.Style.space.medium*2), implicitWidth)
+        width: Math.min(((parent ? parent.width : 0) - (Maui.Style.space.medium * 2)), implicitWidth)
 
         maxListHeight: _browserList.height - (Maui.Style.contentMargins*2)
 
@@ -169,7 +169,7 @@ Maui.Page
         onNewTabClicked: openTab(currentBrowser.currentPath)
         onCloseTabClicked: (index) => closeTab(index)
         Keys.enabled: true
-        Keys.forwardTo: currentTab
+        Keys.forwardTo: currentTab ? [currentTab] : []
         background: null
         // tabBar.background: null
 
@@ -205,4 +205,3 @@ Maui.Page
         return false;
     }
 }
-

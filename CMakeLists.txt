@@ -60,14 +60,14 @@ if(UNIX OR WIN32 OR APPLE AND NOT ANDROID)
     find_package(Qt6 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Widgets)
 endif()
 
-find_package(MauiKit4 ${REQUIRED_MAUI_VERSION} REQUIRED COMPONENTS FileBrowsing)
+find_package(MauiKit4 ${REQUIRED_MAUI_VERSION} REQUIRED COMPONENTS FileBrowsing Archiver Documents TextEditor)
+
+if(UNIX)
+    find_package(MauiKit4 ${REQUIRED_MAUI_VERSION} REQUIRED COMPONENTS Terminal)
+endif()
 
 ecm_find_qmlmodule(org.mauikit.controls)
 ecm_find_qmlmodule(org.mauikit.filebrowsing)
-ecm_find_qmlmodule(org.mauikit.documents)
-ecm_find_qmlmodule(org.mauikit.archiver)
-
-ecm_find_qmlmodule(org.kde.purpose)
 
 if(ECM_SOURCE_UNDER_VERSION_CONTROL)
     execute_process(
@@ -96,7 +96,7 @@ ecm_setup_version(${INDEX_VERSION}
     VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/index_version.h")
 
 if (QT_KNOWN_POLICY_QTP0001)
-    qt_policy(SET QTP0001 OLD)
+    qt_policy(SET QTP0001 NEW)
 endif()
 
 if (QT_KNOWN_POLICY_QTP0004)

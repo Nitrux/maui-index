@@ -8,6 +8,7 @@ Maui.Page
 {
     id: control
     headBar.visible: false
+    background: null
     footBar.visible: true
     footBar.background: null
 

@@ -147,95 +147,73 @@ Maui.SettingsDialog
             label1.text:  i18n("Sort")
             label2.text: i18n("Default sorting value.")
 
-            Maui.ToolButtonMenu
+            ComboBox
             {
-                icon.name: "view-sort"
+                implicitWidth: Math.max(Maui.Style.units.gridUnit * 7, contentItem.implicitWidth + leftPadding + rightPadding)
+                model: [
+                    i18n("Type"),
+                    i18n("Date"),
+                    i18n("Modified"),
+                    i18n("Size"),
+                    i18n("Name")
+                ]
+                currentIndex: switch(sortSettings.sortBy)
+                              {
+                              case FB.FMList.MIME: return 0
+                              case FB.FMList.DATE: return 1
+                              case FB.FMList.MODIFIED: return 2
+                              case FB.FMList.SIZE: return 3
+                              case FB.FMList.LABEL: return 4
+                              default: return 2
+                              }
 
-                onToggled: open()
-                checkable: true
-
-                Action
+                onActivated: (index) =>
                 {
-                    text: i18n("Type")
-                    checked: sortSettings.sortBy === FB.FMList.MIME
-                    checkable: true
-
-                    onTriggered:
+                    switch(index)
                     {
+                    case 0:
                         sortSettings.sortBy = FB.FMList.MIME
-                    }
-                }
-
-                Action
-                {
-                    text: i18n("Date")
-                    checked: sortSettings.sortBy === FB.FMList.DATE
-                    checkable: true
-                    onTriggered:
-                    {
+                        break
+                    case 1:
                         sortSettings.sortBy = FB.FMList.DATE
-                    }
-                }
-
-                Action
-                {
-                    text: i18n("Modified")
-                    checked: sortSettings.sortBy === FB.FMList.MODIFIED
-                    checkable: true
-                    onTriggered:
-                    {
+                        break
+                    case 2:
                         sortSettings.sortBy = FB.FMList.MODIFIED
-                    }
-                }
-
-                Action
-                {
-                    text: i18n("Size")
-                    checked: sortSettings.sortBy === FB.FMList.SIZE
-                    checkable: true
-                    onTriggered:
-                    {
+                        break
+                    case 3:
                         sortSettings.sortBy = FB.FMList.SIZE
-                    }
-                }
-
-                Action
-                {
-                    text: i18n("Name")
-                    checked:  sortSettings.sortBy === FB.FMList.LABEL
-                    checkable: true
-                    onTriggered:
-                    {
+                        break
+                    case 4:
                         sortSettings.sortBy = FB.FMList.LABEL
+                        break
                     }
                 }
+            }
+        }
 
-                MenuSeparator{}
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Folders First")
+            label2.text: i18n("Show folders before files when sorting.")
 
-                MenuItem
-                {
-                    text: i18n("Show Folders First")
-                    checked:   sortSettings.foldersFirst
-                    checkable: true
+            Switch
+            {
+                checkable: true
+                checked: sortSettings.foldersFirst
+                onToggled: sortSettings.foldersFirst = checked
+            }
+        }
 
-                    onTriggered:
-                    {
-                        sortSettings.foldersFirst =  !sortSettings.foldersFirst
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Group")
+            label2.text: i18n("Group items by the selected sorting mode.")
 
-                    }
-                }
-
-                MenuItem
-                {
-                    id: groupAction
-                    text: i18n("Group")
-                    checkable: true
-                    checked: sortSettings.group
-                    onTriggered:
-                    {
-                        sortSettings.group = !sortSettings.group
-                    }
-                }
+            Switch
+            {
+                checkable: true
+                checked: sortSettings.group
+                onToggled: sortSettings.group = checked
             }
         }
     }

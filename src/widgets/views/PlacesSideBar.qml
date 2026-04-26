@@ -20,7 +20,7 @@ Loader
     active: (control.enabled && control.visible) || item
     Keys.enabled: false
     focus: false
-    readonly property QtObject list: item ? item.list : null
+    readonly property var list: item && item.list ? item.list : null
 
     OpacityAnimator on opacity
     {
@@ -41,7 +41,7 @@ Loader
         {
             color: Maui.Theme.alternateBackgroundColor
             radius: settings.floatyUI ? Maui.Style.radiusV : 0
-            border.color:  settings.floatyUI ? Maui.Theme.backgroundColor : "transparent"
+            border.color: settings.floatyUI ? Maui.Theme.backgroundColor : "transparent"
         }
 
         contentItem: Maui.ListBrowser
@@ -301,5 +301,3 @@ Loader
 
     }
 }
-
-

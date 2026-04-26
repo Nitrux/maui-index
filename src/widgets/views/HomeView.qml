@@ -24,6 +24,7 @@ Maui.Page
     Maui.Theme.inherit: false
     headBar.forceCenterMiddleContent: false
     altHeader: Maui.Handy.isMobile
+    background: null
 
     Maui.ContextualMenu
     {

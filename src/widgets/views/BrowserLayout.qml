@@ -144,7 +144,8 @@ Item
 
     function forceActiveFocus()
     {
-        control.currentItem.forceActiveFocus()
+        if(control.currentItem)
+            control.currentItem.forceActiveFocus()
     }
 
     function split(path, orientation)
@@ -172,5 +173,4 @@ Item
         splitView.closeSplit(index)
     }
 }
-
 

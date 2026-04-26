@@ -23,6 +23,8 @@ Maui.ApplicationWindow
 {
     id: root
     title: currentTab ? currentTab.title : ""
+    color: "transparent"
+    background: null
 
     Maui.Style.accentColor : Maui.Handy.isAndroid ? "#6765C2": undefined
     Maui.Handy.singleClick: Maui.Handy.hasTransientTouchInput
@@ -41,14 +43,21 @@ Maui.ApplicationWindow
     property alias currentTabIndex : _browserView.currentTabIndex
     property bool selectionMode: false
 
-    // Maui.WindowBlur
-    // {
-    //     id: _translucencyManager
-    //     view: root
-    //     geometry: Qt.rect(root.x, root.y, root.width, root.height)
-    //     windowRadius: Maui.Style.radiusV
-    //     enabled: !Maui.Handy.isMobile && settings.windowTranslucency && Maui.Style.enableEffects && Maui.Handy.isPlasma
-    // }
+    Maui.WindowBlur
+    {
+        view: root
+        geometry: Qt.rect(0, 0, root.width, root.height)
+        windowRadius: Maui.Style.radiusV
+        enabled: true
+    }
+
+    Rectangle
+    {
+        anchors.fill: parent
+        color: Maui.Theme.backgroundColor
+        opacity: 0.76
+        radius: Maui.Style.radiusV
+    }
 
     Maui.Notify
     {
@@ -315,11 +324,7 @@ Maui.ApplicationWindow
         sideBar.minimumWidth: Maui.Style.units.gridUnit * 12
         Maui.Theme.colorSet: Maui.Theme.View
 
-        background: Rectangle
-        {
-            color: Maui.Theme.backgroundColor
-            // opacity: _translucencyManager.enabled ? 0.8 : 1
-        }
+        background: null
 
         sideBar.autoShow: true
         sideBar.floats: sideBar.collapsed
@@ -710,6 +715,7 @@ Maui.ApplicationWindow
                 initialItem: BrowserView
                 {
                     id: _browserView
+                    visible: StackView.status !== StackView.Inactive
                     flickable: currentBrowser.flickable
                 }
 
@@ -717,8 +723,8 @@ Maui.ApplicationWindow
                 {
                     id: _homeViewComponent
                     asynchronous: true
-                    visible: StackView.status === StackView.Active
-                    active: StackView.status === StackView.Active || item
+                    visible: StackView.status !== StackView.Inactive
+                    active: StackView.status !== StackView.Inactive || item
 
                     sourceComponent: HomeView {}
 

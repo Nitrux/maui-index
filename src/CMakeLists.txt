@@ -37,6 +37,7 @@ if(ANDROID)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/android_files/version.gradle.in ${CMAKE_BINARY_DIR}/src/version.gradle)
 else()
     qt_add_executable(${PROJECT_NAME}
+        MANUAL_FINALIZATION
         ${index_SRCS}
         ${index_dbus_SRCS}
         ${index_RSCRS})
@@ -44,6 +45,8 @@ endif()
 
 qt_add_qml_module(${PROJECT_NAME} URI app.maui.index
     NO_PLUGIN
+    NO_IMPORT_SCAN
+    RESOURCE_PREFIX /
     QML_FILES
     main.qml
     widgets/views/Browser.qml
@@ -92,6 +95,7 @@ if (ANDROID)
 elseif(UNIX)
     target_link_libraries(${PROJECT_NAME}
         PRIVATE
+        MauiKit4::Terminal
         KF6::KIOCore
         KF6::KIOFileWidgets
         Qt6::DBus)
@@ -107,7 +111,10 @@ target_compile_definitions(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     MauiKit4
+    MauiKit4::Archiver
+    MauiKit4::Documents
     MauiKit4::FileBrowsing
+    MauiKit4::TextEditor
     Qt6::Core
     Qt6::Multimedia
     Qt6::Quick
@@ -126,4 +133,3 @@ if(UNIX AND NOT APPLE AND NOT ANDROID)
 endif()
 
 qt_finalize_target(${PROJECT_NAME})
-

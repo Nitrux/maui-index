@@ -11,11 +11,13 @@ Maui.Page
     id: control
     property alias player : player
     headBar.visible: false
+    background: null
 
     Video
     {
         id: player
         anchors.fill: parent
+        visible: control.StackView.status !== StackView.Inactive
         source: currentUrl
         autoPlay: appSettings.autoPlayPreviews
         loops: 3

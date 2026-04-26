@@ -12,6 +12,10 @@ import ".."
 Maui.ContextualMenu
 {
     id: control
+    readonly property bool canBookmark: !control.isExec && control.isDir
+    readonly property bool hasDirectoryActions: control.isDir
+    readonly property bool canExtract: FB.FM.checkFileType(FB.FMList.COMPRESSED, control.item.mime)
+    readonly property bool showDirectorySection: canBookmark || hasDirectoryActions
 
     /**
       *
@@ -37,13 +41,11 @@ Maui.ContextualMenu
       *
       */
 
-    property bool isFav: false
-
-    title:  control.item ? control.item.label : ""
-    Maui.Controls.subtitle: control.item.mime ? (control.item.mime === "inode/directory" ? (control.item.count ? control.item.count + i18n(" items") : "") : Maui.Handy.formatSize(control.item.size)) : ""
-    icon.source: control.item ? control.item.thumbnail : ""
-    icon.name: control.item ? control.item.icon : ""
-    Maui.Controls.badgeText: _browser.filterSelection(currentPath, control.item.path).length > 1 ?  _browser.filterSelection(currentPath, control.item.path).length : ""
+    title: control.item && control.item.label ? control.item.label : ""
+    Maui.Controls.subtitle: control.item && control.item.mime ? (control.item.mime === "inode/directory" ? (control.item.count ? control.item.count + i18n(" items") : "") : Maui.Handy.formatSize(control.item.size)) : ""
+    icon.source: control.item && control.item.thumbnail ? control.item.thumbnail : ""
+    icon.name: control.item && control.item.icon ? control.item.icon : ""
+    Maui.Controls.badgeText: control.item && control.item.path && _browser.filterSelection(currentPath, control.item.path).length > 1 ? _browser.filterSelection(currentPath, control.item.path).length : ""
 
     Maui.MenuItemActionRow
     {
@@ -84,7 +86,7 @@ Maui.ContextualMenu
         Action
         {
             text: i18n("Remove")
-            Maui.Theme.textColor: Maui.Theme.negativeTextColor
+            Maui.Controls.status: Maui.Controls.Negative
             icon.name: "edit-delete"
             onTriggered:
             {
@@ -165,57 +167,34 @@ Maui.ContextualMenu
         onTriggered: tagFiles(_browser.filterSelection(currentPath, control.item.path))
     }
 
-     MenuSeparator {}
-
-    Maui.MenuItemActionRow
-    {
-        Action
-        {
-            text: control.isFav ? i18n("UnFav") : i18n("Fav")
-            checked: control.isFav
-            checkable: true
-            icon.name: "love"
-            onTriggered:
-            {
-                if(FB.Tagging.toggleFav(item.path))
-                {
-                    control.isFav = !control.isFav
-                }
-            }
-        }
-
-        Action
-        {
-            enabled: !control.isExec
-            text: i18n("Share")
-            icon.name: "document-share"
-            onTriggered:
-            {
-                shareFiles(_browser.filterSelection(currentPath, control.item.path))
-            }
-        }
-
-        Action
-        {
-            enabled: !control.isExec && control.isDir
-            text: i18n("Bookmark")
-            icon.name: "bookmark-new"
-            onTriggered:
-            {
-                _browser.bookmarkFolder([control.item.path])
-            }
-        }
-    }
-
     MenuSeparator
     {
-        visible: control.isDir
+        visible: showDirectorySection
         height: visible ? implicitHeight : -control.spacing
     }
 
     MenuItem
     {
-        enabled: control.isDir
+        enabled: canBookmark
+        visible: enabled
+        height: visible ? implicitHeight : -control.spacing
+        text: i18n("Add Bookmark")
+        icon.name: "bookmark-new"
+        onTriggered:
+        {
+            _browser.bookmarkFolder([control.item.path])
+        }
+    }
+
+    MenuSeparator
+    {
+        visible: hasDirectoryActions
+        height: visible ? implicitHeight : -control.spacing
+    }
+
+    MenuItem
+    {
+        enabled: hasDirectoryActions
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Open in New Tab")
@@ -225,7 +204,7 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: control.isDir && Maui.Handy.isLinux
+        enabled: hasDirectoryActions && Maui.Handy.isLinux
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Open in New Window")
@@ -235,7 +214,7 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: control.isDir && root.currentTab.count === 1
+        enabled: hasDirectoryActions && root.currentTab.count === 1
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Open in Split View")
@@ -247,7 +226,7 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: FB.FM.checkFileType(FB.FMList.COMPRESSED, control.item.mime)
+        enabled: canExtract
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Extract")
@@ -275,7 +254,7 @@ Maui.ContextualMenu
 
     MenuSeparator
     {
-        visible: control.isDir
+        visible: hasDirectoryActions
         height: visible ? implicitHeight : -control.spacing
     }
 
@@ -284,7 +263,7 @@ Maui.ContextualMenu
         id: colorBar
         padding: control.padding
         width: parent.width
-        enabled: control.isDir
+        enabled: hasDirectoryActions
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         Binding on folderColor {
@@ -317,7 +296,6 @@ Maui.ContextualMenu
             control.index = index
             control.isDir = item.isdir == true || item.isdir == "true"
             control.isExec = item.executable == true || item.executable == "true"
-            control.isFav = FB.Tagging.isFav(item.path)
             control.show()
         }
     }

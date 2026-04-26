@@ -31,7 +31,7 @@ Item
     focus: false
     focusPolicy: Qt.NoFocus
 
-    property int preferredWidth: visible ? Math.max(500, item.implicitWidth): 0
+    property int preferredWidth: visible && item ? Math.max(500, item.implicitWidth) : 0
 
     Behavior on preferredWidth
     {
@@ -42,7 +42,7 @@ Item
         }
     }
 
-    implicitHeight: _loader.item.implicitHeight
+    implicitHeight: _loader.item ? _loader.item.implicitHeight : 0
     implicitWidth: preferredWidth
     /**
       * url : string
@@ -97,13 +97,13 @@ Item
                 anchors.fill: parent
                 visible: pathEntry
                 enabled: visible
-                text: control.url
+                text: control.displayPath(control.url)
                 inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
                 implicitWidth: 500
                 horizontalAlignment: Qt.AlignLeft
                 onAccepted:
                 {
-                    pathChanged(text)
+                    pathChanged(control.normalizePathInput(text))
                 }
 
                 onActiveFocusChanged:
@@ -198,7 +198,10 @@ Item
                     {
                         console.log("PATHBAR LIST READY",  _pathList.count)
                         _listView.currentIndex = Qt.binding( ()=>{return  _pathList.count - 1} )
-                        _layout.implicitHeight = Qt.binding( ()=>{return _listView.itemAtIndex( _pathList.count - 1).implicitHeight} )
+                        _layout.implicitHeight = Qt.binding(() => {
+                            const lastItem = _listView.itemAtIndex(_pathList.count - 1)
+                            return lastItem ? lastItem.implicitHeight : 0
+                        })
                     }
 
                     focus: true
@@ -262,5 +265,24 @@ Item
     function showEntryBar()
     {
         control.pathEntry = !control.pathEntry
+    }
+
+    function displayPath(path)
+    {
+        const value = path ? path.toString() : ""
+        if(value.startsWith("file://"))
+            return decodeURIComponent(value.replace(/^file:\/\//, ""))
+
+        return value
+    }
+
+    function normalizePathInput(path)
+    {
+        const value = path ? path.toString().trim() : ""
+
+        if(value.startsWith("/") && !value.startsWith("//"))
+            return "file://" + encodeURI(value)
+
+        return value
     }
 }
