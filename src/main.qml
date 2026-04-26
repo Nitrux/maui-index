@@ -216,8 +216,6 @@ Maui.ApplicationWindow
                              }
 
                              settings.lastUsedTag = tags[0]
-
-                             composerList.updateToUrls(tags)
                          }
         }
     }
