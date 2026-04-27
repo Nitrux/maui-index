@@ -638,17 +638,7 @@ Maui.ApplicationWindow
                         onPathChanged: (path) => currentBrowser.openFolder(path)
 
                         onHomeClicked: currentBrowser.openFolder(FB.FM.homePath())
-                        onPlaceClicked: (path) =>
-                                        {
-                                            if(path === currentBrowser.currentPath)
-                                            {
-                                                popupMainMenu()
-                                            }
-                                            else
-                                            {
-                                                currentBrowser.openFolder(path)
-                                            }
-                                        }
+                        onPlaceClicked: (path) => currentBrowser.openFolder(path)
 
                         onPlaceRightClicked: (path) =>
                                              {

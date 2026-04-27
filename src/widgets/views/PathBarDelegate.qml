@@ -19,40 +19,27 @@ Control
     rightPadding: Maui.Style.space.big
     leftPadding: rightPadding
 
-    property bool checked : ListView.isCurrentItem
+    property bool checked: ListView.isCurrentItem
+    property int delegateIndex: 0
 
     ToolTip.delay: 1000
     ToolTip.timeout: 5000
     ToolTip.visible: _mouseArea.containsMouse || _mouseArea.containsPress
 
+    property alias text: _label.text
 
-    property alias text : _label.text
-    /**
-      *
-      */
     signal rightClicked()
-
-    /**
-      *
-      */
     signal clicked()
-
-    /**
-      *
-      */
     signal doubleClicked()
-
-    /**
-      *
-      */
     signal pressAndHold()
 
     background: Index.PathArrowBackground
     {
         id: _arrowBG
         color: control.checked ? Maui.Theme.highlightColor : (control.hovered ? Maui.Theme.hoverColor : Maui.Theme.backgroundColor)
-
         arrowWidth: 8
+        flatLeft: control.delegateIndex === 0
+        leftRadius: flatLeft ? Maui.Style.radiusV : 0
     }
 
     contentItem: MouseArea
@@ -61,17 +48,17 @@ Control
         propagateComposedEvents: true
         preventStealing: false
         hoverEnabled: !Maui.Handy.isMobile
-        acceptedButtons:  Qt.RightButton | Qt.LeftButton
+        acceptedButtons: Qt.RightButton | Qt.LeftButton
         onClicked: (mouse) =>
                    {
                        if(!Maui.Handy.isMobile && mouse.button === Qt.RightButton)
-                       control.rightClicked()
+                           control.rightClicked()
                        else
-                       control.clicked()
+                           control.clicked()
                    }
 
         onDoubleClicked: control.doubleClicked()
-        onPressAndHold : control.pressAndHold()
+        onPressAndHold: control.pressAndHold()
 
         containmentMask: _arrowBG
 
@@ -96,17 +83,6 @@ Control
 
                 font.weight: control.checked ? Font.DemiBold : Font.Normal
                 color: control.checked ? Maui.Theme.highlightedTextColor : Maui.Theme.textColor
-            }
-
-            Maui.Icon
-            {
-                Layout.alignment: Qt.AlignVCenter
-
-                visible: control.checked
-                color: _label.color
-                implicitHeight: 8
-                implicitWidth: 8
-                source: "qrc:/assets/arrow-down.svg"
             }
         }
     }

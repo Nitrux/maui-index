@@ -74,8 +74,6 @@ Item
       */
     signal placeClicked(string path)
 
-    signal menuClicked()
-
     /**
       * placeRightClicked :
       */
@@ -163,13 +161,15 @@ Item
                 ScrollBar.vertical.policy: ScrollBar.AlwaysOff
 
                 contentHeight: availableHeight
-                leftPadding: 8
+                leftPadding: 1
                 padding: 0
 
                 background: Rectangle
                 {
                     radius: Maui.Style.radiusV
-                    color : _hoverHandler.hovered ? Maui.Theme.hoverColor : Maui.Theme.alternateBackgroundColor
+                    color: _hoverHandler.hovered ? Maui.Theme.hoverColor : Maui.Theme.alternateBackgroundColor
+                    border.color: Qt.rgba(Maui.Theme.textColor.r, Maui.Theme.textColor.g, Maui.Theme.textColor.b, 0.15)
+                    border.width: 1
                 }
 
                 ListView
@@ -236,6 +236,7 @@ Item
                     {
                         height: ListView.view.height
                         text: model.label
+                        delegateIndex: index
                         ToolTip.text: model.path
                         width: Math.max(Maui.Style.iconSizes.medium * 2, implicitWidth)
 
