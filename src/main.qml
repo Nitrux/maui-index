@@ -703,36 +703,6 @@ Maui.ApplicationWindow
                 }
             }
 
-            Maui.ContextualMenu
-            {
-                id: _browserContextMenu
-
-                MenuItem
-                {
-                    text: i18n("New Item")
-                    icon.name: "folder-new"
-                    onTriggered: currentBrowser.newItem()
-                }
-
-                MenuItem
-                {
-                    enabled: !Maui.Handy.isMobile
-                    text: i18n("Open Terminal Here")
-                    icon.name: "dialog-scripts"
-                    onTriggered:
-                    {
-                        inx.openTerminal(currentBrowser.currentPath, appSettings.terminalExecutable)
-                    }
-                }
-
-                MenuItem
-                {
-                    text: i18n("Select All")
-                    icon.name: "edit-select-all"
-                    onTriggered: currentBrowser.selectAll()
-                }
-            }
-
             StackView
             {
                 id: _stackView
@@ -943,8 +913,4 @@ Maui.ApplicationWindow
         _mainMenuLoader.item.popup()
     }
 
-    function popupBrowserContextMenu()
-    {
-        _browserContextMenu.show()
-    }
 }

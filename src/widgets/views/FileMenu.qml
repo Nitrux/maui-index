@@ -12,6 +12,8 @@ import ".."
 Maui.ContextualMenu
 {
     id: control
+    modal: true
+    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     readonly property bool canBookmark: !control.isExec && control.isDir
     readonly property bool hasDirectoryActions: control.isDir
     readonly property bool canExtract: FB.FM.checkFileType(FB.FMList.COMPRESSED, control.item.mime)
@@ -111,13 +113,10 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: currentBrowser && currentBrowser.currentFMList && currentBrowser.currentFMList.clipboardHasContent()
+        enabled: currentBrowser && currentBrowser.currentFMList && currentBrowser.currentFMList.clipboardHasContent
         text: i18n("Paste")
         icon.name: "edit-paste"
-        onTriggered:
-        {
-            currentBrowser.paste()
-        }
+        onTriggered: triggerBrowserPaste("file-menu")
     }
 
     MenuItem
