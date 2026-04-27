@@ -694,7 +694,13 @@ Maui.ApplicationWindow
                 Maui.SearchField
                 {
                     placeholderText: i18n("Search for files")
-                    onAccepted: currentBrowser.search(text)
+                    onAccepted:
+                    {
+                        currentBrowser.search(text)
+
+                        if(_homeViewComponent.visible && _stackView.depth > 1)
+                            _stackView.pop()
+                    }
                 }
             }
 
