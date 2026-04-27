@@ -155,11 +155,17 @@ Item
             return
         }
 
-        splitView.addSplit(_browserComponent, {'browser.currentPath': path})
+        const browser = _browserComponent.createObject(splitView, {'browser.currentPath': path})
+        splitView.addItem(browser)
+        splitView.currentIndex = Math.max(splitView.count - 1, 0)
+        browser.forceActiveFocus()
 
         if(path2.toString().length > 0 && splitView.count === 1)
         {
-            splitView.addSplit(_browserComponent, {'browser.currentPath': path2})
+            const browser2 = _browserComponent.createObject(splitView, {'browser.currentPath': path2})
+            splitView.addItem(browser2)
+            splitView.currentIndex = Math.max(splitView.count - 1, 0)
+            browser2.forceActiveFocus()
         }
     }
 
@@ -173,4 +179,3 @@ Item
         splitView.closeSplit(index)
     }
 }
-

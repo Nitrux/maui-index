@@ -155,14 +155,14 @@ Item
                 anchors.fill: parent
 
                 Maui.Controls.orientation: Qt.Horizontal
-                implicitWidth: contentWidth + leftPadding + rightPadding
+                implicitWidth: Math.max(500, _listView.contentWidth + (_contentWrapper.sideInset * 2))
 
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
                 ScrollBar.vertical.policy: ScrollBar.AlwaysOff
 
-                contentHeight: availableHeight
-                leftPadding: 1
                 padding: 0
+                contentWidth: _contentWrapper.width
+                contentHeight: _contentWrapper.height
 
                 background: Rectangle
                 {
@@ -172,87 +172,93 @@ Item
                     border.width: 1
                 }
 
-                ListView
+                Item
                 {
-                    id: _listView
+                    id: _contentWrapper
+                    readonly property int sideInset: 1
+                    implicitWidth: _listView.contentWidth + (sideInset * 2)
+                    width: Math.max(_layout.availableWidth, implicitWidth)
+                    height: _layout.availableHeight
 
-                    TapHandler
+                    ListView
                     {
-                        onTapped: control.showEntryBar()
-                    }
+                        id: _listView
 
-                    HoverHandler
-                    {
-                        id: _hoverHandler
-                    }
-
-                    Maui.Theme.colorSet: control.Maui.Theme.colorSet
-                    Maui.Theme.inherit: false
-
-                    orientation: ListView.Horizontal
-                    clip: true
-                    spacing: -6
-                    currentIndex: _pathList.count - 1
-
-                    Component.onCompleted:
-                    {
-                        console.log("PATHBAR LIST READY",  _pathList.count)
-                        _listView.currentIndex = Qt.binding( ()=>{return  _pathList.count - 1} )
-                        _layout.implicitHeight = Qt.binding(() => {
-                            const lastItem = _listView.itemAtIndex(_pathList.count - 1)
-                            return lastItem ? lastItem.implicitHeight : 0
-                        })
-                    }
-
-                    focus: true
-                    interactive: Maui.Handy.isTouch
-                    highlightFollowsCurrentItem: true
-                    snapMode: ListView.NoSnap
-
-                    boundsBehavior: Flickable.StopAtBounds
-                    boundsMovement :Flickable.StopAtBounds
-
-                    ListView.onAdd: _listView.positionViewAtEnd()
-                    ListView.onRemove: _listView.positionViewAtEnd()
-
-                    footerPositioning: ListView.OverlayFooter
-                    footer: Item
-                    {
+                        x: _contentWrapper.sideInset
+                        width: _contentWrapper.width - (_contentWrapper.sideInset * 2)
                         height: parent.height
-                        width: height
-                    }
 
-                    model: Maui.BaseModel
-                    {
-                        id: _pathModel
-                        list: Index.PathList
+                        TapHandler
                         {
-                            id: _pathList
-                            path: control.url
-                        }
-                    }
-
-                    delegate: PathBarDelegate
-                    {
-                        height: ListView.view.height
-                        text: model.label
-                        delegateIndex: index
-                        ToolTip.text: model.path
-                        width: Math.max(Maui.Style.iconSizes.medium * 2, implicitWidth)
-
-                        onClicked:
-                        {
-                            control.placeClicked(model.path)
+                            onTapped: control.showEntryBar()
                         }
 
-                        onRightClicked:
+                        HoverHandler
                         {
-                            control.placeRightClicked(model.path)
+                            id: _hoverHandler
                         }
 
-                        onPressAndHold:
+                        Maui.Theme.colorSet: control.Maui.Theme.colorSet
+                        Maui.Theme.inherit: false
+
+                        orientation: ListView.Horizontal
+                        clip: true
+                        spacing: -6
+                        currentIndex: _pathList.count - 1
+
+                        Component.onCompleted:
                         {
-                            control.placeRightClicked(model.path)
+                            console.log("PATHBAR LIST READY",  _pathList.count)
+                            _listView.currentIndex = Qt.binding( ()=>{return  _pathList.count - 1} )
+                            _layout.implicitHeight = Qt.binding(() => {
+                                const lastItem = _listView.itemAtIndex(_pathList.count - 1)
+                                return lastItem ? lastItem.implicitHeight : 0
+                            })
+                        }
+
+                        focus: true
+                        interactive: Maui.Handy.isTouch
+                        highlightFollowsCurrentItem: true
+                        snapMode: ListView.NoSnap
+
+                        boundsBehavior: Flickable.StopAtBounds
+                        boundsMovement :Flickable.StopAtBounds
+
+                        ListView.onAdd: _listView.positionViewAtEnd()
+                        ListView.onRemove: _listView.positionViewAtEnd()
+
+                        model: Maui.BaseModel
+                        {
+                            id: _pathModel
+                            list: Index.PathList
+                            {
+                                id: _pathList
+                                path: control.url
+                            }
+                        }
+
+                        delegate: PathBarDelegate
+                        {
+                            height: ListView.view.height
+                            text: model.label
+                            delegateIndex: index
+                            ToolTip.text: model.path
+                            width: Math.max(Maui.Style.iconSizes.medium * 2, implicitWidth)
+
+                            onClicked:
+                            {
+                                control.placeClicked(model.path)
+                            }
+
+                            onRightClicked:
+                            {
+                                control.placeRightClicked(model.path)
+                            }
+
+                            onPressAndHold:
+                            {
+                                control.placeRightClicked(model.path)
+                            }
                         }
                     }
                 }

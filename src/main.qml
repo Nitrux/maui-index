@@ -352,7 +352,7 @@ Maui.ApplicationWindow
             Maui.Controls.showCSD: true
 
             headBar.visible: true
-            headBar.forceCenterMiddleContent: width > 1000
+            headBar.forceCenterMiddleContent: true
             headerMargins: settings.floatyUI ? Maui.Style.contentMargins : 0
             footerMargins: headerMargins
 
