@@ -4,6 +4,7 @@
 #include <QObject>
 
 class QFileSystemWatcher;
+class QTimer;
 namespace FMH
 {
 class FileLoader;
@@ -37,7 +38,9 @@ private:
     FMH::MODEL_LIST m_list;
     FMH::FileLoader * m_loader;
     QFileSystemWatcher *m_watcher;
+    QTimer *m_refreshTimer;
     void setList();
+    void scheduleRefresh();
 
     QUrl m_url;
     QStringList m_filters;

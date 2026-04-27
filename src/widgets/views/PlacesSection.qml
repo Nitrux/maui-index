@@ -19,6 +19,12 @@ SectionGroup
     title: i18n("Places")
     description: i18n("Quick access to common places.")
 
+    function placeIcon(path, iconName)
+    {
+        const value = String(path)
+        return (value === "/" || value === "file:///") ? "folder-red" : iconName
+    }
+
     browser.itemSize: 220
     browser.itemHeight: 70
     browser.implicitHeight: 140
@@ -50,7 +56,7 @@ SectionGroup
             iconSizeHint: Maui.Style.iconSizes.big
             label1.text: model.label
             label2.text: Qt.formatDateTime(new Date(model.modified), "d MMM yyyy")
-            iconSource: model.icon
+            iconSource: control.placeIcon(model.path, model.icon)
             checkable: selectionMode
 
             Maui.Badge

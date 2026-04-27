@@ -5,11 +5,13 @@
 
 #include <QFileSystemWatcher>
 #include <QDebug>
+#include <QTimer>
 
 RecentFilesModel::RecentFilesModel(QObject *parent) :
   MauiList(parent)
 , m_loader(new FMH::FileLoader)
 , m_watcher(new QFileSystemWatcher(this))
+, m_refreshTimer(new QTimer(this))
 {
 //  connect(m_loader, &FMH::FileLoader::itemsReady, [&](FMH::MODEL_LIST items)
 //  {
@@ -18,7 +20,10 @@ RecentFilesModel::RecentFilesModel(QObject *parent) :
 //    Q_EMIT postItemAppended();
 //  });
 
-    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &RecentFilesModel::setList);
+    m_refreshTimer->setSingleShot(true);
+
+    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &RecentFilesModel::scheduleRefresh);
+    connect(m_refreshTimer, &QTimer::timeout, this, &RecentFilesModel::setList);
 }
 
 
@@ -70,6 +75,7 @@ void RecentFilesModel::setList()
   int i = 0;
 
   this->m_list.clear();
+  this->m_urls.clear();
   Q_EMIT this->preListChanged ();
   const auto urls = dir.entryInfoList ();
   for(const auto &url : urls)
@@ -83,6 +89,12 @@ void RecentFilesModel::setList()
     }
   Q_EMIT postListChanged ();
   Q_EMIT urlsChanged();
+}
+
+void RecentFilesModel::scheduleRefresh()
+{
+    setList();
+    m_refreshTimer->start(1200);
 }
 
 

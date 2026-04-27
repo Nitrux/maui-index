@@ -109,11 +109,11 @@ public Q_SLOTS:
 
     /**
      * @brief openTerminal
-     * Open Terminal Windows
+     * Open an external terminal in the given path
      * @param url
      * Path in which terminal should open
      */
-    static void openTerminal(const QUrl &url);
+    static void openTerminal(const QUrl &url, const QString &program);
 
     static QVariantList quickPaths();    
 
@@ -124,4 +124,3 @@ Q_SIGNALS:
     void openPath(QStringList paths);
     void activate();
 };
-

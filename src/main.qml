@@ -99,6 +99,7 @@ Maui.ApplicationWindow
         property bool autoPlayPreviews: true
         property bool terminalFollowsColorScheme: true
         property string terminalColorScheme: "Maui-Dark"
+        property string terminalExecutable: "/usr/bin/station"
         property bool showActionsBar: true
         property string lastUsedTag
         property bool floatyUI : root.isWide
@@ -585,7 +586,7 @@ Maui.ApplicationWindow
                             icon.name: "dialog-scripts"
                             onTriggered:
                             {
-                                inx.openTerminal(currentBrowser.currentPath)
+                                inx.openTerminal(currentBrowser.currentPath, appSettings.terminalExecutable)
                             }
                         }
 

@@ -74,186 +74,188 @@ Maui.Page
     {
         icon.name: "go-previous"
         text: i18n("Browser")
-        display: isWide ? ToolButton.TextBesideIcon : ToolButton.IconOnly
+        display: ToolButton.IconOnly
         visible: _stackView.depth === 2
         onClicked: _stackView.pop()
     }
 
     ScrollView
     {
+        id: _overviewScroll
         anchors.fill: parent
         contentHeight: _layout.implicitHeight
         contentWidth: availableWidth
+        clip: true
 
         background: null
         padding: Maui.Style.space.medium
 
         property int itemWidth : Math.min(140, _layout.width * 0.3)
 
-        Flickable
+        ColumnLayout
         {
-            boundsBehavior: Flickable.StopAtBounds
-            boundsMovement: Flickable.StopAtBounds
+            id: _layout
+            width: _overviewScroll.availableWidth
+            spacing: Maui.Style.space.huge
 
-            ColumnLayout
+            Loader
             {
-                id: _layout
-                width: parent.width
-                spacing: Maui.Style.space.huge
+                Layout.fillWidth: true
+                asynchronous: true
 
-                Loader
+                sourceComponent: PlacesSection
                 {
-                    Layout.fillWidth: true
-                    asynchronous: true
-
-                    sourceComponent: PlacesSection
-                    {
-                    }
+                    verticalScrollTarget: _overviewScroll.contentItem
                 }
+            }
 
-                Loader
+            Loader
+            {
+                Layout.fillWidth: true
+                asynchronous: true
+
+                sourceComponent: FavoritesSection
                 {
-                    Layout.fillWidth: true
-                    asynchronous: true
-
-                    sourceComponent: FavoritesSection
-                    {
-                    }
+                    verticalScrollTarget: _overviewScroll.contentItem
                 }
+            }
 
-                Loader
+            Loader
+            {
+                asynchronous: true
+
+                Layout.fillWidth: true
+
+                sourceComponent: RecentSection
                 {
-                    asynchronous: true
+                    id: _recentGrid
+                    verticalScrollTarget: _overviewScroll.contentItem
+                    title: i18n("Downloads")
+                    description: i18n("Your most recent downloaded files")
 
-                    Layout.fillWidth: true
+                    list.url: StandardPaths.writableLocation(StandardPaths.DownloadLocation)
 
-                    sourceComponent: RecentSection
+
+                    browser.delegate:  Item
                     {
-                        id: _recentGrid
-                        title: i18n("Downloads")
-                        description: i18n("Your most recent downloaded files")
+                        height: GridView.view.cellHeight
+                        width: GridView.view.cellWidth
 
-                        list.url: StandardPaths.writableLocation(StandardPaths.DownloadLocation)
-
-
-                        browser.delegate:  Item
+                        Maui.ListBrowserDelegate
                         {
-                            height: GridView.view.cellHeight
-                            width: GridView.view.cellWidth
+                            anchors.fill: parent
+                            anchors.margins: Maui.Style.space.small
+                            iconVisible: true
+                            label1.text: model.label
+                            iconSource: model.icon
+                            imageSource: model.thumbnail
+                            template.fillMode: Image.PreserveAspectFit
+                            iconSizeHint: height * 0.5
+                            checkable: selectionMode
 
-                            Maui.ListBrowserDelegate
+                            onClicked: (index) =>
                             {
-                                anchors.fill: parent
-                                anchors.margins: Maui.Style.space.small
-                                iconVisible: true
-                                label1.text: model.label
-                                iconSource: model.icon
-                                imageSource: model.thumbnail
-                                template.fillMode: Image.PreserveAspectFit
-                                iconSizeHint: height * 0.5
-                                checkable: selectionMode
-
-                                onClicked: (index) =>
-                                {
-                                    _recentGrid.currentIndex = index
-                                    openPreview(_recentGrid.baseModel, index)
-                                }
+                                _recentGrid.currentIndex = index
+                                openPreview(_recentGrid.baseModel, index)
                             }
                         }
                     }
                 }
+            }
 
 
-                Loader
+            Loader
+            {
+                Layout.fillWidth: true
+                asynchronous: true
+                sourceComponent: RecentSection
                 {
-                    Layout.fillWidth: true
-                    asynchronous: true
-                    sourceComponent: RecentSection
+                    id: _recentMusic
+                    verticalScrollTarget: _overviewScroll.contentItem
+                    title: i18n("Music")
+                    description: i18n("Your most recent music files")
+
+                    list.url: StandardPaths.writableLocation(StandardPaths.MusicLocation)
+                    list.filters: FB.FM.nameFilters(FB.FMList.AUDIO)
+
+                    browser.delegate: Item
                     {
-                        id: _recentMusic
-                        title: i18n("Music")
-                        description: i18n("Your most recent music files")
+                        height: GridView.view.cellHeight
+                        width: GridView.view.cellWidth
 
-                        list.url: StandardPaths.writableLocation(StandardPaths.MusicLocation)
-                        list.filters: FB.FM.nameFilters(FB.FMList.AUDIO)
-
-                        browser.delegate: Item
+                        AudioCard
                         {
-                            height: GridView.view.cellHeight
-                            width: GridView.view.cellWidth
+                            anchors.fill: parent
+                            anchors.margins: Maui.Style.space.small
+                            iconSource: model.icon
+                            iconSizeHint: Maui.Style.iconSizes.big
+                            imageSource: model.thumbnail
+                            player.source: model.url
+                            isCurrentItem: parent.ListView.isCurrentItem
 
-                            AudioCard
+
+                            label1.text: player.metaData.title && player.metaData.title.length ? player.metaData.title :  model.name
+                            label2.text: player.metaData.albumArtist || player.metaData.albumTitle
+                            onClicked: (index) =>
                             {
-                                anchors.fill: parent
-                                anchors.margins: Maui.Style.space.small
-                                iconSource: model.icon
-                                iconSizeHint: Maui.Style.iconSizes.big
-                                imageSource: model.thumbnail
-                                player.source: model.url
-                                isCurrentItem: parent.ListView.isCurrentItem
-
-
-                                label1.text: player.metaData.title && player.metaData.title.length ? player.metaData.title :  model.name
-                                label2.text: player.metaData.albumArtist || player.metaData.albumTitle
-                                onClicked: (index) =>
-                                {
-                                    _recentMusic.currentIndex = index
-                                    openPreview(_recentMusic.baseModel, index)
-                                }
+                                _recentMusic.currentIndex = index
+                                openPreview(_recentMusic.baseModel, index)
                             }
                         }
                     }
                 }
+            }
 
-                Loader
+            Loader
+            {
+                Layout.fillWidth: true
+                asynchronous: true
+                sourceComponent: RecentSection
                 {
-                    Layout.fillWidth: true
-                    asynchronous: true
-                    sourceComponent: RecentSection
+                    id: _recentPics
+                    verticalScrollTarget: _overviewScroll.contentItem
+                    title: i18n("Images")
+                    description: i18n("Your most recent image files")
+
+                    browser.itemSize: 180
+                    browser.itemHeight: 180
+                    browser.implicitHeight: 180
+
+                    list.url: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
+                    list.filters: FB.FM.nameFilters(FB.FMList.IMAGE)
+
+                    //                        url: inx.screenshotsPath()
+                    //                        filters: FB.FM.nameFilters(FB.FMList.IMAGE)
+
+                    browser.delegate: Item
                     {
-                        id: _recentPics
-                        title: i18n("Images")
-                        description: i18n("Your most recent image files")
+                        height: GridView.view.cellHeight
+                        width: GridView.view.cellWidth
 
-                        browser.itemSize: 180
-                        browser.itemHeight: 180
-                        browser.implicitHeight: 180
-
-                        list.url: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
-                        list.filters: FB.FM.nameFilters(FB.FMList.IMAGE)
-
-                        //                        url: inx.screenshotsPath()
-                        //                        filters: FB.FM.nameFilters(FB.FMList.IMAGE)
-
-                        browser.delegate: Item
+                        ImageCard
                         {
-                            height: GridView.view.cellHeight
-                            width: GridView.view.cellWidth
-
-                            ImageCard
+                            anchors.fill: parent
+                            anchors.margins: Maui.Style.space.small
+                            imageSource: model.thumbnail
+                            isCurrentItem: parent.ListView.isCurrentItem
+                            onClicked: (index) =>
                             {
-                                anchors.fill: parent
-                                anchors.margins: Maui.Style.space.small
-                                imageSource: model.thumbnail
-                                isCurrentItem: parent.ListView.isCurrentItem
-                                onClicked: (index) =>
-                                {
-                                    _recentPics.currentIndex = index
-                                    openPreview(_recentPics.baseModel, index)
-                                }
+                                _recentPics.currentIndex = index
+                                openPreview(_recentPics.baseModel, index)
                             }
                         }
                     }
                 }
+            }
 
-                Loader
+            Loader
+            {
+                Layout.fillWidth: true
+                asynchronous: true
+                sourceComponent:  DisksSection
                 {
-                    Layout.fillWidth: true
-                    asynchronous: true
-                    sourceComponent:  DisksSection
-                    {
-                        id: _disksSection
-                    }
+                    id: _disksSection
+                    verticalScrollTarget: _overviewScroll.contentItem
                 }
             }
         }

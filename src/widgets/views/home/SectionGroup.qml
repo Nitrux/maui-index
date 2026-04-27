@@ -20,8 +20,18 @@ Maui.SectionGroup
     property alias browser: _gridView
     property alias baseModel: _baseModel
     property alias currentIndex : _gridView.currentIndex
+    property var verticalScrollTarget: null
 
     padding: Maui.Style.space.medium
+
+    function scrollOverview(delta)
+    {
+        if (!verticalScrollTarget)
+            return
+
+        const maxContentY = Math.max(0, verticalScrollTarget.contentHeight - verticalScrollTarget.height)
+        verticalScrollTarget.contentY = Math.max(0, Math.min(maxContentY, verticalScrollTarget.contentY - delta))
+    }
 
     background: Rectangle
     {
@@ -56,6 +66,28 @@ Maui.SectionGroup
         model: Maui.BaseModel
         {
             id: _baseModel
+        }
+
+        MouseArea
+        {
+            anchors.fill: parent
+            acceptedButtons: Qt.NoButton
+            propagateComposedEvents: true
+            scrollGestureEnabled: false
+            z: 100
+
+            onWheel: (wheel) =>
+            {
+                if (Math.abs(wheel.angleDelta.y) >= Math.abs(wheel.angleDelta.x))
+                {
+                    control.scrollOverview(wheel.angleDelta.y)
+                    wheel.accepted = true
+                }
+                else
+                {
+                    wheel.accepted = false
+                }
+            }
         }
     }
 }

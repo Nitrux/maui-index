@@ -369,6 +369,21 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
+            label1.text: i18n("Terminal Executable")
+            label2.text: i18n("Executable used for the external 'Open Terminal Here' action.")
+
+            Maui.TextField
+            {
+                implicitWidth: Math.max(Maui.Style.units.gridUnit * 12, 280)
+                placeholderText: "/usr/bin/station"
+                text: appSettings.terminalExecutable
+                selectByMouse: true
+                onTextEdited: appSettings.terminalExecutable = text.trim()
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
             label1.text: i18n("Color Scheme")
             label2.text: i18n("Change the color scheme of the terminal.")
             enabled: !appSettings.terminalFollowsColorScheme

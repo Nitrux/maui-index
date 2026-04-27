@@ -22,6 +22,20 @@ Loader
     focus: false
     readonly property var list: item && item.list ? item.list : null
 
+    function placeIcon(path, iconName, label)
+    {
+        const value = String(path)
+        const text = String(label)
+
+        if (value === "/" || value === "file:///")
+            return "folder-red"
+
+        if ((value.startsWith("/") || value.startsWith("file:///")) && text.startsWith("/"))
+            return "folder"
+
+        return iconName
+    }
+
     OpacityAnimator on opacity
     {
         from: 0
@@ -157,7 +171,7 @@ Loader
                             Layout.columnSpan: modelData.path === "overview:///" ? 2 : 1
 
                             isCurrentItem: modelData.path === "overview:///" ? _stackView.depth === 2 : (currentBrowser.currentPath === modelData.path && _stackView.depth === 1)
-                            iconSource: modelData.icon + "-symbolic"
+                            iconSource: control.placeIcon(modelData.path, modelData.icon, modelData.label) + "-symbolic"
                             iconSizeHint: 16
                             template.isMask: true
                             label1.text: modelData.label
@@ -217,7 +231,7 @@ Loader
 
                 iconSize: Maui.Style.iconSize
                 label: model.label
-                iconName: model.icon + "-symbolic"
+                iconName: control.placeIcon(model.path, model.icon, model.label) + "-symbolic"
                 iconVisible: true
                 template.isMask: iconSize <= Maui.Style.iconSizes.medium
 

@@ -5,8 +5,6 @@
 
 #include "index.h"
 
-#include <KTerminalLauncherJob>
-
 #include <QGuiApplication>
 #include <QQuickWindow>
 #include <QQmlApplicationEngine>
@@ -263,11 +261,15 @@ void Index::setQmlObject(QObject *object)
     m_qmlObject = object;
 }
 
-void Index::openTerminal(const QUrl &url)
+void Index::openTerminal(const QUrl &url, const QString &program)
 {
-    auto job = new KTerminalLauncherJob(QString());
-    job->setWorkingDirectory(url.toLocalFile());
-    job->start();
+    const QString terminalProgram = program.trimmed().isEmpty() ? QStringLiteral("/usr/bin/station") : program.trimmed();
+    const QString workingDirectory = url.isLocalFile() ? url.toLocalFile() : QString();
+
+    if (!QProcess::startDetached(terminalProgram, {}, workingDirectory))
+    {
+        qWarning() << "Failed to launch terminal executable" << terminalProgram << "for" << workingDirectory;
+    }
 }
 
 QVariantList Index::quickPaths()
