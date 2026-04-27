@@ -16,6 +16,7 @@ Maui.ContextualMenu
     readonly property bool hasDirectoryActions: control.isDir
     readonly property bool canExtract: FB.FM.checkFileType(FB.FMList.COMPRESSED, control.item.mime)
     readonly property bool showDirectorySection: canBookmark || hasDirectoryActions
+    readonly property var selectedUris: _browser.filterSelection(currentPath, control.item.path)
 
     /**
       *
@@ -89,28 +90,50 @@ Maui.ContextualMenu
     MenuItem
     {
         enabled: !control.isExec
-
-        visible: appSettings.lastUsedTag.length > 0
-        height: visible ? implicitHeight : -control.spacing
-        text: i18n("Add to '%1'", appSettings.lastUsedTag)
-        icon.name: "tag"
+        text: i18n("Copy")
+        icon.name: "edit-copy"
         onTriggered:
         {
-            FB.Tagging.tagUrl(control.item.path, appSettings.lastUsedTag)
+            currentBrowser.copy(control.selectedUris)
         }
     }
 
-    Action
+    MenuItem
     {
         enabled: !control.isExec
-        text: i18n("Add Tag")
-        icon.name: "tag"
-        onTriggered: tagFiles(_browser.filterSelection(currentPath, control.item.path))
+        text: i18n("Cut")
+        icon.name: "edit-cut"
+        onTriggered:
+        {
+            currentBrowser.cut(control.selectedUris)
+        }
+    }
+
+    MenuItem
+    {
+        enabled: currentBrowser && currentBrowser.currentFMList && currentBrowser.currentFMList.clipboardHasContent()
+        text: i18n("Paste")
+        icon.name: "edit-paste"
+        onTriggered:
+        {
+            currentBrowser.paste()
+        }
+    }
+
+    MenuItem
+    {
+        enabled: !control.isExec
+        text: i18n("Delete")
+        icon.name: "edit-delete"
+        onTriggered:
+        {
+            currentBrowser.remove(control.selectedUris)
+        }
     }
 
     MenuSeparator
     {
-        visible: showDirectorySection
+        visible: showDirectorySection || canExtract
         height: visible ? implicitHeight : -control.spacing
     }
 
@@ -129,7 +152,7 @@ Maui.ContextualMenu
 
     MenuSeparator
     {
-        visible: hasDirectoryActions
+        visible: hasDirectoryActions && canBookmark
         height: visible ? implicitHeight : -control.spacing
     }
 
@@ -163,8 +186,6 @@ Maui.ContextualMenu
         onTriggered: root.currentTab.split(control.item.path, Qt.Horizontal)
     }
 
-    MenuSeparator {}
-
     MenuItem
     {
         enabled: canExtract
@@ -178,17 +199,6 @@ Maui.ContextualMenu
                              'dirName' : control.item.label.replace(control.item.suffix, ""),
                              'destination': currentBrowser.currentPath})
             var dialog = _extractDialogComponent.createObject(root, props)
-            dialog.open()
-        }
-    }
-
-    MenuItem
-    {
-        text: i18n("Compress")
-        icon.name: "archive-insert"
-        onTriggered:
-        {
-           var dialog = _compressDialogComponent.createObject(root, ({'urls': _browser.filterSelection(currentPath, control.item.path)}))
             dialog.open()
         }
     }

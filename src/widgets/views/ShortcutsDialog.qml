@@ -202,5 +202,25 @@ Maui.SettingsDialog
                 }
             }
         }
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Selection Bar")
+
+            Maui.ToolActions
+            {
+                checkable: false
+                autoExclusive: false
+                Action
+                {
+                    text: "Ctrl"
+                }
+
+                Action
+                {
+                    text: i18n("Left-click")
+                }
+            }
+        }
     }
 }

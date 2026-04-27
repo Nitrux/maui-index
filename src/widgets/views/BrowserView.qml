@@ -85,78 +85,35 @@ Maui.Page
 
         Action
         {
-            text: i18n("Copy")
-            icon.name: "edit-copy"
+            text: i18n("Rename")
+            icon.name: "edit-rename"
+            enabled: _selectionBar.count === 1
             onTriggered:
             {
-                currentBrowser.copy(_selectionBar.uris)
+                currentBrowser.renameItem()
             }
         }
 
         Action
         {
-            text: i18n("Cut")
-            icon.name: "edit-cut"
+            text: i18n("Compress")
+            icon.name: "utilities-file-archiver"
             onTriggered:
             {
-                currentBrowser.cut(_selectionBar.uris)
+               var dialog = _compressDialogComponent.createObject(root, ({'urls': selectionBar.uris}))
+                dialog.open()
             }
         }
 
         Action
         {
-            text: i18n("Paste")
-            icon.name: "edit-paste"
-            enabled: currentBrowser && currentBrowser.currentFMList && currentBrowser.currentFMList.clipboardHasContent()
+            text: i18n("Tags")
+            icon.name: "tag"
             onTriggered:
             {
-                currentBrowser.paste()
+                tagFiles(_selectionBar.uris)
             }
         }
-
-        Action
-        {
-            text: i18n("Remove")
-            icon.name: "edit-delete"
-            onTriggered:
-            {
-                currentBrowser.remove(_selectionBar.uris)
-            }
-        }
-
-        hiddenActions:[
-            Action
-            {
-                text: i18n("Rename")
-                icon.name: "edit-rename"
-                enabled: _selectionBar.count === 1
-                onTriggered:
-                {
-                    currentBrowser.renameItem()
-                }
-            },
-
-            Action
-            {
-                text: i18n("Compress")
-                icon.name: "archive-insert"
-                onTriggered:
-                {
-                   var dialog = _compressDialogComponent.createObject(root, ({'urls': selectionBar.uris}))
-                    dialog.open()
-                }
-            },
-
-            Action
-            {
-                text: i18n("Tags")
-                icon.name: "tag"
-                onTriggered:
-                {
-                    tagFiles(_selectionBar.uris)
-                }
-            }
-        ]
     }
 
     Maui.TabView
