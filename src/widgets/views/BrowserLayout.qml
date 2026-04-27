@@ -92,85 +92,130 @@ Item
                 running: visible
             }
 
-            contentItem:  Grid
+            contentItem: Row
             {
-                columns: 2
-                rows: 2
                 spacing: Maui.Style.defaultSpacing
-                Repeater
+
+                Item
                 {
-                    model: control.actionsBarActions
+                    id: _dragHandle
+                    width: Maui.Style.space.big
+                    height: _actionsGrid.implicitHeight
 
-                    ToolButton
+                    Row
                     {
-                        id: _actionButton
-                        readonly property bool destructive: modelData && modelData.Maui.Controls.status === Maui.Controls.Negative
-                        Maui.Theme.colorSet: Maui.Theme.Complementary
-                        Maui.Controls.status: modelData && modelData.Maui.Controls.status ? modelData.Maui.Controls.status : Maui.Controls.Normal
+                        anchors.centerIn: parent
+                        spacing: 3
 
-                        action: modelData
-                        display: ToolButton.IconOnly
-                        flat: false
-                        icon.color: destructive ? "#fafafa" : _actionButton.color
-
-                        background: Rectangle
+                        Repeater
                         {
-                            radius: Maui.Style.radiusV
-                            color: _actionButton.destructive
-                                ? (_actionButton.pressed || _actionButton.down || _actionButton.checked
-                                   ? Qt.darker(Maui.Theme.negativeBackgroundColor, 1.12)
-                                   : (_actionButton.hovered
-                                      ? Qt.lighter(Maui.Theme.negativeBackgroundColor, 1.05)
-                                      : Maui.Theme.negativeBackgroundColor))
-                                : (_actionButton.pressed || _actionButton.down || _actionButton.checked
-                                   ? _actionButton.Maui.Theme.highlightColor
-                                   : (_actionButton.highlighted || _actionButton.hovered
-                                      ? _actionButton.Maui.Theme.hoverColor
-                                      : _actionButton.Maui.Theme.backgroundColor))
+                            model: 2
 
-                            function statusBorderColor()
+                            Column
                             {
-                                switch(_actionButton.Maui.Controls.status)
+                                spacing: 3
+
+                                Repeater
                                 {
-                                case Maui.Controls.Positive:
-                                    return _actionButton.Maui.Theme.positiveBackgroundColor
-                                case Maui.Controls.Negative:
-                                    return _actionButton.Maui.Theme.negativeBackgroundColor
-                                case Maui.Controls.Neutral:
-                                    return _actionButton.Maui.Theme.neutralBackgroundColor
-                                case Maui.Controls.Normal:
-                                default:
-                                    return "transparent"
+                                    model: 4
+
+                                    Rectangle
+                                    {
+                                        width: 2
+                                        height: width
+                                        radius: width / 2
+                                        color: Maui.Theme.textColor
+                                        opacity: _dragHandleHandler.active ? 0.9 : 0.55
+                                    }
                                 }
                             }
-
-                            border.color: _actionButton.destructive
-                                ? "transparent"
-                                : (_actionButton.Maui.Controls.status ? statusBorderColor() : "transparent")
                         }
                     }
-                }
-            }
 
-            DragHandler
-            {
-                target: _pane
-                // target: _actionsBarLoader
-                // grabPermissions: PointerHandler.TakeOverForbidden | PointerHandler.CanTakeOverFromAnything
-                xAxis.maximum: control.width - _pane.width
-                xAxis.minimum: 0
-
-                yAxis.enabled : false
-
-                onActiveChanged:
-                {
-                    if(!active)
+                    DragHandler
                     {
-                        console.log(centroid.position, centroid.scenePosition, centroid.velocity.x)
+                        id: _dragHandleHandler
+                        target: _pane
+                        xAxis.maximum: control.width - _pane.width
+                        xAxis.minimum: 0
 
-                        let pos = centroid.velocity.x
-                        _pane.x = Qt.binding(()=> { return pos < 0 ? Maui.Style.space.big : control.width - _pane.width - Maui.Style.space.big })
-                        _pane.y = Qt.binding(()=> { return control.height - _pane.height - control.currentItem.terminalPanelHeight - (control.currentItem.browser.footBar.visible ? control.currentItem.browser.footBar.height : 0) - Maui.Style.space.big })
+                        yAxis.enabled : false
+
+                        onActiveChanged:
+                        {
+                            if(!active)
+                            {
+                                const pos = centroid.velocity.x
+                                _pane.x = Qt.binding(()=> { return pos < 0 ? Maui.Style.space.big : control.width - _pane.width - Maui.Style.space.big })
+                                _pane.y = Qt.binding(()=> { return control.height - _pane.height - control.currentItem.terminalPanelHeight - (control.currentItem.browser.footBar.visible ? control.currentItem.browser.footBar.height : 0) - Maui.Style.space.big })
+                            }
+                        }
+                    }
+
+                    HoverHandler
+                    {
+                        cursorShape: _dragHandleHandler.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                    }
+                }
+
+                Grid
+                {
+                    id: _actionsGrid
+                    columns: 2
+                    rows: 2
+
+                    Repeater
+                    {
+                        model: control.actionsBarActions
+
+                        ToolButton
+                        {
+                            id: _actionButton
+                            readonly property bool destructive: modelData && modelData.Maui.Controls.status === Maui.Controls.Negative
+                            Maui.Theme.colorSet: Maui.Theme.Complementary
+                            Maui.Controls.status: modelData && modelData.Maui.Controls.status ? modelData.Maui.Controls.status : Maui.Controls.Normal
+
+                            action: modelData
+                            display: ToolButton.IconOnly
+                            flat: false
+                            icon.color: destructive ? "#fafafa" : _actionButton.color
+
+                            background: Rectangle
+                            {
+                                radius: Maui.Style.radiusV
+                                color: _actionButton.destructive
+                                    ? (_actionButton.pressed || _actionButton.down || _actionButton.checked
+                                       ? Qt.darker(Maui.Theme.negativeBackgroundColor, 1.12)
+                                       : (_actionButton.hovered
+                                          ? Qt.lighter(Maui.Theme.negativeBackgroundColor, 1.05)
+                                          : Maui.Theme.negativeBackgroundColor))
+                                    : (_actionButton.pressed || _actionButton.down || _actionButton.checked
+                                       ? _actionButton.Maui.Theme.highlightColor
+                                       : (_actionButton.highlighted || _actionButton.hovered
+                                          ? _actionButton.Maui.Theme.hoverColor
+                                          : _actionButton.Maui.Theme.backgroundColor))
+
+                                function statusBorderColor()
+                                {
+                                    switch(_actionButton.Maui.Controls.status)
+                                    {
+                                    case Maui.Controls.Positive:
+                                        return _actionButton.Maui.Theme.positiveBackgroundColor
+                                    case Maui.Controls.Negative:
+                                        return _actionButton.Maui.Theme.negativeBackgroundColor
+                                    case Maui.Controls.Neutral:
+                                        return _actionButton.Maui.Theme.neutralBackgroundColor
+                                    case Maui.Controls.Normal:
+                                    default:
+                                        return "transparent"
+                                    }
+                                }
+
+                                border.color: _actionButton.destructive
+                                    ? "transparent"
+                                    : (_actionButton.Maui.Controls.status ? statusBorderColor() : "transparent")
+                            }
+                        }
                     }
                 }
             }
