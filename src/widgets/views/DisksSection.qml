@@ -148,12 +148,7 @@ SectionGroup
             id: _mouseArea
             anchors.fill: parent
             hoverEnabled: true
-            acceptedButtons: Qt.LeftButton
-            onClicked:
-            {
-                control.currentIndex = -1
-                currentBrowser.openFolder(model.path)
-            }
+            acceptedButtons: Qt.NoButton
         }
 
         ToolTip.visible: _mouseArea.containsMouse
