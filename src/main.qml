@@ -499,6 +499,15 @@ Maui.ApplicationWindow
                         {
                             icon.name: "view-sort"
                             title: i18n("Sort")
+                            Maui.Controls.component: Component
+                            {
+                                Item
+                                {
+                                    implicitWidth: 0
+                                    implicitHeight: 0
+                                    visible: false
+                                }
+                            }
 
                             MenuItem
                             {

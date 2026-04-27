@@ -22,6 +22,7 @@ Maui.SplitViewItem
     readonly property alias browser : _browser
     readonly property alias settings : _browser.settings
     readonly property alias title : _browser.title
+    readonly property alias emptyTrashAction : _emptyTrashAction
     readonly property bool supportsTerminal : true
     readonly property int terminalPanelHeight: _terminalSplitView.visible ? _terminalSplitView.height : 0
 
@@ -93,6 +94,23 @@ Maui.SplitViewItem
         }
     }
 
+    Action
+    {
+        id: _emptyTrashAction
+        text: i18n("Empty Trash")
+        icon.name: "trash-empty"
+        Maui.Controls.status: Maui.Controls.Negative
+        enabled: _browser.currentFMList && _browser.currentFMList.count > 0
+        onTriggered:
+        {
+            const job = FB.FM.emptyTrash()
+            if(job && _browser.currentFMList)
+            {
+                job.finished.connect(() => _browser.currentFMList.clearContents())
+            }
+        }
+    }
+
     Maui.SplitView
     {
         anchors.fill: parent
@@ -109,6 +127,7 @@ Maui.SplitViewItem
             SplitView.fillHeight: true
             Maui.Theme.colorSet: Maui.Theme.View
             background: null
+            footBar.visible: false
 
             property alias viewType : _dirConf.viewType
             property alias sortBy : _dirConf.sortKey
@@ -332,9 +351,9 @@ Maui.SplitViewItem
                     syncTerminal(currentBrowser.currentPath)
                 }
             }
+
         }
     }
-
 
     Component.onCompleted:
     {

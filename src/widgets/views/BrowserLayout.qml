@@ -27,6 +27,9 @@ Item
     readonly property alias currentItem : _splitView.currentItem
     readonly property alias model : _splitView.contentModel
     readonly property string title : count === 2 ?  model.get(0).browser.title + "  -  " + model.get(1).browser.title : browser.title
+    readonly property var actionsBarActions: currentItem && currentItem.browser.currentFMList && currentItem.browser.currentFMList.pathType === FB.FMList.TRASH_PATH
+                                             ? [_newTabAction, currentItem.emptyTrashAction, _splitViewAction, _showTerminalAction]
+                                             : [_newTabAction, _viewHiddenAction, _splitViewAction, _showTerminalAction]
 
     readonly property FB.FileBrowser browser : currentItem.browser
     readonly property Maui.SplitView splitView : _splitView
@@ -96,15 +99,55 @@ Item
                 spacing: Maui.Style.defaultSpacing
                 Repeater
                 {
-                    model: [_newTabAction, _viewHiddenAction, _splitViewAction, _showTerminalAction]
+                    model: control.actionsBarActions
 
                     ToolButton
                     {
+                        id: _actionButton
+                        readonly property bool destructive: modelData && modelData.Maui.Controls.status === Maui.Controls.Negative
                         Maui.Theme.colorSet: Maui.Theme.Complementary
+                        Maui.Controls.status: modelData && modelData.Maui.Controls.status ? modelData.Maui.Controls.status : Maui.Controls.Normal
 
                         action: modelData
                         display: ToolButton.IconOnly
                         flat: false
+                        icon.color: destructive ? "#fafafa" : _actionButton.color
+
+                        background: Rectangle
+                        {
+                            radius: Maui.Style.radiusV
+                            color: _actionButton.destructive
+                                ? (_actionButton.pressed || _actionButton.down || _actionButton.checked
+                                   ? Qt.darker(Maui.Theme.negativeBackgroundColor, 1.12)
+                                   : (_actionButton.hovered
+                                      ? Qt.lighter(Maui.Theme.negativeBackgroundColor, 1.05)
+                                      : Maui.Theme.negativeBackgroundColor))
+                                : (_actionButton.pressed || _actionButton.down || _actionButton.checked
+                                   ? _actionButton.Maui.Theme.highlightColor
+                                   : (_actionButton.highlighted || _actionButton.hovered
+                                      ? _actionButton.Maui.Theme.hoverColor
+                                      : _actionButton.Maui.Theme.backgroundColor))
+
+                            function statusBorderColor()
+                            {
+                                switch(_actionButton.Maui.Controls.status)
+                                {
+                                case Maui.Controls.Positive:
+                                    return _actionButton.Maui.Theme.positiveBackgroundColor
+                                case Maui.Controls.Negative:
+                                    return _actionButton.Maui.Theme.negativeBackgroundColor
+                                case Maui.Controls.Neutral:
+                                    return _actionButton.Maui.Theme.neutralBackgroundColor
+                                case Maui.Controls.Normal:
+                                default:
+                                    return "transparent"
+                                }
+                            }
+
+                            border.color: _actionButton.destructive
+                                ? "transparent"
+                                : (_actionButton.Maui.Controls.status ? statusBorderColor() : "transparent")
+                        }
                     }
                 }
             }
