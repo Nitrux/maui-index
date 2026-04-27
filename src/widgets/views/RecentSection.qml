@@ -18,13 +18,12 @@ SectionGroup
     readonly property alias list : _recentModelList
 
     browser.itemSize: 220
-    browser.itemHeight: 70
-    browser.implicitHeight: 140
+    browser.itemHeight: 82
+    browser.implicitHeight: 164
 
     template.template.content:  Button
     {
-        icon.name: "list-add"
-        text: i18n("More")
+        text: i18n("Explore")
         onClicked: openTab(_recentGrid.list.url)
     }
 
@@ -33,5 +32,3 @@ SectionGroup
         id: _recentModelList
     }
 }
-
-

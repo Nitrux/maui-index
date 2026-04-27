@@ -300,7 +300,7 @@ Maui.SplitViewItem
 
             onRightClicked:
             {
-                popupMainMenu()
+                popupBrowserContextMenu()
             }
         }
 

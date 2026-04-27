@@ -50,7 +50,7 @@ SectionGroup
             onClicked:
             {
                 control.currentIndex = index
-                openPreview(control.baseModel, currentIndex)
+                openPreview(model.path || model.url)
             }
         }
     }

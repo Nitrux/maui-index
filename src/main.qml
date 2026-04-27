@@ -31,7 +31,7 @@ Maui.ApplicationWindow
     property QtObject tagsDialog : null
 
     readonly property alias selectionBar : _browserView.selectionBar
-    readonly property alias pathBar: _pathBarLoader.item
+    readonly property alias pathBar: _headBarMiddleLoader.item
 
     readonly property alias currentTab : _browserView.currentTab
     readonly property alias currentSplit : _browserView.currentSplit
@@ -351,7 +351,7 @@ Maui.ApplicationWindow
             altHeader: Maui.Handy.isMobile
             Maui.Controls.showCSD: true
 
-            headBar.visible: !_homeViewComponent.visible
+            headBar.visible: true
             headBar.forceCenterMiddleContent: width > 1000
             headerMargins: settings.floatyUI ? Maui.Style.contentMargins : 0
             footerMargins: headerMargins
@@ -379,59 +379,87 @@ Maui.ApplicationWindow
                     }
                 },
 
-                Maui.ToolActions
+                Loader
                 {
-                    autoExclusive: false
-                    checkable: false
-                    display: ToolButton.IconOnly
+                    asynchronous: true
+                    active: _homeViewComponent.visible
+                    visible: active
 
-                    Action
+                    sourceComponent: ToolButton
                     {
                         icon.name: "go-previous"
-                        onTriggered : currentBrowser.goBack()
-                    }
-
-                    Action
-                    {
-                        icon.name: "go-next"
-                        onTriggered : currentBrowser.goForward()
+                        display: ToolButton.IconOnly
+                        onClicked: _stackView.pop()
                     }
                 },
 
-                Maui.ToolActions
+                Loader
                 {
-                    autoExclusive: true
-                    expanded: root.isWide
-                    cyclic: true
-                    display: ToolButton.IconOnly
+                    asynchronous: true
+                    active: !_homeViewComponent.visible
+                    visible: active
 
-                    Action
+                    sourceComponent: Maui.ToolActions
                     {
-                        text: i18n("List")
-                        icon.name: "view-list-details"
-                        checked: currentBrowser.viewType === FB.FMList.LIST_VIEW
-                        checkable: true
-                        onTriggered:
+                        autoExclusive: false
+                        checkable: false
+                        display: ToolButton.IconOnly
+
+                        Action
                         {
-                            if(currentBrowser)
-                            {
-                                currentBrowser.viewType = FB.FMList.LIST_VIEW
-                            }
+                            icon.name: "go-previous"
+                            onTriggered : currentBrowser.goBack()
+                        }
+
+                        Action
+                        {
+                            icon.name: "go-next"
+                            onTriggered : currentBrowser.goForward()
                         }
                     }
+                },
 
-                    Action
+                Loader
+                {
+                    asynchronous: true
+                    active: !_homeViewComponent.visible
+                    visible: active
+
+                    sourceComponent: Maui.ToolActions
                     {
-                        text: i18n("Grid")
-                        icon.name: "view-list-icons"
-                        checked:  currentBrowser.viewType === FB.FMList.ICON_VIEW
-                        checkable: true
+                        autoExclusive: true
+                        expanded: root.isWide
+                        cyclic: true
+                        display: ToolButton.IconOnly
 
-                        onTriggered:
+                        Action
                         {
-                            if(currentBrowser)
+                            text: i18n("List")
+                            icon.name: "view-list-details"
+                            checked: currentBrowser.viewType === FB.FMList.LIST_VIEW
+                            checkable: true
+                            onTriggered:
                             {
-                                currentBrowser.viewType = FB.FMList.ICON_VIEW
+                                if(currentBrowser)
+                                {
+                                    currentBrowser.viewType = FB.FMList.LIST_VIEW
+                                }
+                            }
+                        }
+
+                        Action
+                        {
+                            text: i18n("Grid")
+                            icon.name: "view-list-icons"
+                            checked:  currentBrowser.viewType === FB.FMList.ICON_VIEW
+                            checkable: true
+
+                            onTriggered:
+                            {
+                                if(currentBrowser)
+                                {
+                                    currentBrowser.viewType = FB.FMList.ICON_VIEW
+                                }
                             }
                         }
                     }
@@ -440,12 +468,19 @@ Maui.ApplicationWindow
 
             rightContent: [
 
-                ToolButton
+                Loader
                 {
-                    icon.name: "edit-find"
-                    checked: currentBrowser.headBar.visible
-                    checkable: true
-                    onClicked: currentBrowser.toggleSearchBar()
+                    asynchronous: true
+                    active: !_homeViewComponent.visible
+                    visible: active
+
+                    sourceComponent: ToolButton
+                    {
+                        icon.name: "edit-find"
+                        checked: currentBrowser.headBar.visible
+                        checkable: true
+                        onClicked: currentBrowser.toggleSearchBar()
+                    }
                 },
 
                 Loader
@@ -453,51 +488,12 @@ Maui.ApplicationWindow
                     id: _mainMenuLoader
 
                     asynchronous: true
+                    active: !_homeViewComponent.visible
+                    visible: active
                     sourceComponent: Maui.ToolButtonMenu
                     {
                         id: _mainMenu
                         icon.name:  "overflow-menu"
-
-                        property bool canPaste: false
-                        menu.onOpened: canPaste = currentBrowser.currentFMList.clipboardHasContent()
-
-                        MenuItem
-                        {
-                            text: i18n("Paste")
-                            enabled: _mainMenu.canPaste
-                            action: Action
-                            {
-                                shortcut: "Ctrl+V"
-                            }
-                            icon.name: "edit-paste"
-                            onTriggered: currentBrowser.paste()
-
-                            property int count
-                            onVisibleChanged: if(visible) count= currentBrowser.currentFMList.clipboardFilesCount()
-                            Maui.Controls.badgeText: count
-                        }
-
-                        MenuItem
-                        {
-                            text: i18n("Select All")
-                            icon.name: "edit-select-all"
-                            action: Action
-                            {
-                                shortcut: "Ctrl+A"
-                            }
-                            onTriggered: currentBrowser.selectAll()
-                        }
-
-                        MenuItem
-                        {
-                            text: i18n("New Item")
-                            icon.name: "folder-new"
-                            action: Action
-                            {
-                                shortcut: "Ctrl+N"
-                            }
-                            onTriggered: currentBrowser.newItem()
-                        }
 
                         Menu
                         {
@@ -571,27 +567,6 @@ Maui.ApplicationWindow
 
                         MenuSeparator {}
 
-                        Maui.MenuItemActionRow
-                        {
-                            visible: !appSettings.showActionsBar
-                            height: visible ? implicitHeight: -_mainMenu.spacing
-                            actions: [_newTabAction, _viewHiddenAction, _splitViewAction, _showTerminalAction]
-                        }
-
-                        MenuItem
-                        {
-                            enabled: !Maui.Handy.isMobile
-                            text: i18n("Open Terminal Here")
-                            id: openTerminal
-                            icon.name: "dialog-scripts"
-                            onTriggered:
-                            {
-                                inx.openTerminal(currentBrowser.currentPath, appSettings.terminalExecutable)
-                            }
-                        }
-
-                        MenuSeparator {}
-
                         MenuItem
                         {
                             text: i18n("Shortcuts")
@@ -622,14 +597,23 @@ Maui.ApplicationWindow
 
             headBar.middleContent: Loader
             {
-                id: _pathBarLoader
+                id: _headBarMiddleLoader
 
                 asynchronous: true
 
                 Layout.fillWidth: true
                 Layout.minimumWidth: 100
+                Layout.maximumWidth: _homeViewComponent.visible ? 500 : -1
+                Layout.alignment: Qt.AlignCenter
 
-                sourceComponent: Item
+                sourceComponent: _homeViewComponent.visible ? _overviewSearchComponent : _pathBarComponent
+            }
+
+            Component
+            {
+                id: _pathBarComponent
+
+                Item
                 {
                     implicitHeight: _pathBar.implicitHeight
                     readonly property alias pathBar: _pathBar
@@ -700,6 +684,47 @@ Maui.ApplicationWindow
                             }
                         }
                     }
+                }
+            }
+
+            Component
+            {
+                id: _overviewSearchComponent
+
+                Maui.SearchField
+                {
+                    placeholderText: i18n("Search for files")
+                    onAccepted: currentBrowser.search(text)
+                }
+            }
+
+            Maui.ContextualMenu
+            {
+                id: _browserContextMenu
+
+                MenuItem
+                {
+                    text: i18n("New Item")
+                    icon.name: "folder-new"
+                    onTriggered: currentBrowser.newItem()
+                }
+
+                MenuItem
+                {
+                    enabled: !Maui.Handy.isMobile
+                    text: i18n("Open Terminal Here")
+                    icon.name: "dialog-scripts"
+                    onTriggered:
+                    {
+                        inx.openTerminal(currentBrowser.currentPath, appSettings.terminalExecutable)
+                    }
+                }
+
+                MenuItem
+                {
+                    text: i18n("Select All")
+                    icon.name: "edit-select-all"
+                    onTriggered: currentBrowser.selectAll()
                 }
             }
 
@@ -911,5 +936,10 @@ Maui.ApplicationWindow
     function popupMainMenu()
     {
         _mainMenuLoader.item.popup()
+    }
+
+    function popupBrowserContextMenu()
+    {
+        _browserContextMenu.show()
     }
 }

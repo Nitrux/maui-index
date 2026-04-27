@@ -105,26 +105,26 @@ Maui.Page
 
         Action
         {
-            text: i18n("Share")
-            icon.name: "document-share"
+            text: i18n("Paste")
+            icon.name: "edit-paste"
+            enabled: currentBrowser && currentBrowser.currentFMList && currentBrowser.currentFMList.clipboardHasContent()
             onTriggered:
             {
-                shareFiles(_selectionBar.uris)
+                currentBrowser.paste()
+            }
+        }
+
+        Action
+        {
+            text: i18n("Remove")
+            icon.name: "edit-delete"
+            onTriggered:
+            {
+                currentBrowser.remove(_selectionBar.uris)
             }
         }
 
         hiddenActions:[
-            Action
-            {
-                text: i18n("Open")
-                icon.name: "document-open"
-                onTriggered:
-                {
-                    for(var i in selectionBar.uris)
-                        currentBrowser.openFile(_selectionBar.uris[i])
-                }
-            },
-
             Action
             {
                 text: i18n("Compress")
@@ -143,17 +143,6 @@ Maui.Page
                 onTriggered:
                 {
                     tagFiles(_selectionBar.uris)
-                }
-            },
-
-            Action
-            {
-                text: i18n("Remove")
-                icon.name: "edit-delete"
-
-                onTriggered:
-                {
-                    currentBrowser.remove(_selectionBar.uris)
                 }
             }
         ]

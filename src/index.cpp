@@ -13,6 +13,7 @@
 #include <QFileInfo>
 
 #include <QProcess>
+#include <QStandardPaths>
 
 #include <KF6/KI18n/KLazyLocalizedString>
 
@@ -275,32 +276,62 @@ void Index::openTerminal(const QUrl &url, const QString &program)
 QVariantList Index::quickPaths()
 {
     FMH::MODEL_LIST paths;
+    const auto appendQuickPlace = [&paths](const QString &path, const QString &fallbackLabel, const QString &fallbackIcon, const QString &color, const bool forceIcon = false)
+    {
+        if (path.isEmpty())
+            return;
+
+        const auto url = QUrl::fromLocalFile(path);
+        auto info = FMStatic::getFileInfoModel(url);
+
+        if (info.isEmpty())
+        {
+            info = FMH::MODEL {
+                {FMH::MODEL_KEY::PATH, url.toString()},
+                {FMH::MODEL_KEY::ICON, fallbackIcon},
+                {FMH::MODEL_KEY::LABEL, fallbackLabel}
+            };
+        }
+
+        if (forceIcon)
+            info[FMH::MODEL_KEY::ICON] = fallbackIcon;
+
+        info.insert(FMH::MODEL_KEY::TYPE, QStringLiteral("Quick"));
+        info.insert(FMH::MODEL_KEY::COLOR, color);
+        paths << info;
+    };
 
     paths << FMH::MODEL {{FMH::MODEL_KEY::PATH, "overview:///"},
-                        {FMH::MODEL_KEY::ICON, "folder-recent"},
+                        {FMH::MODEL_KEY::ICON, "computer"},
                         {FMH::MODEL_KEY::LABEL, i18n("Overview")},
                         {FMH::MODEL_KEY::TYPE, "Quick"},
                         {FMH::MODEL_KEY::COLOR, "green"}};
-
-    paths << FMH::MODEL {{FMH::MODEL_KEY::PATH, FMStatic::PATHTYPE_URI[FMStatic::PATHTYPE_KEY::TAGS_PATH] + "fav"},
-                        {FMH::MODEL_KEY::ICON, "love"},
-                        {FMH::MODEL_KEY::LABEL, i18n("Favorite")},
-                        {FMH::MODEL_KEY::TYPE, "Quick"},
-                        {FMH::MODEL_KEY::COLOR, "pink"}};
 
     paths << FMH::MODEL {{FMH::MODEL_KEY::PATH, "tags:///"},
                         {FMH::MODEL_KEY::ICON, "tag"},
                         {FMH::MODEL_KEY::LABEL, i18n("Tags")}, {FMH::MODEL_KEY::TYPE, "Quick"},
                         {FMH::MODEL_KEY::COLOR, "blue"}};
 
-    auto defaultPaths = FMStatic::getDefaultPaths();
+    const auto defaultPaths = FMStatic::getDefaultPaths();
+    for (const auto &item : defaultPaths)
+    {
+        if (item[FMH::MODEL_KEY::PATH] == FMStatic::RootPath)
+            continue;
 
-    // std::for_each(defaultPaths.begin(), defaultPaths.end(), [](auto &item)
-    //               {
-    //                   item.insert(FMH::MODEL_KEY::COLOR, "orange");
-    //               });
+        paths << item;
+    }
 
-    paths << defaultPaths;
+    appendQuickPlace(QStandardPaths::writableLocation(QStandardPaths::TemplatesLocation),
+                     i18n("Templates"),
+                     QStringLiteral("folder-templates"),
+                     QStringLiteral("orange"),
+                     true);
+
+    appendQuickPlace(QStandardPaths::writableLocation(QStandardPaths::PublicShareLocation),
+                     i18n("Public"),
+                     QStringLiteral("folder-publicshare"),
+                     QStringLiteral("orange"),
+                     true);
 
     return FMH::toMapList(paths);
 }

@@ -31,6 +31,7 @@
 
 #include "models/recentfilesmodel.h"
 #include "models/pathlist.h"
+#include "models/storagemodel.h"
 
 #define INDEX_URI "org.maui.index"
 
@@ -130,6 +131,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("inx", index.get());
     qmlRegisterType<FilePreviewer>(INDEX_URI, 1, 0, "FilePreviewProvider");
     qmlRegisterType<RecentFilesModel>(INDEX_URI, 1, 0, "RecentFiles");
+    qmlRegisterType<StorageModel>(INDEX_URI, 1, 0, "StorageModel");
     qmlRegisterType<DirInfo>(INDEX_URI, 1, 0, "DirInfo");
     qmlRegisterType<PathList>(INDEX_URI, 1, 0, "PathList");
     qmlRegisterType<FolderConfig>(INDEX_URI, 1, 0, "FolderConfig");

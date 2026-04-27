@@ -19,21 +19,51 @@ SectionGroup
     title: i18n("Places")
     description: i18n("Quick access to common places.")
 
-    function placeIcon(path, iconName)
+    function fileUrl(path)
     {
         const value = String(path)
-        return (value === "/" || value === "file:///") ? "folder-red" : iconName
+        return value.startsWith("file://") ? value : "file://" + value
+    }
+
+    function appendPlace(location, fallbackLabel)
+    {
+        const path = StandardPaths.writableLocation(location)
+        if (!path)
+            return
+
+        const url = fileUrl(path)
+        if (!FB.FM.isDir(url))
+            return
+
+        const info = FB.FM.getFileInfo(url)
+        placesModel.append({
+            label: String(info.label || fallbackLabel),
+            modified: String(info.modified || ""),
+            icon: String(info.icon || "folder"),
+            path: url,
+            count: Number(info.count || 0)
+        })
+    }
+
+    function reloadPlaces()
+    {
+        placesModel.clear()
+        appendPlace(StandardPaths.DesktopLocation, i18n("Desktop"))
+        appendPlace(StandardPaths.DocumentsLocation, i18n("Documents"))
+        appendPlace(StandardPaths.DownloadLocation, i18n("Downloads"))
+        appendPlace(StandardPaths.MusicLocation, i18n("Music"))
+        appendPlace(StandardPaths.PicturesLocation, i18n("Pictures"))
+        appendPlace(StandardPaths.MoviesLocation, i18n("Videos"))
     }
 
     browser.itemSize: 220
     browser.itemHeight: 70
     browser.implicitHeight: 140
+    browser.model: placesModel
 
-    baseModel.list: FB.PlacesList
+    ListModel
     {
-        id: placesList
-
-        groups: [FB.FMList.PLACES_PATH]
+        id: placesModel
     }
 
     template.template.content: Button
@@ -56,7 +86,7 @@ SectionGroup
             iconSizeHint: Maui.Style.iconSizes.big
             label1.text: model.label
             label2.text: Qt.formatDateTime(new Date(model.modified), "d MMM yyyy")
-            iconSource: control.placeIcon(model.path, model.icon)
+            iconSource: model.icon
             checkable: selectionMode
 
             Maui.Badge
@@ -65,13 +95,14 @@ SectionGroup
                 text: model.count
             }
 
-            onClicked: (index) =>
+            onClicked: () =>
             {
                 control.currentIndex = index
-                model.count = 0
                 _stackView.pop()
                 currentBrowser.openFolder(model.path)
             }
         }
     }
+
+    Component.onCompleted: reloadPlaces()
 }

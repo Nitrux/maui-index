@@ -17,6 +17,7 @@ set(index_SRCS
     controllers/patharrowbackground.cpp
     models/recentfilesmodel.cpp
     models/pathlist.cpp
+    models/storagemodel.cpp
     data/data.qrc)
 
 qt_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/index.h org.kde.Index.xml)

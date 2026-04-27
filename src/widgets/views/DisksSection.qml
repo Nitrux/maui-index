@@ -9,54 +9,34 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import org.mauikit.controls as Maui
-
-import org.mauikit.filebrowsing as FB
+import org.maui.index as Index
 import "home"
 
 SectionGroup
 {
     id: control
-    title: i18n("Devices and Remote")
-    description: i18n("Remote locations and devices like disks, phones and cameras")
+    property bool expanded: false
 
-    function placeIcon(path, iconName, label)
+    title: i18n("Storage")
+    description: i18n("Mounted drives with their used and free space")
+
+    browser.itemSize: Math.min(browser.width * 0.45, 320)
+    browser.itemHeight: 170
+    browser.implicitHeight: expanded ? 360 : 170
+
+    template.template.content: Button
     {
-        const value = String(path)
-        const text = String(label)
-
-        if (value === "/" || value === "file:///")
-            return "folder-red"
-
-        if ((value.startsWith("/") || value.startsWith("file:///")) && text.startsWith("/"))
-            return "folder"
-
-        return iconName
+        text: control.expanded ? i18n("Collapse") : i18n("Expand")
+        onClicked: control.expanded = !control.expanded
     }
 
-    function placeLabel(label)
-    {
-        const text = String(label)
-
-        if (text.startsWith("/") && text.length > 15)
-            return text.slice(0, 15) + "..."
-
-        return text
-    }
-
-    browser.itemSize: Math.min(browser.width * 0.3, 180)
-    browser.itemHeight: 220
-    browser.implicitHeight: 220
-
-    baseModel.list: FB.PlacesList
-    {
-        groups: [FB.FMList.DRIVES_PATH, FB.FMList.REMOTE_PATH]
-    }
+    baseModel.list: Index.StorageModel {}
 
     browser.delegate: Item
     {
         width: GridView.view.cellWidth
         height: GridView.view.cellHeight
-        readonly property bool currentItem: GridView.isCurrentItem
+        readonly property bool currentItem: false
 
         Rectangle
         {
@@ -73,31 +53,91 @@ SectionGroup
                 anchors.margins: Maui.Style.space.medium
                 spacing: Maui.Style.space.small
 
-                Item
+                RowLayout
                 {
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.minimumHeight: 96
+                    spacing: Maui.Style.space.medium
 
                     Maui.IconItem
                     {
-                        anchors.centerIn: parent
-                        iconSource: control.placeIcon(model.path, model.icon, model.label)
-                        iconSizeHint: Maui.Style.iconSizes.huge
+                        iconSource: model.icon
+                        iconSizeHint: Maui.Style.iconSizes.big
                         highlighted: currentItem
+                    }
+
+                    ColumnLayout
+                    {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        Label
+                        {
+                            Layout.fillWidth: true
+                            text: model.label
+                            font.bold: true
+                            elide: Text.ElideRight
+                            color: currentItem ? Maui.Theme.highlightedTextColor : Maui.Theme.textColor
+                        }
+
+                        Label
+                        {
+                            Layout.fillWidth: true
+                            text: model.details
+                            elide: Text.ElideMiddle
+                            opacity: 0.75
+                            color: currentItem ? Maui.Theme.highlightedTextColor : Maui.Theme.textColor
+                        }
+
+                        Label
+                        {
+                            Layout.fillWidth: true
+                            text: model.type
+                            opacity: 0.65
+                            color: currentItem ? Maui.Theme.highlightedTextColor : Maui.Theme.textColor
+                        }
+                    }
+                }
+
+                ProgressBar
+                {
+                    id: _usageBar
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 1
+                    value: Number(model.value)
+                    background: Rectangle
+                    {
+                        implicitHeight: 10
+                        radius: height / 2
+                        color: Qt.rgba(Maui.Theme.textColor.r, Maui.Theme.textColor.g, Maui.Theme.textColor.b, 0.18)
+                    }
+                    contentItem: Item
+                    {
+                        implicitHeight: 10
+
+                        Rectangle
+                        {
+                            width: _usageBar.visualPosition * parent.width
+                            height: parent.height
+                            radius: height / 2
+                            color: Maui.Theme.highlightColor
+                        }
                     }
                 }
 
                 Label
                 {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.max(implicitHeight, Maui.Style.iconSizes.big + Maui.Style.space.small)
-                    Layout.maximumHeight: 84
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignTop
-                    wrapMode: Text.NoWrap
-                    elide: Text.ElideRight
-                    text: control.placeLabel(model.label)
+                    text: model.summary
+                    wrapMode: Text.Wrap
+                    color: currentItem ? Maui.Theme.highlightedTextColor : Maui.Theme.textColor
+                }
+
+                Label
+                {
+                    Layout.fillWidth: true
+                    text: model.message
+                    opacity: 0.75
                     color: currentItem ? Maui.Theme.highlightedTextColor : Maui.Theme.textColor
                 }
             }
@@ -111,13 +151,13 @@ SectionGroup
             acceptedButtons: Qt.LeftButton
             onClicked:
             {
-                control.currentIndex = index
+                control.currentIndex = -1
                 currentBrowser.openFolder(model.path)
             }
         }
 
         ToolTip.visible: _mouseArea.containsMouse
         ToolTip.delay: 1000
-        ToolTip.text: model.label
+        ToolTip.text: model.label + "\n" + model.details + "\n" + model.summary
     }
 }

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 
 import org.mauikit.controls as Maui
 
@@ -14,7 +15,8 @@ Maui.DialogWindow
 
     title: _previewer.title
     width: 700
-    height: 1000
+    readonly property real preferredHeight: Math.max(680, _previewer.implicitHeight + page.headBar.implicitHeight + page.footBar.implicitHeight + (Maui.Style.space.big * 2))
+    height: Math.min(Screen.desktopAvailableHeight * 0.9, preferredHeight)
 
     page.showTitle: true
 
@@ -33,23 +35,14 @@ Maui.DialogWindow
                               }
     }
 
-    page.footBar.rightContent: [
-        FB.FavButton
-        {
-            url: _previewer.currentUrl
-        },
-
+    page.headBar.leftContent: [
         ToolButton
         {
-            icon.name: "document-share"
-            onClicked: shareFiles([_previewer.currentUrl])
-        },
-
-        Button
-        {
-            text: i18n("Open")
             icon.name: "document-open"
-            //        flat: true
+            display: AbstractButton.IconOnly
+            focusPolicy: Qt.NoFocus
+            ToolTip.visible: hovered
+            ToolTip.text: i18n("Open")
             onClicked:
             {
                 FB.FM.openUrl(_previewer.currentUrl)

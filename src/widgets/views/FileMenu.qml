@@ -103,10 +103,6 @@ Maui.ContextualMenu
         enabled: !control.isExec
         text: i18n("Select")
         icon.name: "edit-select"
-        action: Action
-        {
-            shortcut: "Ctrl+Shift+→"
-        }
         onTriggered:
         {
             _browser.addToSelection(control.item)
@@ -133,10 +129,6 @@ Maui.ContextualMenu
         enabled: !control.isExec
         text: i18n("Preview and Info")
         icon.name: "view-preview"
-        action: Action
-        {
-            shortcut: "Spacebar"
-        }
         onTriggered:
         {
             openPreview(control.item.path)

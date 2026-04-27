@@ -36,6 +36,43 @@ Loader
         return iconName
     }
 
+    function sidebarIcon(path, iconName, label)
+    {
+        const resolved = placeIcon(path, iconName, label)
+        return resolved === "folder-red" ? resolved : resolved + "-symbolic"
+    }
+
+    function usesSymbolicIcon(path, iconName, label)
+    {
+        return placeIcon(path, iconName, label) !== "folder-red"
+    }
+
+    function isDeviceSection(type)
+    {
+        const value = String(type)
+        return value === i18n("Drives") || value === i18n("Removable")
+    }
+
+    function shouldShowPlace(index, type, path, label)
+    {
+        if (!isDeviceSection(type))
+            return true
+
+        if (!control.list || !control.list.isDevice(index))
+            return false
+
+        const url = String(path)
+        const text = String(label)
+
+        if (url === "/" || url === "file:///")
+            return false
+
+        if (text.startsWith("/"))
+            return false
+
+        return true
+    }
+
     OpacityAnimator on opacity
     {
         from: 0
@@ -46,6 +83,7 @@ Loader
 
     sourceComponent: Pane
     {
+        readonly property alias list: _listBrowser.list
         padding: 0
         focus: false
         clip: true
@@ -163,6 +201,7 @@ Loader
                         {
                             Maui.Theme.colorSet: Maui.Theme.Button
                             Maui.Theme.inherit: false
+                            readonly property string resolvedIcon: control.sidebarIcon(modelData.path, modelData.icon, modelData.label)
 
                             Layout.preferredHeight: Math.min(50, width)
                             Layout.preferredWidth: 50
@@ -171,9 +210,9 @@ Loader
                             Layout.columnSpan: modelData.path === "overview:///" ? 2 : 1
 
                             isCurrentItem: modelData.path === "overview:///" ? _stackView.depth === 2 : (currentBrowser.currentPath === modelData.path && _stackView.depth === 1)
-                            iconSource: control.placeIcon(modelData.path, modelData.icon, modelData.label) + "-symbolic"
+                            iconSource: resolvedIcon
                             iconSizeHint: 16
-                            template.isMask: true
+                            template.isMask: control.usesSymbolicIcon(modelData.path, modelData.icon, modelData.label)
                             label1.text: modelData.label
                             labelsVisible: false
                             tooltipText: modelData.label
@@ -226,14 +265,18 @@ Loader
 
             delegate: Maui.ListDelegate
             {
+                readonly property bool shownPlace: control.shouldShowPlace(index, model.type, model.path, model.label)
                 isCurrentItem: ListView.isCurrentItem && _stackView.depth === 1
                 width: ListView.view.width
+                height: shownPlace ? implicitHeight : 0
+                visible: shownPlace
+                enabled: shownPlace
 
                 iconSize: Maui.Style.iconSize
                 label: model.label
-                iconName: control.placeIcon(model.path, model.icon, model.label) + "-symbolic"
+                iconName: control.sidebarIcon(model.path, model.icon, model.label)
                 iconVisible: true
-                template.isMask: iconSize <= Maui.Style.iconSizes.medium
+                template.isMask: control.usesSymbolicIcon(model.path, model.icon, model.label) && iconSize <= Maui.Style.iconSizes.medium
 
                 template.content: ToolButton
                 {

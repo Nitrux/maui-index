@@ -22,9 +22,9 @@ Maui.Page
 
     Maui.Theme.colorSet: Maui.Theme.View
     Maui.Theme.inherit: false
-    headBar.forceCenterMiddleContent: false
     altHeader: Maui.Handy.isMobile
     background: null
+    headBar.visible: false
 
     Maui.ContextualMenu
     {
@@ -56,29 +56,6 @@ Maui.Page
         }
     }
 
-    headBar.middleContent: Maui.SearchField
-    {
-        id: _searchField
-        Layout.fillWidth: true
-        Layout.minimumWidth: 100
-        Layout.maximumWidth: 500
-        Layout.alignment: Qt.AlignCenter
-        placeholderText: i18n("Search for files")
-        onAccepted:
-        {
-            currentBrowser.search(text)
-        }
-    }
-
-    headBar.farLeftContent: ToolButton
-    {
-        icon.name: "go-previous"
-        text: i18n("Browser")
-        display: ToolButton.IconOnly
-        visible: _stackView.depth === 2
-        onClicked: _stackView.pop()
-    }
-
     ScrollView
     {
         id: _overviewScroll
@@ -102,28 +79,57 @@ Maui.Page
             {
                 Layout.fillWidth: true
                 asynchronous: true
-
-                sourceComponent: PlacesSection
+                sourceComponent:  DisksSection
                 {
+                    id: _disksSection
                     verticalScrollTarget: _overviewScroll.contentItem
                 }
             }
 
             Loader
             {
+                asynchronous: true
                 Layout.fillWidth: true
-                asynchronous: true
 
-                sourceComponent: FavoritesSection
+                sourceComponent: RecentSection
                 {
+                    id: _recentDocs
                     verticalScrollTarget: _overviewScroll.contentItem
+                    title: i18n("Documents")
+                    description: i18n("Your most recent document files")
+
+                    list.url: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+
+                    browser.delegate:  Item
+                    {
+                        height: GridView.view.cellHeight
+                        width: GridView.view.cellWidth
+
+                        Maui.ListBrowserDelegate
+                        {
+                            anchors.fill: parent
+                            anchors.margins: Maui.Style.space.small
+                            iconVisible: true
+                            label1.text: model.label
+                            iconSource: model.icon
+                            imageSource: model.thumbnail
+                            template.fillMode: Image.PreserveAspectFit
+                            iconSizeHint: height * 0.62
+                            checkable: selectionMode
+
+                            onClicked: () =>
+                            {
+                                _recentDocs.currentIndex = index
+                                openPreview(model.path || model.url)
+                            }
+                        }
+                    }
                 }
             }
 
             Loader
             {
                 asynchronous: true
-
                 Layout.fillWidth: true
 
                 sourceComponent: RecentSection
@@ -150,13 +156,13 @@ Maui.Page
                             iconSource: model.icon
                             imageSource: model.thumbnail
                             template.fillMode: Image.PreserveAspectFit
-                            iconSizeHint: height * 0.5
+                            iconSizeHint: height * 0.62
                             checkable: selectionMode
 
-                            onClicked: (index) =>
+                            onClicked: () =>
                             {
                                 _recentGrid.currentIndex = index
-                                openPreview(_recentGrid.baseModel, index)
+                                openPreview(model.path || model.url)
                             }
                         }
                     }
@@ -188,7 +194,7 @@ Maui.Page
                             anchors.fill: parent
                             anchors.margins: Maui.Style.space.small
                             iconSource: model.icon
-                            iconSizeHint: Maui.Style.iconSizes.big
+                            iconSizeHint: Maui.Style.iconSizes.huge
                             imageSource: model.thumbnail
                             player.source: model.url
                             isCurrentItem: parent.ListView.isCurrentItem
@@ -196,10 +202,10 @@ Maui.Page
 
                             label1.text: player.metaData.title && player.metaData.title.length ? player.metaData.title :  model.name
                             label2.text: player.metaData.albumArtist || player.metaData.albumTitle
-                            onClicked: (index) =>
+                            onClicked: () =>
                             {
                                 _recentMusic.currentIndex = index
-                                openPreview(_recentMusic.baseModel, index)
+                                openPreview(model.path || model.url)
                             }
                         }
                     }
@@ -238,26 +244,16 @@ Maui.Page
                             anchors.margins: Maui.Style.space.small
                             imageSource: model.thumbnail
                             isCurrentItem: parent.ListView.isCurrentItem
-                            onClicked: (index) =>
+                            onClicked: () =>
                             {
                                 _recentPics.currentIndex = index
-                                openPreview(_recentPics.baseModel, index)
+                                openPreview(model.path || model.url)
                             }
                         }
                     }
                 }
             }
 
-            Loader
-            {
-                Layout.fillWidth: true
-                asynchronous: true
-                sourceComponent:  DisksSection
-                {
-                    id: _disksSection
-                    verticalScrollTarget: _overviewScroll.contentItem
-                }
-            }
         }
     }
 }

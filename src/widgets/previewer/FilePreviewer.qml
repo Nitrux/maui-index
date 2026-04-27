@@ -15,7 +15,7 @@ Item
 
     ListModel { id: infoModel }
 
-    readonly property string title : iteminfo.label
+    readonly property string title : String(iteminfo.label || "")
     property var iteminfo : ({})
 
     property bool isDir : false
@@ -81,10 +81,10 @@ Item
                 {
                     height: parent.height * 0.9
                     width: height
-                    label1.text: iteminfo.label
+                    label1.text: String(iteminfo.label || "")
                     anchors.centerIn: parent
-                    iconSource: iteminfo.icon
-                    imageSource: iteminfo.thumbnail
+                    iconSource: String(iteminfo.icon || "")
+                    imageSource: String(iteminfo.thumbnail || "")
                     iconSizeHint: Maui.Style.iconSizes.large
                 }
             }
@@ -184,10 +184,20 @@ Item
         infoModel.append({key: "Owner", value: iteminfo.owner})
         infoModel.append({key: "Group", value: iteminfo.group})
         infoModel.append({key: "Size", value: Maui.Handy.formatSize(iteminfo.size)})
-        infoModel.append({key: "Symbolic Link", value: iteminfo.symlink})
-        infoModel.append({key: "Path", value: iteminfo.path})
+        infoModel.append({key: "Symbolic Link", value: displayPath(iteminfo.symlink)})
+        infoModel.append({key: "Path", value: displayPath(iteminfo.path)})
         // infoModel.append({key: "Thumbnail", value: iteminfo.thumbnail})
         // infoModel.append({key: "Icon Name", value: iteminfo.icon})
+    }
+
+    function displayPath(path)
+    {
+        const value = String(path || "")
+
+        if (value.startsWith("file://"))
+            return decodeURIComponent(value.slice(7))
+
+        return value
     }
 
     function toggleInfo()

@@ -36,22 +36,13 @@ Maui.PopupPage
     }
     
     footBar.rightContent: [
-        FB.FavButton
-        {
-            url: _previewer.currentUrl
-        },
-        
         ToolButton
         {
-            icon.name: "document-share"
-            onClicked: shareFiles([_previewer.currentUrl])
-        },
-        
-        Button
-        {
-            text: i18n("Open")
             icon.name: "document-open"
-            //        flat: true
+            display: AbstractButton.IconOnly
+            focusPolicy: Qt.NoFocus
+            ToolTip.visible: hovered
+            ToolTip.text: i18n("Open")
             onClicked:
             {
                 FB.FM.openUrl(_previewer.currentUrl)
