@@ -19,29 +19,17 @@ set(index_SRCS
     models/pathlist.cpp
     data/data.qrc)
 
-if(UNIX AND NOT ANDROID)
-    qt_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/index.h org.kde.Index.xml)
-    qt_add_dbus_adaptor(index_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Index.xml index.h Index)
-    qt_add_dbus_interface(index_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Index.xml indexinterface)
-endif()
+qt_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/index.h org.kde.Index.xml)
+qt_add_dbus_adaptor(index_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Index.xml index.h Index)
+qt_add_dbus_interface(index_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Index.xml indexinterface)
 
 qt_add_resources(index_RSCRS index_assets.qrc)
 
-if(ANDROID)
-    qt_add_executable(${PROJECT_NAME}
-        MANUAL_FINALIZATION
-        ${index_SRCS}
-        ${index_RSCRS})
-
-    set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android_files)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/android_files/version.gradle.in ${CMAKE_BINARY_DIR}/src/version.gradle)
-else()
-    qt_add_executable(${PROJECT_NAME}
-        MANUAL_FINALIZATION
-        ${index_SRCS}
-        ${index_dbus_SRCS}
-        ${index_RSCRS})
-endif()
+qt_add_executable(${PROJECT_NAME}
+    MANUAL_FINALIZATION
+    ${index_SRCS}
+    ${index_dbus_SRCS}
+    ${index_RSCRS})
 
 qt_add_qml_module(${PROJECT_NAME} URI app.maui.index
     NO_PLUGIN
@@ -84,26 +72,13 @@ qt_add_qml_module(${PROJECT_NAME} URI app.maui.index
     widgets/previewer/FileProperties.qml
     widgets/views/home/SectionGroup.qml)
 
-if (ANDROID)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        Qt6::QuickControls2)
-
-    kde_source_files_enable_exceptions(${PROJECT_NAME} index.cpp)
-
-    #    set_target_properties(create-apk-${PROJECT_NAME} PROPERTIES ANDROID_APK_DIR "${APK_DIR}")
-elseif(UNIX)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        MauiKit4::Terminal
-        KF6::KIOCore
-        KF6::KIOFileWidgets
-        Qt6::DBus)
-endif()
-
-if(UNIX OR WIN32 OR APPLE AND NOT ANDROID)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
-endif()
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    MauiKit4::Terminal
+    KF6::KIOCore
+    KF6::KIOFileWidgets
+    Qt6::DBus
+    Qt6::Widgets)
 
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
@@ -125,11 +100,8 @@ target_link_libraries(${PROJECT_NAME}
     KF6::I18n)
 
 #TODO: port to ecm_install_icons()
-if(UNIX AND NOT APPLE AND NOT ANDROID)
-    install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
-    install(FILES org.kde.index.desktop DESTINATION ${KDE_INSTALL_APPDIR})
-
-    install(FILES assets/index.svg DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps)
-endif()
+install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
+install(FILES org.kde.index.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(FILES assets/index.svg DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps)
 
 qt_finalize_target(${PROJECT_NAME})

@@ -204,7 +204,7 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: hasDirectoryActions && Maui.Handy.isLinux
+        enabled: hasDirectoryActions
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Open in New Window")

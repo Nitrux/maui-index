@@ -48,7 +48,7 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            enabled: Maui.Handy.isLinux && !Maui.Handy.isMobile
+            enabled: !Maui.Handy.isMobile
             label1.text: i18n("Open in Window")
             label2.text: i18n("Show the file previews in a new window.")
 
@@ -342,8 +342,6 @@ Maui.SettingsDialog
     {
         title: i18n("Terminal")
         description: i18n("Embedded terminal options.")
-        enabled: Maui.Handy.isLinux
-
         Maui.FlexSectionItem
         {
             label1.text:  i18n("Sync Terminal")

@@ -5,9 +5,7 @@
 
 #include "index.h"
 
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
 #include <KTerminalLauncherJob>
-#endif
 
 #include <QGuiApplication>
 #include <QQuickWindow>
@@ -23,7 +21,6 @@
 #include <MauiKit4/Core/fmh.h>
 #include <MauiKit4/FileBrowsing/fmstatic.h>
 
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
 #include "indexinterface.h"
 #include "indexadaptor.h"
 
@@ -152,19 +149,15 @@ bool IndexInstance::registerService()
     return true;
 }
 
-#endif
-
 Index::Index(QObject *parent)
     : QObject(parent)
 {
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
     new ActionsAdaptor(this);
     if(!QDBusConnection::sessionBus().registerObject(QStringLiteral("/Actions"), this))
     {
         qDebug() << "FAILED TO REGISTER BACKGROUND DBUS OBJECT";
         return;
     }
-#endif
 }
 
 void Index::openDirectories(const QStringList &dirs, bool)
@@ -272,15 +265,9 @@ void Index::setQmlObject(QObject *object)
 
 void Index::openTerminal(const QUrl &url)
 {
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
-
     auto job = new KTerminalLauncherJob(QString());
     job->setWorkingDirectory(url.toLocalFile());
     job->start();
-
-#else
-    Q_UNUSED(url)
-#endif
 }
 
 QVariantList Index::quickPaths()

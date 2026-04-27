@@ -9,7 +9,6 @@
 #include <QUrl>
 #include <QStringList>
 
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
 class OrgKdeIndexActionsInterface;
 
 namespace IndexInstance
@@ -20,14 +19,11 @@ bool attachToExistingInstance(const QList<QUrl>& inputUrls, bool openFiles, bool
 
 bool registerService();
 }
-#endif
 
 class Index : public QObject
 {
     Q_OBJECT
-    //#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
     Q_CLASSINFO("D-Bus Interface", "org.kde.index.Actions")
-    //#endif
 
 public:
     explicit Index(QObject *parent = nullptr);
@@ -128,5 +124,4 @@ Q_SIGNALS:
     void openPath(QStringList paths);
     void activate();
 };
-
 

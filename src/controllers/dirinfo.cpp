@@ -1,16 +1,13 @@
 #include "dirinfo.h"
 
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
 #include <KIO/DirectorySizeJob>
 #include <KIO/FileSystemFreeSpaceJob>
-#endif
 
 #include <QDebug>
 #include <MauiKit4/FileBrowsing/fmstatic.h>
 
 DirInfo::DirInfo(QObject *parent) : QObject(parent)
 {
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
     // auto m_free =  KIO::fileSystemFreeSpace (QUrl("file:///"));
     // connect(m_free, &KIO::FileSystemFreeSpaceJob::result, [this, m_free](KJob *, KIO::filesize_t size, KIO::filesize_t available)
     // {
@@ -25,7 +22,6 @@ DirInfo::DirInfo(QObject *parent) : QObject(parent)
     //     m_free->deleteLater();
     // 
     // });
-#endif
 }
 
 QUrl DirInfo::url() const
@@ -92,7 +88,6 @@ void DirInfo::getSize()
         return;
     qDebug() << "Askign for dir size" << m_url;
 
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
     auto m_job = KIO::directorySize(m_url);
 
     //    connect(m_job, &KIO::DirectorySizeJob::percent, [this, m_job](KJob *, unsigned long percent)
@@ -117,7 +112,4 @@ void DirInfo::getSize()
         Q_EMIT this->dirsCountChanged(m_dirCount);
 
     });
-
-#endif
 }
-

@@ -26,7 +26,6 @@ Maui.ApplicationWindow
     color: "transparent"
     background: null
 
-    Maui.Style.accentColor : Maui.Handy.isAndroid ? "#6765C2": undefined
     Maui.Handy.singleClick: Maui.Handy.hasTransientTouchInput
 
     property QtObject tagsDialog : null
@@ -96,14 +95,14 @@ Maui.ApplicationWindow
 
         property bool dirConf : true
         property bool syncTerminal: true
-        property bool previewerWindow: Maui.Handy.isLinux && !Maui.Handy.isMobile
+        property bool previewerWindow: !Maui.Handy.isMobile
         property bool autoPlayPreviews: true
         property bool terminalFollowsColorScheme: true
         property string terminalColorScheme: "Maui-Dark"
         property bool showActionsBar: true
         property string lastUsedTag
         property bool floatyUI : root.isWide
-        property bool windowTranslucency : Maui.Handy.isLinux
+        property bool windowTranslucency : true
     }
 
     Settings
@@ -180,7 +179,7 @@ Maui.ApplicationWindow
     {
         id: _showTerminalAction
         text: i18n("Terminal")
-        enabled: !Maui.Handy.isAndroid && currentTab && currentTab.currentItem ? currentTab.currentItem.supportsTerminal : false
+        enabled: currentTab && currentTab.currentItem ? currentTab.currentItem.supportsTerminal : false
         icon.name: "dialog-scripts"
         checked : currentTab && currentBrowser ? currentTab.currentItem.terminalVisible : false
         checkable: true
@@ -580,7 +579,7 @@ Maui.ApplicationWindow
 
                         MenuItem
                         {
-                            enabled: Maui.Handy.isLinux && !Maui.Handy.isMobile
+                            enabled: !Maui.Handy.isMobile
                             text: i18n("Open Terminal Here")
                             id: openTerminal
                             icon.name: "dialog-scripts"
@@ -828,12 +827,6 @@ Maui.ApplicationWindow
     {
         if(urls.length <= 0)
         {
-            return
-        }
-
-        if(Maui.Handy.isAndroid)
-        {
-            FB.FM.openUrl(urls[0])
             return
         }
 

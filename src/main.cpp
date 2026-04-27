@@ -3,29 +3,18 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include <QCommandLineParser>
+#include <QDate>
 #include <QIcon>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
 #include <QUrl>
 
-#ifdef Q_OS_ANDROID
-#include <QGuiApplication>
-#include <MauiKit4/Core/mauiandroid.h>
-#else
-#include <QApplication>
-#endif
-
-#ifdef Q_OS_MACOS
-#include <MauiKit4/Core/mauimacos.h>
-#endif
-
 #include <MauiKit4/Core/mauiapp.h>
 #include <MauiKit4/FileBrowsing/moduleinfo.h>
 
-#if defined Q_OS_LINUX && !defined Q_OS_ANDROID
 #include <KF6/KIO/kio_version.h>
-#endif
 
 #include <KAboutData>
 #include <KLocalizedString>
@@ -47,19 +36,11 @@
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
-#ifdef Q_OS_WIN32
-    qputenv("QT_MULTIMEDIA_PREFERRED_PLUGINS", "w");
-#endif
-
     QSurfaceFormat format;
     format.setAlphaBufferSize(8);
     QSurfaceFormat::setDefaultFormat(format);
 
-#ifdef Q_OS_ANDROID
-    QGuiApplication app(argc, argv);
-#else
     QApplication app(argc, argv);
-#endif
 
     app.setOrganizationName(QStringLiteral("Maui"));
     app.setWindowIcon(QIcon("://assets/index.png"));
@@ -71,26 +52,24 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
                      INDEX_VERSION_STRING,
                      i18n("Browse, organize and preview your files."),
                      KAboutLicense::LGPL_V3,
-                     INDEX_COPYRIGHT_NOTICE,
+                     i18n("© %1 Made by Nitrux | Built with MauiKit", QString::number(QDate::currentDate().year())),
                      QString(GIT_BRANCH) + "/" + QString(GIT_COMMIT_HASH));
 
     about.addAuthor(QStringLiteral("Camilo Higuita"), i18n("Developer"), QStringLiteral("milo.h@aol.com"));
-    about.addAuthor(QStringLiteral("Gabriel Dominguez"), i18n("Developer"), QStringLiteral("gabriel@gabrieldominguez.es"));
-    about.setHomepage("https://mauikit.org");
-    about.setProductName("maui/index");
-    about.setBugAddress("https://invent.kde.org/maui/index-fm/-/issues");
+    about.addAuthor(QStringLiteral("Uri Herrera"), i18n("Developer"), QStringLiteral("uri_herrera@nxos.org"));
+    about.setHomepage("https://nxos.org");
+    about.setProductName("nitrux/index");
     about.setOrganizationDomain(INDEX_URI);
+    about.setDesktopFileName("org.kde.index");
     about.setProgramLogo(app.windowIcon());
 
-#if defined Q_OS_LINUX && !defined Q_OS_ANDROID
     about.addComponent("KIO", "", KIO_VERSION_STRING);
-#endif
 
-    const auto FBData = MauiKitFileBrowsing::aboutData();
-    about.addComponent(FBData.name(), MauiKitFileBrowsing::buildVersion(), FBData.version(), FBData.webAddress());
+    const auto fileBrowsingData = MauiKitFileBrowsing::aboutData();
+    about.addComponent(fileBrowsingData.name(), MauiKitFileBrowsing::buildVersion(), fileBrowsingData.version(), fileBrowsingData.webAddress());
 
     KAboutData::setApplicationData(about);
-    MauiApp::instance()->setIconName("qrc:/assets/index.png");
+    MauiApp::instance()->setIconName("qrc:/assets/index.svg");
 
     QCommandLineOption newWindowOption(QStringList() << "n" << "new", i18n("Open url in a new window."), "url");
 
@@ -111,20 +90,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
             paths << QUrl::fromUserInput(path).toString();
     }
 
-#ifdef Q_OS_ANDROID
-        if (!MAUIAndroid::checkRunTimePermissions({"android.permission.MANAGE_EXTERNAL_STORAGE",
-                                                   "android.permission.WRITE_EXTERNAL_STORAGE"}))
-            qWarning() << "Failed to get WRITE and READ permissions";
-
-#endif
-
-#if (defined Q_OS_LINUX || defined Q_OS_FREEBSD) && !defined Q_OS_ANDROID
-
     if(parser.isSet(newWindowOption))
     {
         paths = QStringList() << QUrl::fromUserInput(parser.value(newWindowOption)).toString() ;
-    }else
-    {        
+    }
+    else
+    {
         if (IndexInstance::attachToExistingInstance(QUrl::fromStringList(paths), false, false))
         {
             // Successfully attached to existing instance of Index
@@ -133,7 +104,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     }
 
     IndexInstance::registerService();
-#endif
 
     auto index = std::make_unique<Index>(nullptr);
 
@@ -168,10 +138,5 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qmlRegisterType<PathArrowBackground>(INDEX_URI, 1, 0, "PathArrowBackground");
 
     engine.load(url);
-
-#ifdef Q_OS_MACOS
-    //        MAUIMacOS::removeTitlebarFromWindow();
-    //        MauiApp::instance()->setEnableCSD(true); //for now index can not handle cloud accounts
-#endif
     return app.exec();
 }

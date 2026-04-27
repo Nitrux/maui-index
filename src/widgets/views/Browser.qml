@@ -22,7 +22,7 @@ Maui.SplitViewItem
     readonly property alias browser : _browser
     readonly property alias settings : _browser.settings
     readonly property alias title : _browser.title
-    readonly property bool supportsTerminal : Maui.Handy.isLinux
+    readonly property bool supportsTerminal : true
     readonly property int terminalPanelHeight: _terminalSplitView.visible ? _terminalSplitView.height : 0
 
     property alias currentPath: _browser.currentPath
@@ -323,7 +323,7 @@ Maui.SplitViewItem
                 anchors.fill: parent
                 visible: active
                 asynchronous: true
-                active: (Maui.Handy.isLinux && terminalVisible) || item
+                active: terminalVisible || item
                 focus: false
                 onLoaded:
                 {
