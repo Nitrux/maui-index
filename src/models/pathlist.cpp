@@ -87,7 +87,11 @@ FMH::MODEL_LIST PathList::splitPath(const QString &path)
 
       if (label.contains(":") && i == count - 1) // handle the protocol
         {
-          res << FMH::MODEL {{FMH::MODEL_KEY::LABEL, "/"}, {FMH::MODEL_KEY::PATH, _url + "///"}};
+          const auto isFileScheme = label == QStringLiteral("file:");
+          const auto rootLabel = isFileScheme ? QStringLiteral("/") : _url + QStringLiteral("/");
+          const auto rootPath = isFileScheme ? _url + QStringLiteral("///") : _url + QStringLiteral("/");
+
+          res << FMH::MODEL {{FMH::MODEL_KEY::LABEL, rootLabel}, {FMH::MODEL_KEY::PATH, rootPath}};
           break;
         }
 

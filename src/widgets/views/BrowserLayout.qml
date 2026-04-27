@@ -57,7 +57,7 @@ Item
             Maui.Theme.inherit: false
 
             x: control.width - width - Maui.Style.space.big
-            y: control.height - height - currentItem.terminalPanelHeight - Maui.Style.space.big
+            y: control.height - height - currentItem.terminalPanelHeight - (currentItem.browser.footBar.visible ? currentItem.browser.footBar.height : 0) - Maui.Style.space.big
             background: Rectangle
             {
                 radius: Maui.Style.radiusV
@@ -127,7 +127,7 @@ Item
 
                         let pos = centroid.velocity.x
                         _pane.x = Qt.binding(()=> { return pos < 0 ? Maui.Style.space.big : control.width - _pane.width - Maui.Style.space.big })
-                        _pane.y = Qt.binding(()=> { return control.height - _pane.height - control.currentItem.terminalPanelHeight - Maui.Style.space.big })
+                        _pane.y = Qt.binding(()=> { return control.height - _pane.height - control.currentItem.terminalPanelHeight - (control.currentItem.browser.footBar.visible ? control.currentItem.browser.footBar.height : 0) - Maui.Style.space.big })
                     }
                 }
             }

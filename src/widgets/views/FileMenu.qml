@@ -47,57 +47,6 @@ Maui.ContextualMenu
     icon.name: control.item && control.item.icon ? control.item.icon : ""
     Maui.Controls.badgeText: control.item && control.item.path && _browser.filterSelection(currentPath, control.item.path).length > 1 ? _browser.filterSelection(currentPath, control.item.path).length : ""
 
-    Maui.MenuItemActionRow
-    {
-
-        Action
-        {
-            enabled: !control.isExec
-            text: i18n("Copy")
-            icon.name: "edit-copy"
-            onTriggered:
-            {
-                _browser.copy(_browser.filterSelection(currentPath, control.item.path))
-            }
-        }
-
-        Action
-        {
-            enabled: !control.isExec
-            text: i18n("Cut")
-            icon.name: "edit-cut"
-            onTriggered:
-            {
-                _browser.cut(_browser.filterSelection(currentPath, control.item.path))
-            }
-        }
-
-        Action
-        {
-            enabled: !control.isExec
-            text: i18n("Rename")
-            icon.name: "edit-rename"
-            onTriggered:
-            {
-                _browser.renameItem()
-            }
-        }
-
-        Action
-        {
-            text: i18n("Remove")
-            Maui.Controls.status: Maui.Controls.Negative
-            icon.name: "edit-delete"
-            onTriggered:
-            {
-                _browser.remove(_browser.filterSelection(currentPath, control.item.path))
-
-            }
-        }
-    }
-
-    MenuSeparator{}
-
     MenuItem
     {
         enabled: !control.isExec

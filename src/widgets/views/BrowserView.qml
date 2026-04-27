@@ -127,6 +127,17 @@ Maui.Page
         hiddenActions:[
             Action
             {
+                text: i18n("Rename")
+                icon.name: "edit-rename"
+                enabled: _selectionBar.count === 1
+                onTriggered:
+                {
+                    currentBrowser.renameItem()
+                }
+            },
+
+            Action
+            {
                 text: i18n("Compress")
                 icon.name: "archive-insert"
                 onTriggered:
