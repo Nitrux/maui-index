@@ -78,24 +78,11 @@ Maui.SplitViewItem
         id: _emptyAreaMenu
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        onVisibleChanged:
-        {
-            console.log("EMPTY AREA MENU VISIBLE", visible,
-                        "path", _browser.currentPath,
-                        "readOnly", _browser.readOnly,
-                        "clipboardHasContent", _browser.currentFMList ? _browser.currentFMList.clipboardHasContent : false,
-                        "pasteEnabled", _pasteMenuItem.enabled)
-        }
-
         MenuItem
         {
             text: i18n("New Item")
             icon.name: "folder-new"
-            onTriggered:
-            {
-                console.log("EMPTY AREA MENU NEW ITEM")
-                _browser.newItem()
-            }
+            onTriggered: _browser.newItem()
         }
 
         MenuItem
@@ -104,11 +91,7 @@ Maui.SplitViewItem
             enabled: !_browser.readOnly && _browser.currentFMList && _browser.currentFMList.clipboardHasContent
             text: i18n("Paste")
             icon.name: "edit-paste"
-            onTriggered:
-            {
-                console.log("EMPTY AREA MENU PASTE", "enabled", enabled, "path", _browser.currentPath, "fmList", _browser.currentFMList)
-                _browser.paste()
-            }
+            onTriggered: _browser.paste()
         }
 
         MenuItem
@@ -116,22 +99,14 @@ Maui.SplitViewItem
             enabled: !Maui.Handy.isMobile
             text: i18n("Open Terminal Here")
             icon.name: "dialog-scripts"
-            onTriggered:
-            {
-                console.log("EMPTY AREA MENU OPEN TERMINAL")
-                inx.openTerminal(_browser.currentPath, appSettings.terminalExecutable)
-            }
+            onTriggered: inx.openTerminal(_browser.currentPath, appSettings.terminalExecutable)
         }
 
         MenuItem
         {
             text: i18n("Select All")
             icon.name: "edit-select-all"
-            onTriggered:
-            {
-                console.log("EMPTY AREA MENU SELECT ALL")
-                _browser.selectAll()
-            }
+            onTriggered: _browser.selectAll()
         }
     }
 

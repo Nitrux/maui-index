@@ -236,13 +236,11 @@ Maui.ContextualMenu
     function showFor(index)
     {
         control.item = _browser.currentFMList.get(index)
-        console.log("CURRENT ITEM" , item.name)
         if(item.path.startsWith("tags://") || item.path.startsWith("applications://"))
             return
 
         if(item)
         {
-            console.log("GOT ITEM FILE", index, item.path)
             control.index = index
             control.isDir = item.isdir == true || item.isdir == "true"
             control.isExec = item.executable == true || item.executable == "true"
