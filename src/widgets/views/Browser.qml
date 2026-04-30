@@ -6,6 +6,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
 import org.mauikit.controls as Maui
 import org.mauikit.filebrowsing as FB
@@ -115,10 +116,24 @@ Maui.SplitViewItem
         id: _removeTagDialogComponent
         Maui.InfoDialog
         {
+            id: _removeTagDialog
             property string tag
 
             title: i18n("Remove '%1'", tag)
             standardButtons: Dialog.Yes | Dialog.Cancel
+            footer: DialogButtonBox
+            {
+                width: parent.width
+                padding: Maui.Style.contentMargins
+                standardButtons: _removeTagDialog.standardButtons
+
+                delegate: Button
+                {
+                    focus: true
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                }
+            }
 
             message: i18n("Are you sure you want to remove this tag? This operation can not be undone.")
             onAccepted:
