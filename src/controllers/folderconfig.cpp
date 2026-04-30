@@ -1,7 +1,23 @@
 #include "folderconfig.h"
+#include <QDir>
+#include <QFileInfo>
 #include <QSettings>
 
 #include <QDebug>
+
+namespace
+{
+QString directoryConfigPath(const QUrl &path)
+{
+    return QDir(path.toLocalFile()).filePath(QStringLiteral(".directory"));
+}
+
+bool hasSafeDirectoryConfig(const QString &configPath)
+{
+    const QFileInfo configInfo(configPath);
+    return !configInfo.exists() || (configInfo.isFile() && !configInfo.isSymLink());
+}
+}
 
 FolderConfig::FolderConfig(QObject *parent) : QObject(parent)
   ,m_settings(nullptr)
@@ -13,7 +29,7 @@ FolderConfig::~FolderConfig()
 {
     if(m_settings)
     {
-        m_settings->deleteLater();
+        delete m_settings;
     }
 }
 
@@ -140,6 +156,13 @@ void FolderConfig::setDirConf(const QString &key, const QVariant &value)
         return;
     }
 
+    const auto configPath = directoryConfigPath(m_path);
+    if (!hasSafeDirectoryConfig(configPath))
+    {
+        qWarning() << "Refusing to write unsafe directory config" << configPath;
+        return;
+    }
+
     m_settings->beginGroup("Index");
     m_settings->setValue(key, value);
     m_settings->endGroup();
@@ -150,6 +173,9 @@ void FolderConfig::setValues()
 {
     if(!m_enabled)
         return;
+
+    delete m_settings;
+    m_settings = nullptr;
 
     if (!m_path.isValid() || !m_path.isLocalFile() || !FMH::fileExists(m_path))
     {
@@ -165,10 +191,17 @@ void FolderConfig::setValues()
     uint sortby = m_fallbackSortKey;
     uint viewType = m_fallbackViewType;
 
-    auto configUrl = QUrl(m_path.toString()+"/.directory");
-     m_settings = new QSettings(configUrl.toLocalFile(), QSettings::Format::NativeFormat);
+    const auto configPath = directoryConfigPath(m_path);
+    if (!hasSafeDirectoryConfig(configPath))
+    {
+        qWarning() << "Refusing to read unsafe directory config" << configPath;
+        resetToFallbackValues();
+        return;
+    }
 
-    if (FMH::fileExists(configUrl) && configUrl.isLocalFile())
+    m_settings = new QSettings(configPath, QSettings::Format::NativeFormat);
+
+    if (QFileInfo::exists(configPath))
     {
         m_settings->beginGroup("Index");
 
