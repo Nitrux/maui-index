@@ -3,11 +3,9 @@ import QtQuick.Controls
 
 import org.mauikit.texteditor as TE
 
-TE.TextEditor
+TE.TextViewer
 {
     id: control
-    body.readOnly: true
-    document.enableSyntaxHighlighting: true
     fileUrl: currentUrl
 
     Connections
