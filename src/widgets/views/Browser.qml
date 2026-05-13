@@ -86,6 +86,7 @@ Maui.SplitViewItem
             id: _pasteMenuItem
             visible: _emptyAreaMenu.hasClipboardContent
             enabled: _emptyAreaMenu.hasClipboardContent
+            height: visible ? implicitHeight : -_emptyAreaMenu.spacing
             text: i18n("Paste")
             icon.name: "edit-paste"
             onTriggered: _browser.paste()
