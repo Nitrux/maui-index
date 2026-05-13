@@ -44,12 +44,6 @@ Maui.ContextualMenu
       *
       */
 
-    title: control.item && control.item.label ? control.item.label : ""
-    Maui.Controls.subtitle: control.item && control.item.mime ? (control.item.mime === "inode/directory" ? (control.item.count ? control.item.count + i18n(" items") : "") : Maui.Handy.formatSize(control.item.size)) : ""
-    icon.source: control.item && control.item.thumbnail ? control.item.thumbnail : ""
-    icon.name: control.item && control.item.icon ? control.item.icon : ""
-    Maui.Controls.badgeText: control.item && control.item.path && _browser.filterSelection(currentPath, control.item.path).length > 1 ? _browser.filterSelection(currentPath, control.item.path).length : ""
-
     MenuItem
     {
         enabled: !control.isExec
@@ -84,6 +78,19 @@ Maui.ContextualMenu
         onTriggered:
         {
             openPreview(control.item.path)
+        }
+    }
+
+    MenuSeparator {}
+
+    MenuItem
+    {
+        enabled: !control.isExec
+        text: i18n("Rename")
+        icon.name: "edit-rename"
+        onTriggered:
+        {
+            currentBrowser.renameItem()
         }
     }
 

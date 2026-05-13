@@ -79,20 +79,29 @@ Maui.SplitViewItem
         id: _emptyAreaMenu
         modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        readonly property bool hasClipboardContent: !_browser.readOnly && _browser.currentFMList && _browser.currentFMList.clipboardHasContent
+
+        MenuItem
+        {
+            id: _pasteMenuItem
+            visible: _emptyAreaMenu.hasClipboardContent
+            enabled: _emptyAreaMenu.hasClipboardContent
+            text: i18n("Paste")
+            icon.name: "edit-paste"
+            onTriggered: _browser.paste()
+        }
+
+        MenuSeparator
+        {
+            visible: _emptyAreaMenu.hasClipboardContent
+            height: visible ? implicitHeight : -_emptyAreaMenu.spacing
+        }
+
         MenuItem
         {
             text: i18n("New Item")
             icon.name: "folder-new"
             onTriggered: _browser.newItem()
-        }
-
-        MenuItem
-        {
-            id: _pasteMenuItem
-            enabled: !_browser.readOnly && _browser.currentFMList && _browser.currentFMList.clipboardHasContent
-            text: i18n("Paste")
-            icon.name: "edit-paste"
-            onTriggered: _browser.paste()
         }
 
         MenuItem
