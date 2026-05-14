@@ -4,7 +4,6 @@
 #include <MauiKit4/FileBrowsing/fmstatic.h>
 
 #include <QFileSystemWatcher>
-#include <QDebug>
 #include <QTimer>
 
 RecentFilesModel::RecentFilesModel(QObject *parent) :
@@ -82,7 +81,6 @@ void RecentFilesModel::setList()
     {
       if(i >= 6)
         break;
-      qDebug() << "RECENT:" << url.filePath () << dir.path ();
       m_urls << QUrl::fromLocalFile (url.filePath ()).toString();
       m_list << FMStatic::getFileInfoModel (QUrl::fromLocalFile (url.filePath ()));
       i++;

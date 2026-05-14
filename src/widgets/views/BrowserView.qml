@@ -145,11 +145,9 @@ Maui.Page
     {
         for(var i = 0; i < browserList.count; i++)
         {
-            console.log("It TABS", i)
             var tab = browserList.contentModel.get(i)
             for(var j = 0; j < tab.count; j++)
             {
-                console.log("It SPlits", j)
                 var view = tab.model.get(j)
                 if(url === view.currentPath)
                 {

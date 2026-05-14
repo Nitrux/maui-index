@@ -42,6 +42,108 @@ Maui.ApplicationWindow
     property alias currentTabIndex : _browserView.currentTabIndex
     property bool selectionMode: false
 
+    function resolveFooterBar()
+    {
+        const footerContainerChild = resolveFooterContainerChild()
+
+        return footerContainerChild && footerContainerChild.item ? footerContainerChild.item : footerContainerChild
+    }
+
+    function resolveFooterContainerChild()
+    {
+        return _pageLayout && _pageLayout.footerContainer && _pageLayout.footerContainer.visibleChildren.length > 0
+                ? _pageLayout.footerContainer.visibleChildren[0]
+                : null
+    }
+
+    function ensureFooterBarHeight(reason)
+    {
+        if (!_pageLayout || !_pageLayout.split || _pageLayout.splitIn !== ToolBar.Footer)
+            return
+
+        const footerContainer = _pageLayout.footerContainer
+        const footerContainerChild = resolveFooterContainerChild()
+        const footerBar = resolveFooterBar()
+        if (!footerBar)
+            return
+
+        const pathBarItem = root.pathBar
+        const pathBarHeight = pathBarItem && pathBarItem.height !== undefined ? pathBarItem.height : -1
+        const pathBarImplicitHeight = pathBarItem && pathBarItem.implicitHeight !== undefined ? pathBarItem.implicitHeight : -1
+        const headBarHeight = _pageLayout.headBar && _pageLayout.headBar.height !== undefined ? _pageLayout.headBar.height : -1
+        const headBarImplicitHeight = _pageLayout.headBar && _pageLayout.headBar.implicitHeight !== undefined ? _pageLayout.headBar.implicitHeight : -1
+        const fallbackHeight = Maui.Style.toolBarHeight
+        const targetHeight = Math.max(fallbackHeight, headBarHeight, headBarImplicitHeight, pathBarHeight, pathBarImplicitHeight)
+        const footerContainerCurrentHeight = footerContainer && footerContainer.height !== undefined ? footerContainer.height : -1
+        const preferredHeight = footerBar.preferredHeight !== undefined ? footerBar.preferredHeight : -1
+        const implicitHeight = footerBar.implicitHeight !== undefined ? footerBar.implicitHeight : -1
+        const currentHeight = footerBar.height !== undefined ? footerBar.height : -1
+
+        if (footerContainer && footerContainer.forceLayout)
+            footerContainer.forceLayout()
+
+        if (footerContainerCurrentHeight !== targetHeight || preferredHeight !== targetHeight || implicitHeight !== targetHeight || currentHeight !== targetHeight)
+        {
+            if (footerContainer && footerContainer.implicitHeight !== undefined && footerContainer.implicitHeight !== targetHeight)
+                footerContainer.implicitHeight = targetHeight
+
+            if (footerContainer && footerContainer.height !== undefined && footerContainer.height !== targetHeight)
+                footerContainer.height = targetHeight
+
+            if (footerContainerChild && footerContainerChild.implicitHeight !== undefined && footerContainerChild.implicitHeight !== targetHeight)
+                footerContainerChild.implicitHeight = targetHeight
+
+            if (footerContainerChild && footerContainerChild.height !== undefined && footerContainerChild.height !== targetHeight)
+                footerContainerChild.height = targetHeight
+
+            if (footerBar.preferredHeight !== undefined && footerBar.preferredHeight !== targetHeight)
+                footerBar.preferredHeight = targetHeight
+
+            if (footerBar.implicitHeight !== undefined && footerBar.implicitHeight !== targetHeight)
+                footerBar.implicitHeight = targetHeight
+
+            if (footerBar.height !== undefined && footerBar.height !== targetHeight)
+                footerBar.height = targetHeight
+
+        }
+    }
+
+    onWidthChanged:
+    {
+        Qt.callLater(() => ensureFooterBarHeight("root width changed"))
+    }
+
+    onHeightChanged:
+    {
+        Qt.callLater(() => ensureFooterBarHeight("root height changed"))
+    }
+
+    onCurrentBrowserChanged:
+    {
+        Qt.callLater(() => ensureFooterBarHeight("currentBrowser changed"))
+    }
+
+    onPathBarChanged:
+    {
+        Qt.callLater(() => ensureFooterBarHeight("pathBar changed"))
+    }
+
+    Timer
+    {
+        id: _footerStartupTimer
+        repeat: true
+        running: true
+        interval: 250
+        property int ticks: 0
+        onTriggered:
+        {
+            root.ensureFooterBarHeight("startup tick " + ticks)
+            ticks++
+            if (ticks >= 12)
+                stop()
+        }
+    }
+
     Maui.WindowBlur
     {
         view: root
@@ -132,14 +234,10 @@ Maui.ApplicationWindow
                            const tabMap = {'path': browser.currentPath}
                            tabPaths.push(tabMap)
 
-                           console.log("saving tabs", browser.currentPath)
-
                        }
 
                        tabs.push(tabPaths)
                    }
-
-                   console.log("saving tabs", tabs.length)
 
                    settings.lastSession = tabs
                    settings.lastTabIndex = currentTabIndex
@@ -353,16 +451,32 @@ Maui.ApplicationWindow
 
             headBar.visible: true
             headBar.forceCenterMiddleContent: true
-            headerMargins: settings.floatyUI ? Maui.Style.contentMargins : 0
+            headerMargins: Maui.Handy.isMobile ? 0 : Maui.Style.contentMargins
             footerMargins: headerMargins
 
             Maui.Theme.colorSet: Maui.Theme.View
             background: null
 
+            onSplitChanged:
+            {
+                Qt.callLater(() => root.ensureFooterBarHeight("pageLayout split changed"))
+            }
+
+            onWidthChanged:
+            {
+                Qt.callLater(() => root.ensureFooterBarHeight("pageLayout width changed"))
+            }
+
+            onHeightChanged:
+            {
+                Qt.callLater(() => root.ensureFooterBarHeight("pageLayout height changed"))
+            }
+
             leftContent:  [
 
                 Loader
                 {
+                    id: _sidebarToggleLoader
                     asynchronous: true
                     active: _sideBarView.sideBar.collapsed || !_sideBarView.sideBar.visible
                     visible: active
@@ -381,8 +495,9 @@ Maui.ApplicationWindow
 
                 Loader
                 {
+                    id: _overviewBackLoader
                     asynchronous: true
-                    active: _homeViewComponent.visible
+                    active: _stackView.depth > 1
                     visible: active
 
                     sourceComponent: ToolButton
@@ -395,8 +510,9 @@ Maui.ApplicationWindow
 
                 Loader
                 {
+                    id: _historyActionsLoader
                     asynchronous: true
-                    active: !_homeViewComponent.visible
+                    active: _stackView.depth === 1 && !!root.currentBrowser
                     visible: active
 
                     sourceComponent: Maui.ToolActions
@@ -421,8 +537,9 @@ Maui.ApplicationWindow
 
                 Loader
                 {
+                    id: _viewTypeActionsLoader
                     asynchronous: true
-                    active: !_homeViewComponent.visible
+                    active: _stackView.depth === 1 && !!root.currentBrowser
                     visible: active
 
                     sourceComponent: Maui.ToolActions
@@ -470,8 +587,9 @@ Maui.ApplicationWindow
 
                 Loader
                 {
+                    id: _searchToggleLoader
                     asynchronous: true
-                    active: !_homeViewComponent.visible
+                    active: _stackView.depth === 1 && !!root.currentBrowser
                     visible: active
 
                     sourceComponent: ToolButton
@@ -486,9 +604,8 @@ Maui.ApplicationWindow
                 Loader
                 {
                     id: _mainMenuLoader
-
                     asynchronous: true
-                    active: !_homeViewComponent.visible
+                    active: _stackView.depth === 1 && !!root.currentBrowser
                     visible: active
                     sourceComponent: Maui.ToolButtonMenu
                     {
@@ -612,10 +729,10 @@ Maui.ApplicationWindow
 
                 Layout.fillWidth: true
                 Layout.minimumWidth: 100
-                Layout.maximumWidth: _homeViewComponent.visible ? 500 : -1
+                Layout.maximumWidth: _stackView.depth > 1 ? 500 : -1
                 Layout.alignment: Qt.AlignCenter
 
-                sourceComponent: _homeViewComponent.visible ? _overviewSearchComponent : _pathBarComponent
+                sourceComponent: (_stackView.depth > 1 || !root.currentBrowser) ? _overviewSearchComponent : _pathBarComponent
             }
 
             Component
@@ -697,7 +814,7 @@ Maui.ApplicationWindow
                     {
                         currentBrowser.search(text)
 
-                        if(_homeViewComponent.visible && _stackView.depth > 1)
+                        if(_stackView.depth > 1)
                             _stackView.pop()
                     }
                 }
@@ -758,7 +875,6 @@ Maui.ApplicationWindow
         const tabs = settings.lastSession
         if(settings.restoreSession && tabs.length)
         {
-            console.log("restore", tabs.length)
             restoreSession(tabs)
             return
         }
@@ -902,7 +1018,8 @@ Maui.ApplicationWindow
      */
     function openMainMenu()
     {
-        _mainMenuLoader.item.open()
+        if(_mainMenuLoader.item)
+            _mainMenuLoader.item.open()
     }
 
     /**
@@ -910,7 +1027,8 @@ Maui.ApplicationWindow
       */
     function popupMainMenu()
     {
-        _mainMenuLoader.item.popup()
+        if(_mainMenuLoader.item)
+            _mainMenuLoader.item.popup()
     }
 
 }

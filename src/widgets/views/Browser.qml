@@ -243,15 +243,7 @@ Maui.SplitViewItem
                 fallbackViewType: appSettings.viewType
             }
 
-            Action
-            {
-                id: _createNewAction
-                text: i18n("Create new")
-                enabled: _browser.currentFMList.status.exists
-                onTriggered: _browser.newItem()
-            }
-
-            browser.holder.actions: _browser.currentFMList.pathType === FB.FMList.TRASH_PATH ? [] : [_createNewAction]
+            browser.holder.actions: []
 
             Connections
             {

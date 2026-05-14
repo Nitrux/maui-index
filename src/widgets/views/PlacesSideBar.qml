@@ -87,11 +87,26 @@ Loader
 
     sourceComponent: Pane
     {
+        id: _sideBarPane
         readonly property alias list: _listBrowser.list
         padding: 0
         focus: false
         clip: true
         Maui.Theme.colorSet: Maui.Theme.Window
+
+        function syncCurrentPlaceSelection(preserveContentY = true)
+        {
+            if (!currentBrowser)
+                return
+
+            const targetIndex = placesList.indexOfPath(currentBrowser.currentPath)
+            const previousContentY = _listBrowser.flickable.contentY
+
+            _listBrowser.currentIndex = targetIndex
+
+            if (preserveContentY)
+                _listBrowser.flickable.contentY = previousContentY
+        }
 
         background: Rectangle
         {
@@ -114,10 +129,22 @@ Loader
             holder.title: i18n("Bookmarks")
             holder.body: i18n("Your bookmarks will be listed here")
 
-            Binding on currentIndex
+            Connections
             {
-                value: placesList.indexOfPath(currentBrowser.currentPath)
-                restoreMode: Binding.RestoreBindingOrValue
+                target: root
+                function onCurrentBrowserChanged()
+                {
+                    Qt.callLater(() => _sideBarPane.syncCurrentPlaceSelection(true))
+                }
+            }
+
+            Connections
+            {
+                target: currentBrowser ? currentBrowser : null
+                function onCurrentPathChanged()
+                {
+                    Qt.callLater(() => _sideBarPane.syncCurrentPlaceSelection(true))
+                }
             }
 
             Loader
@@ -264,7 +291,12 @@ Loader
 
             Component.onCompleted:
             {
-                _listBrowser.flickable.positionViewAtBeginning()
+                _listBrowser.flickable.highlightFollowsCurrentItem = false
+                Qt.callLater(() =>
+                {
+                    _listBrowser.flickable.positionViewAtBeginning()
+                    _sideBarPane.syncCurrentPlaceSelection(true)
+                })
             }
 
             delegate: Maui.ListDelegate

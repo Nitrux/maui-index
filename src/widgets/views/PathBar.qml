@@ -208,7 +208,6 @@ Item
 
                         Component.onCompleted:
                         {
-                            console.log("PATHBAR LIST READY",  _pathList.count)
                             _listView.currentIndex = Qt.binding( ()=>{return  _pathList.count - 1} )
                             _layout.implicitHeight = Qt.binding(() => {
                                 const lastItem = _listView.itemAtIndex(_pathList.count - 1)

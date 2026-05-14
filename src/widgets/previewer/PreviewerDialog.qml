@@ -25,7 +25,6 @@ Maui.PopupPage
         Layout.fillHeight: true
         focus: true
         Keys.enabled: true
-        Keys.onPressed: (event) => console.log("Key pressed on preview popup", event.key)
         Keys.onEscapePressed: (event) =>
                               {
                                   control.close()

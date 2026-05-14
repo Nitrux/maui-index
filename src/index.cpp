@@ -9,7 +9,6 @@
 #include <QQuickWindow>
 #include <QQmlApplicationEngine>
 
-#include <QDebug>
 #include <QFileInfo>
 
 #include <QProcess>
@@ -34,7 +33,6 @@ QVector<QPair<QSharedPointer<OrgKdeIndexActionsInterface>, QStringList>> IndexIn
                                             QStringLiteral("/Actions"),
                                             QDBusConnection::sessionBus()));
 
-        qDebug() << "IS PREFRFRED INTERFACE VALID?" << preferredInterface->isValid() << preferredInterface->lastError().message();
         if (preferredInterface->isValid() && !preferredInterface->lastError().isValid()) {
             dolphinInterfaces.append(qMakePair(preferredInterface, QStringList()));
         }
@@ -53,8 +51,6 @@ QVector<QPair<QSharedPointer<OrgKdeIndexActionsInterface>, QStringList>> IndexIn
     {
         if (service.startsWith(pattern) && !service.endsWith(myPid))
         {
-            qDebug() << "EXISTING INTANCES" << service;
-
                    // Check if instance can handle our URLs
             QSharedPointer<OrgKdeIndexActionsInterface> interface(
                 new OrgKdeIndexActionsInterface(service,
@@ -154,7 +150,6 @@ Index::Index(QObject *parent)
     new ActionsAdaptor(this);
     if(!QDBusConnection::sessionBus().registerObject(QStringLiteral("/Actions"), this))
     {
-        qDebug() << "FAILED TO REGISTER BACKGROUND DBUS OBJECT";
         return;
     }
 }
@@ -176,7 +171,6 @@ void Index::activateWindow()
         auto window = qobject_cast<QQuickWindow *>(m_qmlObject);
         if (window)
         {
-            qDebug() << "Trying to raise wndow";
             window->raise();
             window->requestActivate();
         }

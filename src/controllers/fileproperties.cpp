@@ -3,7 +3,6 @@
 #include <QFileInfo>
 
 #include <KUser>
-#include <QDebug>
 
 // Only maxentries users are listed in the plugin
 // increase if you need more
@@ -32,14 +31,10 @@ void FileProperties::setUrl(const QUrl &newUrl)
 
 bool Permission::checkPermission(const QUrl &url, const Permission::UserType &user, const Permission::PermissionType &type)
 {
-  qDebug() << "Checkign permissions" <<url << user << type;
-
   if(!url.isValid () || url.isEmpty () || !url.isLocalFile ())
     {
       return false;
     }
-
-  qDebug() << "Checkign permissions" << user << type;
 
   QFile file(url.toLocalFile ());
 
@@ -90,18 +85,13 @@ bool Permission::checkPermission(const QUrl &url, const Permission::UserType &us
 
 bool Permission::setPermission(const QUrl &url, const UserType &user, const PermissionType &key, const bool &state)
 {
-  qDebug() << "Setting permissions" <<url << user << key << state;
-
   if(!url.isValid () || url.isEmpty () || !url.isLocalFile ())
     {
       return false;
     }
 
-  qDebug() << "Setting permissions" <<url << user << key << state;
-
   QFile file(url.toLocalFile ());
   auto permissions = file.permissions ();
-  qDebug() << "Setting permissions" <<url << user << key << state << permissions;
 
   switch(user)
     {
@@ -118,8 +108,6 @@ bool Permission::setPermission(const QUrl &url, const UserType &user, const Perm
             }else
             {
               permissions = permissions & (~QFileDevice::ReadOwner);
-              qDebug() << "Setting permissions" <<permissions;
-
             }
           break;
         case EXECUTE:
@@ -290,12 +278,8 @@ void Permission::setRead(bool newRead)
 
   if(!Permission::setPermission (m_url, m_user, PermissionType::READ, newRead))
     {
-      qDebug() << "Setting permissions failed";
-
       return;
     }
-
-  qDebug() << "Setting permissions?";
 
   m_read = newRead;
   Q_EMIT readChanged();

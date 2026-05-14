@@ -3,7 +3,7 @@
 #include <QFileInfo>
 #include <QSettings>
 
-#include <QDebug>
+#include <QLoggingCategory>
 
 namespace
 {

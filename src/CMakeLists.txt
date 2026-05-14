@@ -81,9 +81,6 @@ target_link_libraries(${PROJECT_NAME}
     Qt6::DBus
     Qt6::Widgets)
 
-target_compile_definitions(${PROJECT_NAME}
-    PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
-
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     MauiKit4

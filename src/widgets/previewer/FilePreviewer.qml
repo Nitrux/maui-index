@@ -24,8 +24,6 @@ Item
 
     onCurrentUrlChanged:
     {
-        console.log("PREVIEWER URL CHANGED", control.currentUrl)
-
         iteminfo = FB.FM.getFileInfo(currentUrl)
         initModel()
 
@@ -130,8 +128,6 @@ Item
     {
         // if(!previewLoader.active)
         //     return
-        console.log("ASKIGN TO PREVIEW FILE <<", control.currentUrl, iteminfo.mime)
-
         // if(control.showInfo)
 
         control.isDir = iteminfo.isdir == "true"
@@ -165,10 +161,8 @@ Item
 
         if(previewLoader.source == source)
         {
-            console.log("SAME PREVIEWER SOURCE DO NOT REUPDATE", source, previewLoader.source)
             return
         }
-        console.log("previe mime", iteminfo.mime, previewLoader.source)
         previewLoader.source = source
         control.showInfo = (source === "DefaultPreview.qml")
     }
