@@ -22,6 +22,28 @@
 #include "indexinterface.h"
 #include "indexadaptor.h"
 
+namespace
+{
+bool launchDetachedIndexWindow(const QUrl &url)
+{
+    const QStringList arguments = {"-n", url.toString()};
+    const QString appPath = QCoreApplication::applicationFilePath();
+
+    if (!appPath.isEmpty() && QProcess::startDetached(appPath, arguments))
+    {
+        return true;
+    }
+
+    if (QProcess::startDetached(QStringLiteral("index"), arguments))
+    {
+        return true;
+    }
+
+    qWarning() << "Failed to detach tab into a new window for" << url;
+    return false;
+}
+}
+
 QVector<QPair<QSharedPointer<OrgKdeIndexActionsInterface>, QStringList>> IndexInstance::appInstances(const QString& preferredService)
 {
     QVector<QPair<QSharedPointer<OrgKdeIndexActionsInterface>, QStringList>> dolphinInterfaces;
@@ -220,10 +242,12 @@ void Index::openNewTabAndActivate(const QUrl &)
 
 void Index::openNewWindow(const QUrl &url)
 {
-    QProcess process;
-    process.setProgram("index");
-    process.setArguments({"-n", url.toString()});
-    process.startDetached();
+    launchDetachedIndexWindow(url);
+}
+
+bool Index::detachTabToNewWindow(const QUrl &url)
+{
+    return launchDetachedIndexWindow(url);
 }
 
 /* to be called to launch index with opening different paths */

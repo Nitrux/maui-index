@@ -493,6 +493,15 @@ Maui.ApplicationWindow
                     }
                 },
 
+                ToolSeparator
+                {
+                    visible: _pageLayout.split
+                             && _pageLayout.splitIn === ToolBar.Footer
+                             && _sidebarToggleLoader.active
+                    topPadding: 10
+                    bottomPadding: 10
+                },
+
                 Loader
                 {
                     id: _overviewBackLoader

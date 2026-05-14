@@ -28,6 +28,7 @@ class Index : public QObject
 public:
     explicit Index(QObject *parent = nullptr);
     Q_INVOKABLE void openPaths(const QStringList &paths);
+    Q_INVOKABLE bool detachTabToNewWindow(const QUrl &url);
     void setQmlObject(QObject  *object);
 
 public Q_SLOTS:

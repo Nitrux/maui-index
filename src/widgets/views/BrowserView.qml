@@ -123,20 +123,91 @@ Maui.Page
         tabBar.margins: settings.floatyUI ? Maui.Style.contentMargins : 0
         tabBar.topMargin: Maui.Handy.isMobile ? Maui.Style.contentMargins  : 0
         currentIndex : -1
-        onNewTabClicked: openTab(currentBrowser.currentPath)
+        onNewTabClicked: openTab(currentBrowser ? currentBrowser.currentPath : FB.FM.homePath())
         onCloseTabClicked: (index) => closeTab(index)
+        tabBar.showNewTabButton: false
         Keys.enabled: true
         Keys.forwardTo: currentTab ? [currentTab] : []
         background: null
         // tabBar.background: null
+
+        tabViewButton: Maui.TabViewButton
+        {
+            id: _tabButton
+            tabView: _browserList
+
+            onClicked:
+            {
+                _browserList.setCurrentIndex(_tabButton.mindex)
+
+                if(_browserList.currentItem)
+                {
+                    _browserList.currentItem.forceActiveFocus()
+                }
+            }
+
+            onRightClicked: _browserList.openTabMenu(_tabButton.mindex)
+            onCloseClicked: _browserList.closeTabClicked(_tabButton.mindex)
+        }
+
+        tabBar.leftContent: [
+            ToolButton
+            {
+                text: _browserList.count
+                visible: _browserList.count > 1
+                display: ToolButton.TextOnly
+                font.bold: true
+                font.pointSize: Maui.Style.fontSizes.small
+                onClicked: _browserList.openOverview()
+
+                background: Rectangle
+                {
+                    color: Maui.Theme.alternateBackgroundColor
+                    radius: Maui.Style.radiusV
+                }
+            },
+
+            ToolSeparator
+            {
+                visible: _browserList.count > 1
+                topPadding: 10
+                bottomPadding: 10
+            }
+        ]
+
+        tabBar.rightContent: [
+            ToolSeparator
+            {
+                visible: _browserList.count > 1
+                topPadding: 10
+                bottomPadding: 10
+            },
+
+            ToolButton
+            {
+                icon.name: "list-add"
+                display: ToolButton.IconOnly
+                onClicked: openTab(currentBrowser ? currentBrowser.currentPath : FB.FM.homePath())
+
+                ToolTip.delay: 1000
+                ToolTip.timeout: 5000
+                ToolTip.visible: hovered
+                ToolTip.text: i18n("New tab")
+            }
+        ]
 
         menuActions: Action
         {
             text: i18n("Detach Tab")
             onTriggered:
             {
-                inx.openNewWindow(_browserList.contentModel.get(_browserList.menu.index).path)
-                closeTab(_browserList.menu.index)
+                const tabIndex = _browserList.menu.index
+                const tabPath = _browserList.contentModel.get(tabIndex).path
+
+                if (inx.detachTabToNewWindow(tabPath))
+                {
+                    closeTab(tabIndex)
+                }
             }
         }
     }
