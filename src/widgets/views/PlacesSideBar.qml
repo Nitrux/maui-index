@@ -57,6 +57,11 @@ Loader
         return value === i18n("Drives") || value === i18n("Removable")
     }
 
+    function isExternalDeviceSection(type)
+    {
+        return String(type) === i18n("Removable")
+    }
+
     function shouldShowPlace(index, type, path, label)
     {
         if (!isDeviceSection(type))
@@ -157,9 +162,21 @@ Loader
                     id: _menu
 
                     property string path
+                    property string placeType
                     property int bookmarkIndex : -1
+                    property bool hasBookmarkEntry: bookmarkIndex >= 0
+                    property bool isDeviceEntry: hasBookmarkEntry && placesList.isDevice(bookmarkIndex)
+                    property bool isExternalDeviceEntry: isDeviceEntry && control.isExternalDeviceSection(placeType)
+                    property bool needsSetup: isExternalDeviceEntry && placesList.setupNeeded(bookmarkIndex)
+                    property bool showDeviceAction: isExternalDeviceEntry
+                    property bool showRemoveAction: hasBookmarkEntry && !isDeviceEntry
 
-                    onClosed: _menu.bookmarkIndex = -1
+                    onClosed:
+                    {
+                        _menu.bookmarkIndex = -1
+                        _menu.path = ""
+                        _menu.placeType = ""
+                    }
 
                     MenuItem
                     {
@@ -183,11 +200,37 @@ Loader
                         onTriggered: currentTab.split(_menu.path, Qt.Horizontal)
                     }
 
-                    MenuSeparator{}
+                    MenuSeparator
+                    {
+                        visible: _menu.showDeviceAction || _menu.showRemoveAction
+                        height: visible ? implicitHeight : 0
+                    }
 
                     MenuItem
                     {
-                        enabled: _menu.bookmarkIndex >= 0
+                        visible: _menu.showDeviceAction
+                        height: visible ? implicitHeight : 0
+                        text: _menu.needsSetup ? i18n("Mount") : i18n("Unmount")
+                        icon.name: _menu.needsSetup ? "media-mount" : "media-eject"
+                        onTriggered:
+                        {
+                            if (_menu.needsSetup)
+                            {
+                                placesList.requestSetup(_menu.bookmarkIndex)
+                                notify("media-mount", i18n("Storage"), i18n("Mounting device..."))
+                            } else
+                            {
+                                placesList.requestTeardown(_menu.bookmarkIndex)
+                                notify("media-eject", i18n("Storage"), i18n("Unmounting device..."))
+                            }
+                        }
+                    }
+
+                    MenuItem
+                    {
+                        visible: _menu.showRemoveAction
+                        height: visible ? implicitHeight : 0
+                        enabled: _menu.showRemoveAction
                         text: i18n("Remove")
                         icon.name: "edit-delete"
                         Maui.Controls.status: Maui.Controls.Negative
@@ -266,12 +309,14 @@ Loader
                             onRightClicked:
                             {
                                 _menuLoader.item.path = modelData.path
+                                _menuLoader.item.placeType = ""
                                 _menuLoader.item.show()
                             }
 
                             onPressAndHold:
                             {
                                 _menuLoader.item.path = modelData.path
+                                _menuLoader.item.placeType = ""
                                 _menuLoader.item.show()
                             }
                         }
@@ -286,6 +331,16 @@ Loader
                 {
                     id: placesList
                     groups: appSettings.sidebarSections
+                }
+            }
+
+            Connections
+            {
+                target: placesList
+                function onOperationError(message)
+                {
+                    const text = String(message).trim().length ? message : i18n("The storage operation failed.")
+                    notify("dialog-error", i18n("Storage"), text)
                 }
             }
 
@@ -316,12 +371,23 @@ Loader
 
                 template.content: ToolButton
                 {
-                    visible: placesList.isDevice(index) && placesList.setupNeeded(index)
-                    icon.name: "media-mount"
+                    visible: placesList.isDevice(index) && control.isExternalDeviceSection(model.type)
+                    icon.name: placesList.setupNeeded(index) ? "media-mount" : "media-eject"
                     flat: true
                     icon.height: Maui.Style.iconSizes.small
                     icon.width: Maui.Style.iconSizes.small
-                    onClicked: placesList.requestSetup(index)
+                    onClicked:
+                    {
+                        if (placesList.setupNeeded(index))
+                        {
+                            placesList.requestSetup(index)
+                            notify(model.icon, model.label, i18n("Mounting device..."))
+                        } else
+                        {
+                            placesList.requestTeardown(index)
+                            notify(model.icon, model.label, i18n("Unmounting device..."))
+                        }
+                    }
                 }
 
                 onClicked: (mouse) =>
@@ -339,6 +405,7 @@ Loader
                 onRightClicked:
                 {
                     _menuLoader.item.path = model.path
+                    _menuLoader.item.placeType = model.type
                     _menuLoader.item.bookmarkIndex = index
                     _menuLoader.item.show()
                 }
@@ -346,6 +413,7 @@ Loader
                 onPressAndHold:
                 {
                     _menuLoader.item.path = model.path
+                    _menuLoader.item.placeType = model.type
                     _menuLoader.item.bookmarkIndex = index
                     _menuLoader.item.show()
                 }
