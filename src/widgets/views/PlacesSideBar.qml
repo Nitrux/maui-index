@@ -324,18 +324,13 @@ Loader
                     onClicked: placesList.requestSetup(index)
                 }
 
-                Action
-                {
-                    id: _mountAction
-                    text: i18n("Mount")
-                    onTriggered: placesList.requestSetup(index);
-                }
-
                 onClicked: (mouse) =>
                            {
                                if( placesList.isDevice(index) && placesList.setupNeeded(index))
                                {
-                                   notify(model.icon, model.label, i18n("This device needs to be mounted before accessing it. Do you want to set up this device?"), [_mountAction])
+                                   placesList.requestSetup(index)
+                                   notify(model.icon, model.label, i18n("Mounting device..."))
+                                   return
                                }
 
                                openPlace(model.path, mouse)
