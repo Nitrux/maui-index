@@ -131,10 +131,33 @@ Maui.Page
         background: null
         // tabBar.background: null
 
-        tabViewButton: Maui.TabViewButton
+        tabViewButton: Maui.TabButton
         {
             id: _tabButton
-            tabView: _browserList
+            property Item tabView: _browserList
+            readonly property int mindex: _tabButton.TabBar.index
+            readonly property var tabInfo:
+            {
+                const item = tabView && tabView.contentModel && mindex >= 0 ? tabView.contentModel.get(mindex) : null
+                return item ? item.Maui.Controls : ({})
+            }
+            readonly property var _tabMenuActions:
+            {
+                const actions = [_detachTabAction]
+                if (_tabButton.mindex > 0)
+                    actions.push(_moveTabLeftAction)
+                if (_tabButton.mindex >= 0 && _tabButton.mindex < (_tabButton.tabView.count - 1))
+                    actions.push(_moveTabRightAction)
+                return actions
+            }
+
+            autoExclusive: true
+            width: tabView.mobile ? ListView.view.width : Math.max(160, Math.min(260, implicitWidth))
+            checked: mindex === tabView.currentIndex
+            text: tabInfo.title || ""
+            icon.name: tabInfo.iconName || ""
+            Maui.Controls.badgeText: tabInfo.badgeText
+            Maui.Controls.status: tabInfo.status
 
             onClicked:
             {
@@ -146,8 +169,70 @@ Maui.Page
                 }
             }
 
-            onRightClicked: _browserList.openTabMenu(_tabButton.mindex)
+            onRightClicked: _tabMenu.show()
             onCloseClicked: _browserList.closeTabClicked(_tabButton.mindex)
+
+            Action
+            {
+                id: _detachTabAction
+                text: i18n("Detach Tab")
+                onTriggered:
+                {
+                    const tabIndex = _tabButton.mindex
+                    if (tabIndex < 0)
+                        return
+
+                    const tab = _browserList.contentModel.get(tabIndex)
+                    const tabPath = tab && tab.browser && tab.browser.currentPath
+                        ? tab.browser.currentPath
+                        : (tab ? tab.path : "")
+
+                    if (tabPath && inx.detachTabToNewWindow(tabPath))
+                    {
+                        closeTab(tabIndex)
+                    }
+                }
+            }
+
+            Action
+            {
+                id: _moveTabLeftAction
+                text: i18n("Move Left")
+                icon.name: "go-previous"
+                onTriggered:
+                {
+                    const from = _tabButton.mindex
+                    if (from > 0)
+                        _browserList.moveTab(from, from - 1)
+                }
+            }
+
+            Action
+            {
+                id: _moveTabRightAction
+                text: i18n("Move Right")
+                icon.name: "go-next"
+                onTriggered:
+                {
+                    const from = _tabButton.mindex
+                    if (from >= 0 && from < (_browserList.count - 1))
+                        _browserList.moveTab(from, from + 1)
+                }
+            }
+
+            Maui.ContextualMenu
+            {
+                id: _tabMenu
+
+                Repeater
+                {
+                    model: _tabButton._tabMenuActions
+                    delegate: MenuItem
+                    {
+                        action: modelData
+                    }
+                }
+            }
         }
 
         tabBar.leftContent: [
@@ -196,20 +281,6 @@ Maui.Page
             }
         ]
 
-        menuActions: Action
-        {
-            text: i18n("Detach Tab")
-            onTriggered:
-            {
-                const tabIndex = _browserList.menu.index
-                const tabPath = _browserList.contentModel.get(tabIndex).path
-
-                if (inx.detachTabToNewWindow(tabPath))
-                {
-                    closeTab(tabIndex)
-                }
-            }
-        }
     }
 
     function isUrlOpen(url : string) : bool

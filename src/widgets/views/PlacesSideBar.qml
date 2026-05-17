@@ -170,6 +170,15 @@ Loader
                     property bool needsSetup: isExternalDeviceEntry && placesList.setupNeeded(bookmarkIndex)
                     property bool showDeviceAction: isExternalDeviceEntry
                     property bool showRemoveAction: hasBookmarkEntry && !isDeviceEntry
+                    readonly property var menuActionList:
+                    {
+                        const actions = [_actions.openInNewTabAction, _actions.openInNewWindowAction, _actions.openInSplitViewAction]
+                        if (_menu.showDeviceAction)
+                            actions.push(_actions.deviceAction)
+                        if (_menu.showRemoveAction)
+                            actions.push(_actions.removeAction)
+                        return actions
+                    }
 
                     onClosed:
                     {
@@ -178,63 +187,66 @@ Loader
                         _menu.placeType = ""
                     }
 
-                    MenuItem
+                    QtObject
                     {
-                        text: i18n("Open in New Tab")
-                        icon.name: "tab-new"
-                        onTriggered: openTab(_menu.path)
-                    }
+                        id: _actions
 
-                    MenuItem
-                    {
-                        text: i18n("Open in New Window")
-                        icon.name: "window-new"
-                        onTriggered: inx.openNewWindow(_menu.path)
-                    }
-
-                    MenuItem
-                    {
-                        enabled: root.currentTab.count === 1
-                        text: i18n("Open in Split View")
-                        icon.name: "view-split-left-right"
-                        onTriggered: currentTab.split(_menu.path, Qt.Horizontal)
-                    }
-
-                    MenuSeparator
-                    {
-                        visible: _menu.showDeviceAction || _menu.showRemoveAction
-                        height: visible ? implicitHeight : 0
-                    }
-
-                    MenuItem
-                    {
-                        visible: _menu.showDeviceAction
-                        height: visible ? implicitHeight : 0
-                        text: _menu.needsSetup ? i18n("Mount") : i18n("Unmount")
-                        icon.name: _menu.needsSetup ? "media-mount" : "media-eject"
-                        onTriggered:
+                        property Action openInNewTabAction: Action
                         {
-                            if (_menu.needsSetup)
+                            text: i18n("Open in New Tab")
+                            icon.name: "tab-new"
+                            onTriggered: openTab(_menu.path)
+                        }
+
+                        property Action openInNewWindowAction: Action
+                        {
+                            text: i18n("Open in New Window")
+                            icon.name: "window-new"
+                            onTriggered: inx.openNewWindow(_menu.path)
+                        }
+
+                        property Action openInSplitViewAction: Action
+                        {
+                            enabled: root.currentTab.count === 1
+                            text: i18n("Open in Split View")
+                            icon.name: "view-split-left-right"
+                            onTriggered: currentTab.split(_menu.path, Qt.Horizontal)
+                        }
+
+                        property Action deviceAction: Action
+                        {
+                            text: _menu.needsSetup ? i18n("Mount") : i18n("Unmount")
+                            icon.name: _menu.needsSetup ? "media-mount" : "media-eject"
+                            onTriggered:
                             {
-                                placesList.requestSetup(_menu.bookmarkIndex)
-                                notify("media-mount", i18n("Storage"), i18n("Mounting device..."))
-                            } else
-                            {
-                                placesList.requestTeardown(_menu.bookmarkIndex)
-                                notify("media-eject", i18n("Storage"), i18n("Unmounting device..."))
+                                if (_menu.needsSetup)
+                                {
+                                    placesList.requestSetup(_menu.bookmarkIndex)
+                                    notify("media-mount", i18n("Storage"), i18n("Mounting device..."))
+                                } else
+                                {
+                                    placesList.requestTeardown(_menu.bookmarkIndex)
+                                    notify("media-eject", i18n("Storage"), i18n("Unmounting device..."))
+                                }
                             }
+                        }
+
+                        property Action removeAction: Action
+                        {
+                            text: i18n("Remove")
+                            icon.name: "edit-delete"
+                            Maui.Controls.status: Maui.Controls.Negative
+                            onTriggered: placesList.removePlace(_menu.bookmarkIndex)
                         }
                     }
 
-                    MenuItem
+                    Repeater
                     {
-                        visible: _menu.showRemoveAction
-                        height: visible ? implicitHeight : 0
-                        enabled: _menu.showRemoveAction
-                        text: i18n("Remove")
-                        icon.name: "edit-delete"
-                        Maui.Controls.status: Maui.Controls.Negative
-                        onTriggered: placesList.removePlace(_menu.bookmarkIndex)
+                        model: _menu.menuActionList
+                        delegate: MenuItem
+                        {
+                            action: modelData
+                        }
                     }
                 }
             }
@@ -308,15 +320,21 @@ Loader
 
                             onRightClicked:
                             {
+                                if (modelData.path === "overview:///")
+                                    return
                                 _menuLoader.item.path = modelData.path
                                 _menuLoader.item.placeType = ""
+                                _menuLoader.item.bookmarkIndex = -1
                                 _menuLoader.item.show()
                             }
 
                             onPressAndHold:
                             {
+                                if (modelData.path === "overview:///")
+                                    return
                                 _menuLoader.item.path = modelData.path
                                 _menuLoader.item.placeType = ""
+                                _menuLoader.item.bookmarkIndex = -1
                                 _menuLoader.item.show()
                             }
                         }

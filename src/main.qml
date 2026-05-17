@@ -62,49 +62,23 @@ Maui.ApplicationWindow
             return
 
         const footerContainer = _pageLayout.footerContainer
-        const footerContainerChild = resolveFooterContainerChild()
         const footerBar = resolveFooterBar()
         if (!footerBar)
             return
 
-        const pathBarItem = root.pathBar
-        const pathBarHeight = pathBarItem && pathBarItem.height !== undefined ? pathBarItem.height : -1
-        const pathBarImplicitHeight = pathBarItem && pathBarItem.implicitHeight !== undefined ? pathBarItem.implicitHeight : -1
-        const headBarHeight = _pageLayout.headBar && _pageLayout.headBar.height !== undefined ? _pageLayout.headBar.height : -1
-        const headBarImplicitHeight = _pageLayout.headBar && _pageLayout.headBar.implicitHeight !== undefined ? _pageLayout.headBar.implicitHeight : -1
-        const fallbackHeight = Maui.Style.toolBarHeight
-        const targetHeight = Math.max(fallbackHeight, headBarHeight, headBarImplicitHeight, pathBarHeight, pathBarImplicitHeight)
-        const footerContainerCurrentHeight = footerContainer && footerContainer.height !== undefined ? footerContainer.height : -1
-        const preferredHeight = footerBar.preferredHeight !== undefined ? footerBar.preferredHeight : -1
-        const implicitHeight = footerBar.implicitHeight !== undefined ? footerBar.implicitHeight : -1
-        const currentHeight = footerBar.height !== undefined ? footerBar.height : -1
+        const footerImplicitContentHeight = footerBar.implicitContentHeight !== undefined
+                ? footerBar.implicitContentHeight
+                : -1
+
+        if (footerImplicitContentHeight <= 0)
+            return
 
         if (footerContainer && footerContainer.forceLayout)
             footerContainer.forceLayout()
 
-        if (footerContainerCurrentHeight !== targetHeight || preferredHeight !== targetHeight || implicitHeight !== targetHeight || currentHeight !== targetHeight)
+        if (footerBar.preferredHeight !== undefined && footerBar.preferredHeight !== footerImplicitContentHeight)
         {
-            if (footerContainer && footerContainer.implicitHeight !== undefined && footerContainer.implicitHeight !== targetHeight)
-                footerContainer.implicitHeight = targetHeight
-
-            if (footerContainer && footerContainer.height !== undefined && footerContainer.height !== targetHeight)
-                footerContainer.height = targetHeight
-
-            if (footerContainerChild && footerContainerChild.implicitHeight !== undefined && footerContainerChild.implicitHeight !== targetHeight)
-                footerContainerChild.implicitHeight = targetHeight
-
-            if (footerContainerChild && footerContainerChild.height !== undefined && footerContainerChild.height !== targetHeight)
-                footerContainerChild.height = targetHeight
-
-            if (footerBar.preferredHeight !== undefined && footerBar.preferredHeight !== targetHeight)
-                footerBar.preferredHeight = targetHeight
-
-            if (footerBar.implicitHeight !== undefined && footerBar.implicitHeight !== targetHeight)
-                footerBar.implicitHeight = targetHeight
-
-            if (footerBar.height !== undefined && footerBar.height !== targetHeight)
-                footerBar.height = targetHeight
-
+            footerBar.preferredHeight = footerImplicitContentHeight
         }
     }
 
