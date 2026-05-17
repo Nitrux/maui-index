@@ -12,17 +12,12 @@ Item
 
     property alias player: player
     property string metaArtworkUrl: ""
-    property string thumbnailArtworkUrl: ""
-    property bool thumbnailArtworkReady: false
     readonly property string defaultAudioIcon: "audio-x-generic"
     readonly property string defaultCoverSource: "qrc:/assets/cover.png"
     readonly property string artworkSource: (() =>
                                             {
                                                 if (control.metaArtworkUrl.length > 0)
                                                     return control.metaArtworkUrl
-
-                                                if (control.thumbnailArtworkReady && control.thumbnailArtworkUrl.length > 0)
-                                                    return control.thumbnailArtworkUrl
 
                                                 return control.defaultCoverSource
                                             })()
@@ -39,7 +34,6 @@ Item
         onSourceChanged:
         {
             control.metaArtworkUrl = ""
-            control.refreshThumbnailCandidate()
             console.log("[Index][AudioPreview] source changed", source, "artworkSource=", control.artworkSource)
         }
 
@@ -141,34 +135,6 @@ Item
         }
     }
 
-    Image
-    {
-        id: thumbnailProbe
-        visible: false
-        asynchronous: true
-        cache: true
-        source: control.thumbnailArtworkUrl
-
-        onStatusChanged:
-        {
-            if (status === Image.Ready)
-            {
-                control.thumbnailArtworkReady = true
-                console.log("[Index][AudioPreview] thumbnail artwork ready", source)
-                return
-            }
-
-            if (status === Image.Loading)
-                return
-
-            control.thumbnailArtworkReady = false
-            if (status === Image.Error && source)
-                console.log("[Index][AudioPreview] thumbnail artwork failed", source)
-        }
-    }
-
-    Component.onCompleted: refreshThumbnailCandidate()
-
     function updateMetaArtworkUrl()
     {
         var resolved = ""
@@ -194,22 +160,6 @@ Item
             control.metaArtworkUrl = resolved
             console.log("[Index][AudioPreview] resolved meta artwork", control.metaArtworkUrl)
         }
-    }
-
-    function refreshThumbnailCandidate()
-    {
-        const thumb = String(iteminfo.thumbnail || "")
-
-        control.thumbnailArtworkUrl = thumb
-        control.thumbnailArtworkReady = false
-
-        if (thumb.length === 0)
-        {
-            console.log("[Index][AudioPreview] no thumbnail candidate, using cover fallback")
-            return
-        }
-
-        console.log("[Index][AudioPreview] probing thumbnail candidate", thumb)
     }
 
     function appendInfoEntry(key, rawValue)
