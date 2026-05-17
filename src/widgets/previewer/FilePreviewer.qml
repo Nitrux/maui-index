@@ -27,12 +27,10 @@ Item
         iteminfo = FB.FM.getFileInfo(currentUrl)
         const resolvedMime = String(iteminfo.mime || "")
         const resolvedThumb = String(iteminfo.thumbnail || "")
-        console.log("[Index][FilePreviewer] currentUrl changed", currentUrl, "mime=", resolvedMime, "thumb=", resolvedThumb)
 
         if (resolvedThumb.length === 0 && FB.FM.checkFileType(FB.FMList.VIDEO, resolvedMime))
         {
             iteminfo.thumbnail = "image://thumbnailer/" + currentUrl
-            console.log("[Index][FilePreviewer] applied thumbnail fallback", iteminfo.thumbnail)
         }
 
         initModel()

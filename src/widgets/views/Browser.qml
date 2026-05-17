@@ -275,7 +275,7 @@ Maui.SplitViewItem
                             if((event.key === Qt.Key_W) && (event.modifiers & Qt.ControlModifier))
                             {
                                 if(_browserView.browserList.count > 1)
-                                root.closeTab(tabsBar.currentIndex)
+                                root.closeTab(_browserView.currentTabIndex)
                                 event.accepted = true
                                 return
                             }
