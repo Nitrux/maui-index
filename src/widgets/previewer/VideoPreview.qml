@@ -13,71 +13,106 @@ Maui.Page
     headBar.visible: false
     background: null
 
-    Video
+    MediaPlayer
     {
         id: player
-        anchors.fill: parent
-        visible: control.StackView.status !== StackView.Inactive
         source: currentUrl
         autoPlay: appSettings.autoPlayPreviews
         loops: 3
-        property string codec : player.metaData.videoCodec
+        audioOutput: AudioOutput {}
+        videoOutput: _videoOutput
 
-        onCodecChanged:
+        onSourceChanged:
         {
-            infoModel.append({key:"Title", value: player.metaData.title})
-            infoModel.append({key:"Camera", value: player.metaData.cameraModel})
-            infoModel.append({key:"Zoom Ratio", value: player.metaData.digitalZoomRatio})
-            infoModel.append({key:"Author", value: player.metaData.author})
-            infoModel.append({key:"Audio Codec", value: player.metaData.audioCodec})
-            infoModel.append({key:"Video Codec", value: player.metaData.videoCodec})
-            infoModel.append({key:"Copyright", value: player.metaData.copyright})
-            infoModel.append({key:"Duration", value: player.metaData.duration})
-            infoModel.append({key:"Framerate", value: player.metaData.videoFrameRate})
-            infoModel.append({key:"Year", value: player.metaData.year})
-            infoModel.append({key:"Aspect Ratio", value: player.metaData.pixelAspectRatio})
-            infoModel.append({key:"Resolution", value: player.metaData.resolution})
+            console.log("[Index][VideoPreview] source changed", source)
         }
 
-        ToolButton
+        onMediaStatusChanged:
         {
-            visible: player.playbackState == MediaPlayer.StoppedState
-            anchors.centerIn: parent
-            icon.color: "transparent"
-            flat: true
-            icon.width: Maui.Style.iconSizes.huge
-            icon.name: iteminfo.icon
+            console.log("[Index][VideoPreview] mediaStatus", mediaStatus, "duration=", duration, "seekable=", seekable)
         }
 
-        focus: true
-        Keys.onSpacePressed: player.playbackState == MediaPlayer.PlayingState ? player.pause() : player.play()
-        Keys.onLeftPressed: player.seek(player.position - 5000)
-        Keys.onRightPressed: player.seek(player.position + 5000)
-
-        RowLayout
+        onPlaybackStateChanged:
         {
-            anchors.fill: parent
+            console.log("[Index][VideoPreview] playbackState", playbackState, "position=", position)
+        }
 
-            MouseArea
-            {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                onDoubleClicked: player.seek(player.position - 5000)
-            }
+        onErrorOccurred: (error, errorString) =>
+        {
+            console.log("[Index][VideoPreview] error", error, errorString)
+        }
+    }
 
-            MouseArea
-            {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play()
-            }
+    VideoOutput
+    {
+        id: _videoOutput
+        anchors.fill: parent
+        // This preview is often loaded in a plain Loader (not a StackView), so keep video output visible.
+        visible: control.visible
+        fillMode: VideoOutput.PreserveAspectFit
 
-            MouseArea
-            {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                onDoubleClicked: player.seek(player.position + 5000)
-            }
+        Component.onCompleted:
+        {
+            console.log("[Index][VideoPreview] VideoOutput ready", "width=", width, "height=", height)
+        }
+    }
+
+    Connections
+    {
+        target: player
+        function onMetaDataChanged()
+        {
+            console.log("[Index][VideoPreview] metadata changed", player.metaData.value(MediaMetaData.VideoCodec), player.metaData.value(MediaMetaData.Resolution))
+            infoModel.append({key: "Title", value: player.metaData.value(MediaMetaData.Title)})
+            infoModel.append({key: "Author", value: player.metaData.value(MediaMetaData.Author)})
+            infoModel.append({key: "Audio Codec", value: player.metaData.value(MediaMetaData.AudioCodec)})
+            infoModel.append({key: "Video Codec", value: player.metaData.value(MediaMetaData.VideoCodec)})
+            infoModel.append({key: "Copyright", value: player.metaData.value(MediaMetaData.Copyright)})
+            infoModel.append({key: "Duration", value: player.metaData.value(MediaMetaData.Duration)})
+            infoModel.append({key: "Framerate", value: player.metaData.value(MediaMetaData.VideoFrameRate)})
+            infoModel.append({key: "Year", value: player.metaData.value(MediaMetaData.Date)})
+            infoModel.append({key: "Resolution", value: player.metaData.value(MediaMetaData.Resolution)})
+        }
+    }
+
+    ToolButton
+    {
+        visible: player.playbackState == MediaPlayer.StoppedState
+        anchors.centerIn: parent
+        icon.color: "transparent"
+        flat: true
+        icon.width: Maui.Style.iconSizes.huge
+        icon.name: iteminfo.icon
+    }
+
+    focus: true
+    Keys.onSpacePressed: player.playbackState == MediaPlayer.PlayingState ? player.pause() : player.play()
+    Keys.onLeftPressed: player.position = Math.max(0, player.position - 5000)
+    Keys.onRightPressed: player.position = player.position + 5000
+
+    RowLayout
+    {
+        anchors.fill: parent
+
+        MouseArea
+        {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            onDoubleClicked: player.position = Math.max(0, player.position - 5000)
+        }
+
+        MouseArea
+        {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play()
+        }
+
+        MouseArea
+        {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            onDoubleClicked: player.position = player.position + 5000
         }
     }
 
@@ -100,10 +135,11 @@ Maui.Page
         id: _slider
         Layout.fillWidth: true
         orientation: Qt.Horizontal
+        enabled: player.seekable
         from: 0
         to: 1000
-        value: (1000 * player.position) / player.duration
+        value: player.duration > 0 ? (1000 * player.position) / player.duration : 0
 
-        onMoved: player.seek((_slider.value / 1000) * player.duration)
+        onMoved: if (player.duration > 0) player.position = ((_slider.value / 1000) * player.duration)
     }
 }

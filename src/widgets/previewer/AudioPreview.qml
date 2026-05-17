@@ -11,6 +11,21 @@ Item
     id: control
 
     property alias player: player
+    property string metaArtworkUrl: ""
+    property string thumbnailArtworkUrl: ""
+    property bool thumbnailArtworkReady: false
+    readonly property string defaultAudioIcon: "audio-x-generic"
+    readonly property string defaultCoverSource: "qrc:/assets/cover.png"
+    readonly property string artworkSource: (() =>
+                                            {
+                                                if (control.metaArtworkUrl.length > 0)
+                                                    return control.metaArtworkUrl
+
+                                                if (control.thumbnailArtworkReady && control.thumbnailArtworkUrl.length > 0)
+                                                    return control.thumbnailArtworkUrl
+
+                                                return control.defaultCoverSource
+                                            })()
 
     MediaPlayer
     {
@@ -21,19 +36,45 @@ Item
 
         audioOutput: AudioOutput {}
 
+        onSourceChanged:
+        {
+            control.metaArtworkUrl = ""
+            control.refreshThumbnailCandidate()
+            console.log("[Index][AudioPreview] source changed", source, "artworkSource=", control.artworkSource)
+        }
+
+        onMediaStatusChanged:
+        {
+            console.log("[Index][AudioPreview] mediaStatus", mediaStatus, "duration=", duration, "seekable=", seekable)
+        }
+
+        onPlaybackStateChanged:
+        {
+            console.log("[Index][AudioPreview] playbackState", playbackState, "position=", position)
+        }
+
+        onErrorOccurred: (error, errorString) =>
+        {
+            console.log("[Index][AudioPreview] error", error, errorString)
+        }
+
         onTitleChanged:
         {
-            infoModel.append({key:"Title", value: player.metaData.value(MediaMetaData.Title)})
-            infoModel.append({key:"Artist", value: player.metaData.value(MediaMetaData.AlbumArtist)})
-            infoModel.append({key:"Album", value: player.metaData.value(MediaMetaData.AlbumTitle)})
-            infoModel.append({key:"Author", value: player.metaData.value(MediaMetaData.Author)})
-            infoModel.append({key:"Codec", value: player.metaData.value(MediaMetaData.AudioCodec)})
-            infoModel.append({key:"Copyright", value: player.metaData.value(MediaMetaData.Copyright)})
-            infoModel.append({key:"Duration", value: player.metaData.value(MediaMetaData.Duration)})
-            infoModel.append({key:"Track", value: player.metaData.value(MediaMetaData.TrackNumber)})
-            infoModel.append({key:"Year", value: player.metaData.value(MediaMetaData.Date)})
-            infoModel.append({key:"Genre", value: player.metaData.value(MediaMetaData.Genre)})
+            console.log("[Index][AudioPreview] metadata title changed", title, "album=", player.metaData.value(MediaMetaData.AlbumTitle))
+            infoModel.clear()
+            appendInfoEntry("Title", player.metaData.value(MediaMetaData.Title))
+            appendInfoEntry("Artist", player.metaData.value(MediaMetaData.AlbumArtist))
+            appendInfoEntry("Album", player.metaData.value(MediaMetaData.AlbumTitle))
+            appendInfoEntry("Author", player.metaData.value(MediaMetaData.Author))
+            appendInfoEntry("Codec", player.metaData.value(MediaMetaData.AudioCodec))
+            appendInfoEntry("Copyright", player.metaData.value(MediaMetaData.Copyright))
+            appendInfoEntry("Duration", player.metaData.value(MediaMetaData.Duration))
+            appendInfoEntry("Track", player.metaData.value(MediaMetaData.TrackNumber))
+            appendInfoEntry("Year", player.metaData.value(MediaMetaData.Date))
+            appendInfoEntry("Genre", player.metaData.value(MediaMetaData.Genre))
         }
+
+        onMetaDataChanged: control.updateMetaArtworkUrl()
     }
 
     ColumnLayout
@@ -55,8 +96,8 @@ Item
                 height: parent.height
                 width: parent.width
                 iconSizeHint: height
-                iconSource: iteminfo.icon
-                imageSource: iteminfo.thumbnail
+                iconSource: String(iteminfo.icon || control.defaultAudioIcon)
+                imageSource: control.artworkSource
             }
         }
 
@@ -99,6 +140,81 @@ Item
             }
         }
     }
+
+    Image
+    {
+        id: thumbnailProbe
+        visible: false
+        asynchronous: true
+        cache: true
+        source: control.thumbnailArtworkUrl
+
+        onStatusChanged:
+        {
+            if (status === Image.Ready)
+            {
+                control.thumbnailArtworkReady = true
+                console.log("[Index][AudioPreview] thumbnail artwork ready", source)
+                return
+            }
+
+            if (status === Image.Loading)
+                return
+
+            control.thumbnailArtworkReady = false
+            if (status === Image.Error && source)
+                console.log("[Index][AudioPreview] thumbnail artwork failed", source)
+        }
+    }
+
+    Component.onCompleted: refreshThumbnailCandidate()
+
+    function updateMetaArtworkUrl()
+    {
+        var resolved = ""
+        const keys = player.metaData.keys()
+
+        for (var i = 0; i < keys.length; i++)
+        {
+            const key = keys[i]
+            const keyName = String(player.metaData.metaDataKeyToString(key) || "")
+            if (keyName.indexOf("CoverArtUrl") === -1 && keyName.indexOf("ThumbnailUrl") === -1)
+                continue
+
+            const value = String(player.metaData.value(key) || "")
+            if (value.startsWith("file:") || value.startsWith("qrc:") || value.startsWith("http:") || value.startsWith("https:") || value.startsWith("data:image/"))
+            {
+                resolved = value
+                break
+            }
+        }
+
+        if (control.metaArtworkUrl !== resolved)
+        {
+            control.metaArtworkUrl = resolved
+            console.log("[Index][AudioPreview] resolved meta artwork", control.metaArtworkUrl)
+        }
+    }
+
+    function refreshThumbnailCandidate()
+    {
+        const thumb = String(iteminfo.thumbnail || "")
+
+        control.thumbnailArtworkUrl = thumb
+        control.thumbnailArtworkReady = false
+
+        if (thumb.length === 0)
+        {
+            console.log("[Index][AudioPreview] no thumbnail candidate, using cover fallback")
+            return
+        }
+
+        console.log("[Index][AudioPreview] probing thumbnail candidate", thumb)
+    }
+
+    function appendInfoEntry(key, rawValue)
+    {
+        const value = rawValue === undefined || rawValue === null ? "" : String(rawValue)
+        infoModel.append({key: key, value: value})
+    }
 }
-
-

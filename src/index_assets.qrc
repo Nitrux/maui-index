@@ -3,5 +3,6 @@
         <file>assets/index.svg</file>
         <file>assets/bookmark-new.svg</file>
         <file>assets/index.png</file>
+        <file>assets/cover.png</file>
     </qresource>
 </RCC>
