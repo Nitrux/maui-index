@@ -38,6 +38,13 @@ Maui.SplitViewItem
 
     onCurrentPathChanged:
     {
+        if(selectionBar)
+        {
+            selectionBar.clear()
+        }
+
+        root.selectionMode = false
+
         if(currentBrowser)
         {
             syncTerminal(currentBrowser.currentPath)
