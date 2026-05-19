@@ -46,7 +46,7 @@ Item
         id: player
         source: currentUrl
         autoPlay: appSettings.autoPlayPreviews
-        property string title : player.metaData.value(MediaMetaData.Title)
+        property string title: String(player.metaData.value(MediaMetaData.Title) || "")
 
         audioOutput: AudioOutput {}
 
@@ -117,11 +117,11 @@ Item
         Maui.ListItemTemplate
         {
             Layout.fillWidth: true
-            label1.text:  player.metaData.value(MediaMetaData.Title)
+            label1.text: String(player.metaData.value(MediaMetaData.Title) || "")
             label1.font.weight: Font.DemiBold
             label1.font.pointSize: Maui.Style.fontSizes.big
 
-            label2.text: player.metaData.value(MediaMetaData.AlbumArtist) || player.metaData.value(MediaMetaData.AlbumTitle)
+            label2.text: String(player.metaData.value(MediaMetaData.AlbumArtist) || player.metaData.value(MediaMetaData.AlbumTitle) || "")
         }
 
         RowLayout
