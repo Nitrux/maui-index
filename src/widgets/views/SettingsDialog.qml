@@ -340,12 +340,12 @@ Maui.SettingsDialog
 
     Maui.SectionGroup
     {
-        title: i18n("Terminal")
+        title: i18n("Embedded Terminal")
         description: i18n("Embedded terminal options.")
         Maui.FlexSectionItem
         {
-            label1.text:  i18n("Sync Terminal")
-            label2.text: i18n("Sync the terminal current working directory to the browser location.")
+            label1.text:  i18n("Sync Work Directory")
+            label2.text: i18n("Keep the embedded terminal working directory synced with the browser location.")
 
             Switch
             {
@@ -357,13 +357,14 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Adaptive Color Scheme")
-            label2.text: i18n("Colors based on the current style.")
+            label1.text: i18n("Font")
+            label2.text: i18n("Font family and size.")
 
-            Switch
+            ToolButton
             {
-                checked: appSettings.terminalFollowsColorScheme
-                onToggled: appSettings.terminalFollowsColorScheme = !appSettings.terminalFollowsColorScheme
+                checkable: true
+                icon.name: "go-next"
+                onToggled: control.addPage(_terminalFontPageComponent)
             }
         }
 
@@ -386,17 +387,39 @@ Maui.SettingsDialog
         {
             label1.text: i18n("Color Scheme")
             label2.text: i18n("Change the color scheme of the terminal.")
-            enabled: !appSettings.terminalFollowsColorScheme
 
             ToolButton
             {
                 checkable: true
                 icon.name: "go-next"
-                onToggled:
+                onToggled: control.addPage(_terminalColorSchemesPageComponent)
+            }
+        }
+    }
+
+    Component
+    {
+        id: _terminalColorSchemesPageComponent
+        TerminalColorSchemes {}
+    }
+
+    Component
+    {
+        id: _terminalFontPageComponent
+
+        Maui.SettingsPage
+        {
+            title: i18n("Font")
+
+            Maui.FontPicker
+            {
+                Layout.fillWidth: true
+                mfont: appSettings.terminalFont
+                model.onlyMonospaced: true
+
+                onFontModified: function(selectedFont)
                 {
-                    var component = Qt.createComponent("TerminalColorSchemes.qml");
-                    var page = component.createObject(control);
-                    control.addPage(page)
+                    appSettings.terminalFont = selectedFont
                 }
             }
         }

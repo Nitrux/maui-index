@@ -8,7 +8,6 @@ import org.mauikit.terminal as Term
 Term.ColorSchemesPage
 {
     currentColorScheme: appSettings.terminalColorScheme
-    enabled: !appSettings.terminalFollowsColorScheme
 
     onCurrentColorSchemeChanged: appSettings.terminalColorScheme = currentColorScheme
 }

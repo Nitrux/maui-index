@@ -140,7 +140,7 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Find Tab")
+            label1.text: i18n("Show Hidden Files")
 
             Maui.ToolActions
             {

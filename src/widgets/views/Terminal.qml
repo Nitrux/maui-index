@@ -14,7 +14,8 @@ Term.Terminal
     Maui.Theme.inherit: false
     focus: false
     focusPolicy: Qt.ClickFocus
-    kterminal.colorScheme: appSettings.terminalFollowsColorScheme ? "Adaptive" : appSettings.terminalColorScheme
+    kterminal.font: appSettings.terminalFont
+    kterminal.colorScheme: appSettings.terminalColorScheme
 
     onUrlsDropped: (urls) =>
                    {

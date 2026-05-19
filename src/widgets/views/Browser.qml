@@ -308,6 +308,13 @@ Maui.SplitViewItem
                                 return
                             }
 
+                            if((event.key === Qt.Key_H) && (event.modifiers & Qt.ControlModifier))
+                            {
+                                appSettings.showHiddenFiles = !appSettings.showHiddenFiles
+                                event.accepted = true
+                                return
+                            }
+
                             if(event.key === Qt.Key_Space)
                             {
                                 if(_browser.currentIndex > -1 && _browser.currentView.count > 0)

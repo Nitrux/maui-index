@@ -173,7 +173,7 @@ Maui.ApplicationWindow
         property bool syncTerminal: true
         property bool previewerWindow: !Maui.Handy.isMobile
         property bool autoPlayPreviews: true
-        property bool terminalFollowsColorScheme: true
+        property font terminalFont: Maui.Style.monospacedFont
         property string terminalColorScheme: "Maui-Dark"
         property string terminalExecutable: "/usr/bin/station"
         property bool showActionsBar: true
