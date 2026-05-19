@@ -12,15 +12,34 @@ Item
 
     property alias player: player
     property string metaArtworkUrl: ""
+    readonly property string fileArtworkUrl: String(iteminfo.thumbnail || "")
     readonly property string defaultAudioIcon: "audio-x-generic"
     readonly property string defaultCoverSource: "qrc:/assets/cover.png"
+    readonly property bool fileArtworkFromThumbnailer: control.fileArtworkUrl.startsWith("image://thumbnailer/")
+    readonly property bool fileArtworkProbeFailed: control.fileArtworkFromThumbnailer
+        && (_artworkProbe.status === Image.Error
+            || (_artworkProbe.status === Image.Ready && _artworkProbe.paintedWidth <= 0 && _artworkProbe.paintedHeight <= 0))
     readonly property string artworkSource: (() =>
                                             {
                                                 if (control.metaArtworkUrl.length > 0)
                                                     return control.metaArtworkUrl
 
+                                                if (control.fileArtworkUrl.length > 0 && !control.fileArtworkProbeFailed)
+                                                    return control.fileArtworkUrl
+
                                                 return control.defaultCoverSource
                                             })()
+
+    Image
+    {
+        id: _artworkProbe
+        visible: false
+        asynchronous: true
+        source: control.fileArtworkUrl
+        sourceSize.width: 256
+        sourceSize.height: 256
+        cache: false
+    }
 
     MediaPlayer
     {

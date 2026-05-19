@@ -234,6 +234,17 @@ Maui.SplitViewItem
             settings.sortBy:  _dirConf.sortKey
             settings.viewType: _dirConf.viewType
 
+            function applyAudioFallbackCover()
+            {
+                const browserView = _browser.browser
+                if (browserView && typeof browserView.audioFallbackImageSource !== "undefined")
+                {
+                    browserView.audioFallbackImageSource = "qrc:/assets/cover.png"
+                }
+            }
+
+            Component.onCompleted: Qt.callLater(applyAudioFallbackCover)
+
             Index.FolderConfig
             {
                 id:  _dirConf

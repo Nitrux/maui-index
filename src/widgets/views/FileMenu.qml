@@ -72,7 +72,9 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: !control.isExec
+        enabled: !control.isExec && !control.isDir
+        visible: enabled
+        height: visible ? implicitHeight : -control.spacing
         text: i18n("Preview and Info")
         icon.name: "view-preview"
         onTriggered:

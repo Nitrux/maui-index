@@ -122,6 +122,7 @@ Maui.Page
         anchors.fill: parent
         tabBar.margins: settings.floatyUI ? Maui.Style.contentMargins : 0
         tabBar.topMargin: Maui.Handy.isMobile ? Maui.Style.contentMargins  : 0
+        showDefaultMenuEntries: false
         currentIndex : -1
         onNewTabClicked: openTab(currentBrowser ? currentBrowser.currentPath : FB.FM.homePath())
         onCloseTabClicked: (index) => closeTab(index)
@@ -135,9 +136,19 @@ Maui.Page
         {
             id: _tabButton
             property Item tabView: _browserList
-            readonly property int mindex: _tabButton.TabBar.index
+            // Keep a stable fallback index from the Repeater context.
+            property int delegateIndex: (typeof index != "undefined" && index >= 0) ? index : -1
+            readonly property int mindex:
+                ((typeof _tabButton.TabBar.index !== "undefined" && _tabButton.TabBar.index >= 0)
+                    ? _tabButton.TabBar.index
+                    : (_tabButton.delegateIndex >= 0
+                        ? _tabButton.delegateIndex
+                        : ((typeof index !== "undefined" && index >= 0) ? index : -1)))
+            // Force reevaluation of model-derived bindings after tab moves.
+            readonly property int _modelPulse: _tabButton.tabView ? (_tabButton.tabView.currentIndex + _tabButton.tabView.count) : 0
             readonly property var tabInfo:
             {
+                const _pulse = _tabButton._modelPulse
                 const item = tabView && tabView.contentModel && mindex >= 0 ? tabView.contentModel.get(mindex) : null
                 return item ? item.Maui.Controls : ({})
             }
@@ -169,7 +180,13 @@ Maui.Page
                 }
             }
 
-            onRightClicked: _tabMenu.show()
+            onRightClicked:
+            {
+                if (_tabButton._tabMenuActions.length > 0)
+                {
+                    _tabMenu.show()
+                }
+            }
             onCloseClicked: _browserList.closeTabClicked(_tabButton.mindex)
 
             Action

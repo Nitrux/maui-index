@@ -28,7 +28,9 @@ Item
         const resolvedMime = String(iteminfo.mime || "")
         const resolvedThumb = String(iteminfo.thumbnail || "")
 
-        if (resolvedThumb.length === 0 && FB.FM.checkFileType(FB.FMList.VIDEO, resolvedMime))
+        if (resolvedThumb.length === 0
+                && (FB.FM.checkFileType(FB.FMList.VIDEO, resolvedMime)
+                    || FB.FM.checkFileType(FB.FMList.AUDIO, resolvedMime)))
         {
             iteminfo.thumbnail = "image://thumbnailer/" + currentUrl
         }
