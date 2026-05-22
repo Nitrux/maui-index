@@ -22,9 +22,9 @@ include(CheckCXXCompilerFlag)
 
 set(QT_MAJOR_VERSION 6)
 
-set(REQUIRED_QT_VERSION 6.5.2)
-set(REQUIRED_KF_VERSION 5.240.0)
-set(REQUIRED_MAUI_VERSION 3.0.0)
+set(REQUIRED_QT_VERSION 6.9)
+set(REQUIRED_KF_VERSION 6.13.0)
+set(REQUIRED_MAUI_VERSION 4.0.3)
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(FATAL_ERROR "index supports Linux builds only.")
