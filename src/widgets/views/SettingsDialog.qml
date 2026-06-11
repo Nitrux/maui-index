@@ -367,10 +367,10 @@ Maui.SettingsDialog
             Switch
             {
                 checkable: true
-                checked: appSettings.sidebarSections.indexOf(FB.FMList.BOOKMARKS_PATH) >= 0
+                checked: appSettings.hasSidebarSection(String(FB.FMList.BOOKMARKS_PATH))
                 onToggled:
                 {
-                    toggleSection(FB.FMList.BOOKMARKS_PATH)
+                    toggleSection(String(FB.FMList.BOOKMARKS_PATH))
                 }
             }
         }
@@ -383,10 +383,10 @@ Maui.SettingsDialog
             Switch
             {
                 checkable: true
-                checked: appSettings.sidebarSections.indexOf(FB.FMList.REMOTE_PATH)>= 0
+                checked: appSettings.hasSidebarSection(String(FB.FMList.REMOTE_PATH))
                 onToggled:
                 {
-                    toggleSection(FB.FMList.REMOTE_PATH)
+                    toggleSection(String(FB.FMList.REMOTE_PATH))
                 }
             }
         }
@@ -399,10 +399,10 @@ Maui.SettingsDialog
             Switch
             {
                 checkable: true
-                checked: appSettings.sidebarSections.indexOf(FB.FMList.REMOVABLE_PATH)>= 0
+                checked: appSettings.hasSidebarSection(String(FB.FMList.REMOVABLE_PATH))
                 onToggled:
                 {
-                    toggleSection(FB.FMList.REMOVABLE_PATH)
+                    toggleSection(String(FB.FMList.REMOVABLE_PATH))
                 }
             }
         }
@@ -415,10 +415,10 @@ Maui.SettingsDialog
             Switch
             {
                 checkable: true
-                checked: appSettings.sidebarSections.indexOf(FB.FMList.DRIVES_PATH)>= 0
+                checked: appSettings.hasSidebarSection(String(FB.FMList.DRIVES_PATH))
                 onToggled:
                 {
-                    toggleSection(FB.FMList.DRIVES_PATH)
+                    toggleSection(String(FB.FMList.DRIVES_PATH))
                 }
             }
         }
@@ -427,7 +427,6 @@ Maui.SettingsDialog
     Maui.SectionGroup
     {
         title: i18n("Embedded Terminal")
-        description: i18n("Configure the embedded terminal in Index.")
 
         Maui.FlexSectionItem
         {

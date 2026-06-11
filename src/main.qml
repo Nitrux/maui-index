@@ -56,6 +56,15 @@ Maui.ApplicationWindow
                 : null
     }
 
+    function setSidebarVisible(visible)
+    {
+        settings.sidebarVisible = visible
+
+        if (settings.sync)
+            settings.sync()
+
+    }
+
     function ensureFooterBarHeight(reason)
     {
         if (!_pageLayout || !_pageLayout.split || _pageLayout.splitIn !== ToolBar.Footer)
@@ -160,11 +169,57 @@ Maui.ApplicationWindow
         property int lastTabIndex : 0
 
         property bool quickSidebarSection : true
-        property var sidebarSections : [
-            FB.FMList.BOOKMARKS_PATH,
-            FB.FMList.REMOTE_PATH,
-            FB.FMList.REMOVABLE_PATH,
-            FB.FMList.DRIVES_PATH]
+        property string sidebarSections: "13, 1, 3, 2"
+
+        function sidebarSectionOrder()
+        {
+            return [
+                FB.FMList.BOOKMARKS_PATH,
+                FB.FMList.REMOTE_PATH,
+                FB.FMList.REMOVABLE_PATH,
+                FB.FMList.DRIVES_PATH]
+        }
+
+        function sidebarSectionsToArray(sections)
+        {
+            if (!sections)
+                return []
+
+            if (Array.isArray(sections))
+                return sections.map(section => Number(section)).filter(section => !Number.isNaN(section))
+
+            const text = String(sections).trim()
+            if (!text.length || text.startsWith("@"))
+                return []
+
+            const matches = text.match(/\d+/g) || []
+            return matches.map(section => Number(section)).filter(section => !Number.isNaN(section))
+        }
+
+        function sidebarSectionsToString(sections)
+        {
+            return normalizeSidebarSections(sections).join(", ")
+        }
+
+        function normalizeSidebarSections(sections)
+        {
+            const source = sidebarSectionsToArray(sections)
+            const normalized = []
+            const order = sidebarSectionOrder()
+
+            for (const candidate of order)
+            {
+                if (source.includes(candidate))
+                    normalized.push(candidate)
+            }
+
+            return normalized
+        }
+
+        function hasSidebarSection(section)
+        {
+            return normalizeSidebarSections(sidebarSections).indexOf(Number(section)) >= 0
+        }
 
 
         property alias sideBarWidth : _sideBarView.sideBar.preferredWidth
@@ -177,6 +232,7 @@ Maui.ApplicationWindow
         property string terminalColorScheme: "Maui-Dark"
         property string terminalExecutable: "/usr/bin/station"
         property bool showActionsBar: true
+        property bool sidebarVisible: true
         property string lastUsedTag
         property bool floatyUI : root.isWide
         property bool windowTranslucency : true
@@ -398,7 +454,7 @@ Maui.ApplicationWindow
 
         background: null
 
-        sideBar.autoShow: true
+        sideBar.autoShow: settings.sidebarVisible
         sideBar.floats: sideBar.collapsed
         sideBar.autoHide: true
         sideBarContent: PlacesSideBar
@@ -409,6 +465,21 @@ Maui.ApplicationWindow
             anchors.fill: parent
             anchors.margins: settings.floatyUI ? Maui.Style.contentMargins : 0
             anchors.rightMargin: 0
+        }
+
+        Connections
+        {
+            target: _sideBarView.sideBar
+
+            function onOpened()
+            {
+                root.setSidebarVisible(true)
+            }
+
+            function onClosed()
+            {
+                root.setSidebarVisible(false)
+            }
         }
 
         Maui.PageLayout
@@ -452,13 +523,22 @@ Maui.ApplicationWindow
                 {
                     id: _sidebarToggleLoader
                     asynchronous: true
-                    active: _sideBarView.sideBar.collapsed || !_sideBarView.sideBar.visible
+                    active: !!_sideBarView.sideBar
                     visible: active
 
                     sourceComponent: ToolButton
                     {
                         icon.name: _sideBarView.sideBar.visible ? "sidebar-collapse" : "sidebar-expand"
-                        onClicked: _sideBarView.sideBar.toggle()
+                        onClicked:
+                        {
+                            const nextVisible = !_sideBarView.sideBar.visible
+                            root.setSidebarVisible(nextVisible, "header toggle")
+
+                            if (nextVisible)
+                                _sideBarView.sideBar.open()
+                            else
+                                _sideBarView.sideBar.close()
+                        }
                         checked: _sideBarView.sideBar.visible
                         ToolTip.delay: 1000
                         ToolTip.timeout: 5000
@@ -469,9 +549,7 @@ Maui.ApplicationWindow
 
                 ToolSeparator
                 {
-                    visible: _pageLayout.split
-                             && _pageLayout.splitIn === ToolBar.Footer
-                             && _sidebarToggleLoader.active
+                    visible: _sidebarToggleLoader.active
                     topPadding: 10
                     bottomPadding: 10
                 },
@@ -840,6 +918,8 @@ Maui.ApplicationWindow
 
     Component.onCompleted:
     {
+        settings.sidebarSections = settings.sidebarSectionsToString(settings.sidebarSections)
+
         if(settings.overviewStart)
         {
             root.openTab(FB.FM.homePath())
@@ -987,8 +1067,32 @@ Maui.ApplicationWindow
       */
     function toggleSection(section)
     {
-        placesSidebar.list.toggleSection(section)
-        appSettings.sidebarSections = placesSidebar.list.groups
+        const value = Number(section)
+        const sections = appSettings.normalizeSidebarSections(appSettings.sidebarSections)
+        const order = appSettings.sidebarSectionOrder()
+        const index = sections.indexOf(value)
+
+        if (index >= 0)
+        {
+            sections.splice(index, 1)
+        } else
+        {
+            let insertAt = sections.length
+            const targetOrder = order.indexOf(value)
+
+            for (let i = 0; i < sections.length; ++i)
+            {
+                if (order.indexOf(sections[i]) > targetOrder)
+                {
+                    insertAt = i
+                    break
+                }
+            }
+
+            sections.splice(insertAt, 0, value)
+        }
+
+        appSettings.sidebarSections = appSettings.sidebarSectionsToString(sections)
     }
 
     function isUrlOpen(url : string) : bool

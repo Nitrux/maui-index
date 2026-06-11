@@ -180,6 +180,16 @@ Item
                     width: Math.max(_layout.availableWidth, implicitWidth)
                     height: _layout.availableHeight
 
+                    Item
+                    {
+                        id: _rightEdgeMarker
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        width: 1
+                        visible: false
+                    }
+
                     ListView
                     {
                         id: _listView
@@ -204,6 +214,7 @@ Item
                         orientation: ListView.Horizontal
                         clip: true
                         spacing: -6
+                        readonly property real rightEdgeX: _rightEdgeMarker.x - _listView.x
                         currentIndex: _pathList.count - 1
 
                         Component.onCompleted:
@@ -241,7 +252,7 @@ Item
                             height: ListView.view.height
                             text: model.label
                             delegateIndex: index
-                            ToolTip.text: model.path
+                            tooltipText: control.displayPath(model.path)
                             width: Math.max(Maui.Style.iconSizes.medium * 2, implicitWidth)
 
                             onClicked:

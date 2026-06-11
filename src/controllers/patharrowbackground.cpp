@@ -9,7 +9,9 @@ PathArrowBackground::PathArrowBackground(QQuickItem *parent)
     , m_color(Qt::white)
     , m_arrowWidth(16)
     , m_flatLeft(false)
+    , m_flatRight(false)
     , m_leftRadius(0)
+    , m_rightRadius(0)
 {
 }
 
@@ -61,6 +63,22 @@ void PathArrowBackground::setFlatLeft(bool flatLeft)
     update();
 }
 
+bool PathArrowBackground::flatRight() const
+{
+    return m_flatRight;
+}
+
+void PathArrowBackground::setFlatRight(bool flatRight)
+{
+    if (m_flatRight == flatRight) {
+        return;
+    }
+
+    m_flatRight = flatRight;
+    Q_EMIT flatRightChanged();
+    update();
+}
+
 qreal PathArrowBackground::leftRadius() const
 {
     return m_leftRadius;
@@ -74,6 +92,22 @@ void PathArrowBackground::setLeftRadius(qreal leftRadius)
 
     m_leftRadius = leftRadius;
     Q_EMIT leftRadiusChanged();
+    update();
+}
+
+qreal PathArrowBackground::rightRadius() const
+{
+    return m_rightRadius;
+}
+
+void PathArrowBackground::setRightRadius(qreal rightRadius)
+{
+    if (qFuzzyCompare(m_rightRadius, rightRadius)) {
+        return;
+    }
+
+    m_rightRadius = rightRadius;
+    Q_EMIT rightRadiusChanged();
     update();
 }
 
@@ -94,25 +128,66 @@ void PathArrowBackground::paint(QPainter *painter)
     const qreal bottom = bounds.bottom();
     const qreal middle = top + (bounds.height() * 0.5);
     const qreal arrowWidth = qMin<qreal>(m_arrowWidth, bounds.width() * 0.5);
-    const qreal radius = qBound<qreal>(0, m_leftRadius, bounds.height() * 0.5);
+    const qreal leftRadius = qBound<qreal>(0, m_leftRadius, bounds.height() * 0.5);
+    const qreal rightRadius = qBound<qreal>(0, m_rightRadius, bounds.height() * 0.5);
 
     QPainterPath path;
 
-    if (m_flatLeft) {
-        path.moveTo(left + radius, top);
-        path.lineTo(right - arrowWidth - 1, top);
-        path.lineTo(right, middle);
-        path.lineTo(right - arrowWidth - 1, bottom);
-        path.lineTo(left + radius, bottom);
+    if (m_flatLeft && m_flatRight) {
+        path.moveTo(left + leftRadius, top);
+        path.lineTo(right - rightRadius, top);
 
-        if (radius > 0) {
-            path.quadTo(left, bottom, left, bottom - radius);
-            path.lineTo(left, top + radius);
-            path.quadTo(left, top, left + radius, top);
+        if (rightRadius > 0) {
+            path.quadTo(right, top, right, top + rightRadius);
+            path.lineTo(right, bottom - rightRadius);
+            path.quadTo(right, bottom, right - rightRadius, bottom);
+        } else {
+            path.lineTo(right, top);
+            path.lineTo(right, bottom);
+        }
+
+        path.lineTo(left + leftRadius, bottom);
+
+        if (leftRadius > 0) {
+            path.quadTo(left, bottom, left, bottom - leftRadius);
+            path.lineTo(left, top + leftRadius);
+            path.quadTo(left, top, left + leftRadius, top);
         } else {
             path.lineTo(left, bottom);
             path.lineTo(left, top);
         }
+    } else if (m_flatLeft) {
+        path.moveTo(left + leftRadius, top);
+        path.lineTo(right - arrowWidth - 1, top);
+        path.lineTo(right, middle);
+        path.lineTo(right - arrowWidth - 1, bottom);
+        path.lineTo(left + leftRadius, bottom);
+
+        if (leftRadius > 0) {
+            path.quadTo(left, bottom, left, bottom - leftRadius);
+            path.lineTo(left, top + leftRadius);
+            path.quadTo(left, top, left + leftRadius, top);
+        } else {
+            path.lineTo(left, bottom);
+            path.lineTo(left, top);
+        }
+    } else if (m_flatRight) {
+        path.moveTo(left - 1, top);
+        path.lineTo(left + arrowWidth, top);
+        path.lineTo(right - rightRadius, top);
+
+        if (rightRadius > 0) {
+            path.quadTo(right, top, right, top + rightRadius);
+            path.lineTo(right, bottom - rightRadius);
+            path.quadTo(right, bottom, right - rightRadius, bottom);
+        } else {
+            path.lineTo(right, top);
+            path.lineTo(right, bottom);
+        }
+
+        path.lineTo(left + arrowWidth, bottom);
+        path.lineTo(left - 1, bottom);
+        path.lineTo(left + arrowWidth, middle);
     } else {
         path.moveTo(left - 1, top);
         path.lineTo(left + arrowWidth, top);

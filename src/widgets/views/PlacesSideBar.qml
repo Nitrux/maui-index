@@ -253,93 +253,100 @@ Loader
 
             // flickable.topMargin: Maui.Style.contentMargins
             // flickable.bottomMargin: Maui.Style.contentMargins
-            flickable.header: Loader
+            flickable.header: ColumnLayout
             {
-                id: _quickSectionLoader
-                asynchronous: true
                 width: parent.width
-                height: implicitHeight + _listBrowser.spacing*2
-                active: appSettings.quickSidebarSection
+                spacing: Maui.Style.space.small
 
-                OpacityAnimator on opacity
+                Loader
                 {
-                    from: 0
-                    to: 1
-                    duration: Maui.Style.units.longDuration
-                    running: _quickSectionLoader.status === Loader.Ready
-                }
+                    id: _quickSectionLoader
+                    asynchronous: true
+                    Layout.fillWidth: true
+                    height: implicitHeight + _listBrowser.spacing*2
+                    active: appSettings.quickSidebarSection
 
-                sourceComponent: GridLayout
-                {
-                    id: _quickSection
-
-                    rows: 3
-                    columns: 3
-
-                    columnSpacing: Maui.Style.defaultSpacing
-                    rowSpacing: Maui.Style.defaultSpacing
-
-                    Repeater
+                    OpacityAnimator on opacity
                     {
-                        model: inx.quickPaths()
+                        from: 0
+                        to: 1
+                        duration: Maui.Style.units.longDuration
+                        running: _quickSectionLoader.status === Loader.Ready
+                    }
 
-                        delegate: Maui.GridBrowserDelegate
+                    sourceComponent: GridLayout
+                    {
+                        id: _quickSection
+
+                        rows: 3
+                        columns: 3
+
+                        columnSpacing: Maui.Style.defaultSpacing
+                        rowSpacing: Maui.Style.defaultSpacing
+
+                        Repeater
                         {
-                            Maui.Theme.colorSet: Maui.Theme.Button
-                            Maui.Theme.inherit: false
-                            readonly property string resolvedIcon: control.sidebarIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
+                            model: inx.quickPaths()
 
-                            Layout.preferredHeight: Math.min(50, width)
-                            Layout.preferredWidth: 50
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.columnSpan: modelData.path === "overview:///" ? 2 : 1
+                            delegate: Maui.GridBrowserDelegate
+                            {
+                                Maui.Theme.colorSet: Maui.Theme.Button
+                                Maui.Theme.inherit: false
+                                readonly property string resolvedIcon: control.sidebarIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
 
-                            isCurrentItem: modelData.path === "overview:///" ? _stackView.depth === 2 : (currentBrowser.currentPath === modelData.path && _stackView.depth === 1)
-                            iconSource: resolvedIcon
-                            iconSizeHint: 16
-                            template.isMask: control.usesSymbolicIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
-                            label1.text: modelData.label
-                            labelsVisible: false
-                            tooltipText: modelData.label
-                            flat: false
+                                Layout.preferredHeight: Math.min(50, width)
+                                Layout.preferredWidth: 50
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                Layout.columnSpan: modelData.path === "overview:///" ? 2 : 1
 
-                            onClicked: (mouse) =>
-                                       {
-                                           if(modelData.path === "overview:///")
+                                isCurrentItem: modelData.path === "overview:///" ? _stackView.depth === 2 : (currentBrowser.currentPath === modelData.path && _stackView.depth === 1)
+                                iconSource: resolvedIcon
+                                iconSizeHint: 16
+                                template.isMask: control.usesSymbolicIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
+                                label1.text: modelData.label
+                                labelsVisible: false
+                                tooltipText: modelData.label
+                                flat: false
+
+                                onClicked: (mouse) =>
                                            {
-                                               _stackView.push(_homeViewComponent)
-                                               if(control.collapsed)
-                                               control.close()
-                                               return
+                                               if(modelData.path === "overview:///")
+                                               {
+                                                   _stackView.push(_homeViewComponent)
+                                                   if(control.collapsed)
+                                                   control.close()
+                                                   return
+                                               }
+
+                                               openPlace(modelData.path, mouse)
+
                                            }
 
-                                           openPlace(modelData.path, mouse)
+                                onRightClicked:
+                                {
+                                    if (modelData.path === "overview:///")
+                                        return
+                                    _menuLoader.item.path = modelData.path
+                                    _menuLoader.item.placeType = ""
+                                    _menuLoader.item.bookmarkIndex = -1
+                                    _menuLoader.item.show()
+                                }
 
-                                       }
-
-                            onRightClicked:
-                            {
-                                if (modelData.path === "overview:///")
-                                    return
-                                _menuLoader.item.path = modelData.path
-                                _menuLoader.item.placeType = ""
-                                _menuLoader.item.bookmarkIndex = -1
-                                _menuLoader.item.show()
-                            }
-
-                            onPressAndHold:
-                            {
-                                if (modelData.path === "overview:///")
-                                    return
-                                _menuLoader.item.path = modelData.path
-                                _menuLoader.item.placeType = ""
-                                _menuLoader.item.bookmarkIndex = -1
-                                _menuLoader.item.show()
+                                onPressAndHold:
+                                {
+                                    if (modelData.path === "overview:///")
+                                        return
+                                    _menuLoader.item.path = modelData.path
+                                    _menuLoader.item.placeType = ""
+                                    _menuLoader.item.bookmarkIndex = -1
+                                    _menuLoader.item.show()
+                                }
                             }
                         }
                     }
                 }
+
             }
 
             model: Maui.BaseModel
@@ -348,7 +355,7 @@ Loader
                 list: FB.PlacesList
                 {
                     id: placesList
-                    groups: appSettings.sidebarSections
+                    groups: appSettings.normalizeSidebarSections(appSettings.sidebarSections)
                 }
             }
 
@@ -376,7 +383,7 @@ Loader
             {
                 readonly property bool shownPlace: control.shouldShowPlace(index, model.type, model.path, model.label)
                 isCurrentItem: ListView.isCurrentItem && _stackView.depth === 1
-                width: ListView.view.width
+                width: _listBrowser.width
                 height: shownPlace ? implicitHeight : 0
                 visible: shownPlace
                 enabled: shownPlace
@@ -439,12 +446,15 @@ Loader
 
             section.property: "type"
             section.criteria: ViewSection.FullString
-            section.delegate: Maui.LabelDelegate
+            section.delegate: Maui.SectionHeader
             {
-                width: ListView.view.width
-                text: section
-                isSection: true
-                //                height: Maui.Style.toolBarHeightAlt
+                width: _listBrowser.width
+                visible: section !== i18n("Bookmarks")
+                text1: section
+                label1.font.weight: Font.Bold
+                label1.font.pixelSize: 14
+                label1.opacity: 1.0
+                label2.visible: false
             }
         }
     }
