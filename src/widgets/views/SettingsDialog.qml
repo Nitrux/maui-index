@@ -11,8 +11,7 @@ Maui.SettingsDialog
 
     Maui.SectionGroup
     {
-        title: i18n("Behaviour")
-        //        description: i18n("Configure the app plugins and behavior.")
+        title: i18n("General")
 
         Maui.FlexSectionItem
         {
@@ -39,12 +38,26 @@ Maui.SettingsDialog
                 onToggled: settings.dirConf = !settings.dirConf
             }
         }
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Terminal Executable")
+            label2.text: i18n("Executable used for the external 'Open Terminal Here' action.")
+
+            Maui.TextField
+            {
+                implicitWidth: Math.max(Maui.Style.units.gridUnit * 12, 280)
+                placeholderText: "/usr/bin/station"
+                text: appSettings.terminalExecutable
+                selectByMouse: true
+                onTextEdited: appSettings.terminalExecutable = text.trim()
+            }
+        }
     }
 
     Maui.SectionGroup
     {
         title: i18n("Previews")
-        //        description: i18n("Configure the app plugins and behavior.")
 
         Maui.FlexSectionItem
         {
@@ -89,7 +102,7 @@ Maui.SettingsDialog
 
     Maui.SectionGroup
     {
-        title: i18n("Browsing & Navigation")
+        title: i18n("Browsing and Navigation")
 
         Maui.FlexSectionItem
         {
@@ -221,7 +234,6 @@ Maui.SettingsDialog
     Maui.SectionGroup
     {
         title: i18n("Interface")
-        //        description: i18n("Configure the app UI.")
 
         Maui.FlexSectionItem
         {
@@ -233,14 +245,6 @@ Maui.SettingsDialog
                 expanded: true
                 autoExclusive: true
                 display: ToolButton.TextOnly
-
-                //                currentIndex: appSettings.gridSize
-
-                //                Action
-                //                {
-                //                    text: i18n("S")
-                //                    onTriggered: appSettings.gridSize = 0
-                //                }
 
                 Action
                 {
@@ -340,8 +344,91 @@ Maui.SettingsDialog
 
     Maui.SectionGroup
     {
+        title: i18n("Sidebar")
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("User Directories")
+            label2.text: i18n("Access to user directories from the sidebar.")
+
+            Switch
+            {
+                checkable: true
+                checked: appSettings.quickSidebarSection
+                onToggled: appSettings.quickSidebarSection = !appSettings.quickSidebarSection
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Bookmarks")
+            label2.text: i18n("Access to saved directories.")
+
+            Switch
+            {
+                checkable: true
+                checked: appSettings.sidebarSections.indexOf(FB.FMList.BOOKMARKS_PATH) >= 0
+                onToggled:
+                {
+                    toggleSection(FB.FMList.BOOKMARKS_PATH)
+                }
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Remote")
+            label2.text: i18n("Access to network directories.")
+
+            Switch
+            {
+                checkable: true
+                checked: appSettings.sidebarSections.indexOf(FB.FMList.REMOTE_PATH)>= 0
+                onToggled:
+                {
+                    toggleSection(FB.FMList.REMOTE_PATH)
+                }
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Removable")
+            label2.text: i18n("Access to external storage, such as USB drives.")
+
+            Switch
+            {
+                checkable: true
+                checked: appSettings.sidebarSections.indexOf(FB.FMList.REMOVABLE_PATH)>= 0
+                onToggled:
+                {
+                    toggleSection(FB.FMList.REMOVABLE_PATH)
+                }
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Devices")
+            label2.text: i18n("Access drives.")
+
+            Switch
+            {
+                checkable: true
+                checked: appSettings.sidebarSections.indexOf(FB.FMList.DRIVES_PATH)>= 0
+                onToggled:
+                {
+                    toggleSection(FB.FMList.DRIVES_PATH)
+                }
+            }
+        }
+    }
+
+    Maui.SectionGroup
+    {
         title: i18n("Embedded Terminal")
-        description: i18n("Embedded terminal options.")
+        description: i18n("Configure the embedded terminal in Index.")
+
         Maui.FlexSectionItem
         {
             label1.text:  i18n("Sync Work Directory")
@@ -357,7 +444,7 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Font")
+            label1.text: i18n("Terminal Font")
             label2.text: i18n("Font family and size.")
 
             ToolButton
@@ -370,23 +457,8 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Terminal Executable")
-            label2.text: i18n("Executable used for the external 'Open Terminal Here' action.")
-
-            Maui.TextField
-            {
-                implicitWidth: Math.max(Maui.Style.units.gridUnit * 12, 280)
-                placeholderText: "/usr/bin/station"
-                text: appSettings.terminalExecutable
-                selectByMouse: true
-                onTextEdited: appSettings.terminalExecutable = text.trim()
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
             label1.text: i18n("Color Scheme")
-            label2.text: i18n("Change the color scheme of the terminal.")
+            label2.text: i18n("Change the color scheme of the embedded terminal.")
 
             ToolButton
             {
@@ -416,117 +488,11 @@ Maui.SettingsDialog
                 Layout.fillWidth: true
                 mfont: appSettings.terminalFont
                 model.onlyMonospaced: true
+                showStyle: false
 
                 onFontModified: function(selectedFont)
                 {
                     appSettings.terminalFont = selectedFont
-                }
-            }
-        }
-    }
-
-    Maui.FlexSectionItem
-    {
-        label1.text: i18n("Quick places")
-        label2.text: i18n("Access to standard locations.")
-
-        ToolButton
-        {
-            checkable: true
-            icon.name: "go-next"
-            onToggled: control.addPage(_sidebarPlacesComponent)
-        }
-    }
-
-
-    Component
-    {
-        id: _sidebarPlacesComponent
-
-        Maui.SettingsPage
-        {
-            title: i18n("Places")
-
-            Maui.SectionGroup
-            {
-                title: i18n("Places")
-                //                description: i18n("Toggle sidebar sections.")
-
-                Maui.FlexSectionItem
-                {
-                    label1.text: i18n("Quick places")
-                    label2.text: i18n("Access to standard locations.")
-
-                    Switch
-                    {
-                        checkable: true
-                        checked: appSettings.quickSidebarSection
-                        onToggled: appSettings.quickSidebarSection = !appSettings.quickSidebarSection
-                    }
-                }
-
-                Maui.FlexSectionItem
-                {
-                    label1.text: i18n("Bookmarks")
-                    label2.text: i18n("Access to standard locations.")
-
-                    Switch
-                    {
-                        checkable: true
-                        checked: appSettings.sidebarSections.indexOf(FB.FMList.BOOKMARKS_PATH) >= 0
-                        onToggled:
-                        {
-                            toggleSection(FB.FMList.BOOKMARKS_PATH)
-                        }
-                    }
-                }
-
-                Maui.FlexSectionItem
-                {
-                    label1.text: i18n("Remote")
-                    label2.text: i18n("Access to network locations.")
-
-                    Switch
-                    {
-                        checkable: true
-                        checked: appSettings.sidebarSections.indexOf(FB.FMList.REMOTE_PATH)>= 0
-                        onToggled:
-                        {
-                            toggleSection(FB.FMList.REMOTE_PATH)
-                        }
-                    }
-                }
-
-                Maui.FlexSectionItem
-                {
-                    label1.text: i18n("Removable")
-                    label2.text: i18n("Access to USB sticks and SD Cards.")
-
-                    Switch
-                    {
-                        checkable: true
-                        checked: appSettings.sidebarSections.indexOf(FB.FMList.REMOVABLE_PATH)>= 0
-                        onToggled:
-                        {
-                            toggleSection(FB.FMList.REMOVABLE_PATH)
-                        }
-                    }
-                }
-
-                Maui.FlexSectionItem
-                {
-                    label1.text: i18n("Devices")
-                    label2.text: i18n("Access drives.")
-
-                    Switch
-                    {
-                        checkable: true
-                        checked: appSettings.sidebarSections.indexOf(FB.FMList.DRIVES_PATH)>= 0
-                        onToggled:
-                        {
-                            toggleSection(FB.FMList.DRIVES_PATH)
-                        }
-                    }
                 }
             }
         }
