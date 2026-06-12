@@ -11,7 +11,6 @@ Maui.SettingsDialog
     Maui.SectionGroup
     {
         title: i18n("Navigation")
-        description: i18n("Browser navigation with keyboard.")
 
         Maui.FlexSectionItem
         {
