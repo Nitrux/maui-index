@@ -641,10 +641,24 @@ Maui.ApplicationWindow
                             }
                         }
                     }
+                },
+
+                ToolSeparator
+                {
+                    visible: !_pageLayout.split && _viewTypeActionsLoader.active && _searchToggleLoader.active
+                    topPadding: 10
+                    bottomPadding: 10
                 }
             ]
 
             rightContent: [
+
+                ToolSeparator
+                {
+                    visible: !_pageLayout.split && _viewTypeActionsLoader.active && _searchToggleLoader.active
+                    topPadding: 10
+                    bottomPadding: 10
+                },
 
                 Loader
                 {
