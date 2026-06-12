@@ -163,6 +163,7 @@ Item
                     id: _actionsGrid
                     columns: 2
                     rows: 2
+                    spacing: Maui.Style.space.tiny
 
                     Repeater
                     {
