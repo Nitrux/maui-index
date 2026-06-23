@@ -569,13 +569,6 @@ Maui.ApplicationWindow
                     }
                 },
 
-                ToolSeparator
-                {
-                    visible: _sidebarToggleLoader.active
-                    topPadding: 10
-                    bottomPadding: 10
-                },
-
                 Loader
                 {
                     id: _historyActionsLoader
