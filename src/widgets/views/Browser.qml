@@ -24,7 +24,7 @@ Maui.SplitViewItem
     readonly property alias settings : _browser.settings
     readonly property alias title : _browser.title
     readonly property alias emptyTrashAction : _emptyTrashAction
-    readonly property bool supportsTerminal : true
+    readonly property bool supportsTerminal: control.currentPath.startsWith("file://")
     readonly property int terminalPanelHeight: _terminalSplitView.visible ? _terminalSplitView.height : 0
 
     property alias currentPath: _browser.currentPath
@@ -38,9 +38,16 @@ Maui.SplitViewItem
 
     onCurrentPathChanged:
     {
-        if(currentBrowser)
+        if (currentBrowser)
         {
-            syncTerminal(currentBrowser.currentPath)
+            if (supportsTerminal)
+            {
+                syncTerminal(currentBrowser.currentPath)
+            }
+            else
+            {
+                terminalVisible = false
+            }
         }
     }
 
@@ -107,7 +114,8 @@ Maui.SplitViewItem
 
         MenuItem
         {
-            enabled: !Maui.Handy.isMobile
+            visible: supportsTerminal && !Maui.Handy.isMobile
+            enabled: supportsTerminal && !Maui.Handy.isMobile
             text: i18n("Open Terminal Here")
             icon.name: "dialog-scripts"
             onTriggered: inx.openTerminal(_browser.currentPath, appSettings.terminalExecutable)
@@ -291,8 +299,11 @@ Maui.SplitViewItem
 
                             if(event.key === Qt.Key_F4)
                             {
-                                toogleTerminal()
-                                event.accepted = true
+                                if (supportsTerminal)
+                                {
+                                    toogleTerminal()
+                                    event.accepted = true
+                                }
                                 return
                             }
 
@@ -424,13 +435,13 @@ Maui.SplitViewItem
         settings.foldersFirst = sortSettings.foldersFirst
         settings.group = sortSettings.group
 
-        terminalLoader.setSource("Terminal.qml", ({'session.initialWorkingDirectory': control.currentPath.replace("file://", "")}))
+        terminalLoader.setSource("Terminal.qml", ({'session.initialWorkingDirectory': supportsTerminal ? control.currentPath.replace("file://", "") : ""}))
         control.forceActiveFocus()
     }
 
     function syncTerminal(path)
     {
-        if(terminalLoader.item && appSettings.syncTerminal && FB.FM.fileExists(path))
+        if (terminalLoader.item && appSettings.syncTerminal && FB.FM.fileExists(path))
             terminalLoader.item.session.changeDir(path.replace("file://", ""))
     }
 
@@ -444,12 +455,16 @@ Maui.SplitViewItem
 
     function toogleTerminal()
     {
+        if (!supportsTerminal)
+            return
+
         terminalVisible = !terminalVisible
 
-        if(terminalVisible)
+        if (terminalVisible)
         {
             terminalLoader.item.forceActiveFocus()
-        }else
+        }
+        else
         {
             control.forceActiveFocus()
         }

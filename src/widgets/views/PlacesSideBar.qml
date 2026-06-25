@@ -263,6 +263,7 @@ Loader
                     id: _quickSectionLoader
                     asynchronous: true
                     Layout.fillWidth: true
+                    Layout.bottomMargin: Maui.Style.space.medium
                     height: implicitHeight + _listBrowser.spacing*2
                     active: appSettings.quickSidebarSection
 
