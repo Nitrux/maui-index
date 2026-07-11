@@ -384,7 +384,7 @@ Loader
             {
                 readonly property bool shownPlace: control.shouldShowPlace(index, model.type, model.path, model.label)
                 isCurrentItem: ListView.isCurrentItem && _stackView.depth === 1
-                width: _listBrowser.width
+                width: _listBrowser.availableWidth
                 height: shownPlace ? implicitHeight : 0
                 visible: shownPlace
                 enabled: shownPlace
@@ -449,7 +449,7 @@ Loader
             section.criteria: ViewSection.FullString
             section.delegate: Maui.SectionHeader
             {
-                width: _listBrowser.width
+                width: _listBrowser.availableWidth
                 visible: section !== i18n("Bookmarks")
                 text1: section
                 label1.font.weight: Font.Bold
