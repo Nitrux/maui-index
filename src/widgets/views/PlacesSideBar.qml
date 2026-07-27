@@ -450,7 +450,6 @@ Loader
             section.delegate: Maui.SectionHeader
             {
                 width: _listBrowser.availableWidth
-                visible: section !== i18n("Bookmarks")
                 text1: section
                 label1.font.weight: Font.Bold
                 label1.font.pixelSize: 14
