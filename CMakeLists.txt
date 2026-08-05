@@ -101,7 +101,7 @@ endif()
 
 add_subdirectory(src)
 
-install(FILES org.kde.index.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
+install(FILES org.maui.index.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
 install(FILES src/data/org.kde.index.notifyrc DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR})
 
 ki18n_install(po)

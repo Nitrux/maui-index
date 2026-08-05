@@ -99,7 +99,7 @@ target_link_libraries(${PROJECT_NAME}
 
 #TODO: port to ecm_install_icons()
 install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
-install(FILES org.kde.index.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(FILES org.maui.index.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 install(FILES assets/index.svg DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps)
 
 qt_finalize_target(${PROJECT_NAME})

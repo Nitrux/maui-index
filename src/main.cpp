@@ -61,7 +61,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     about.setHomepage("https://nxos.org");
     about.setProductName("nitrux/index");
     about.setOrganizationDomain(INDEX_URI);
-    about.setDesktopFileName("org.kde.index");
+    about.setDesktopFileName("org.maui.index");
     about.setProgramLogo(app.windowIcon());
 
     about.addComponent("KIO", "", KIO_VERSION_STRING);
