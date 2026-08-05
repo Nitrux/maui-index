@@ -409,17 +409,14 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Devices")
-            label2.text: i18n("Access drives.")
+            label1.text: i18n("Storage Partitions")
+            label2.text: i18n("Show partitions under Storage in the sidebar.")
 
             Switch
             {
                 checkable: true
-                checked: appSettings.hasSidebarSection(String(FB.FMList.DRIVES_PATH))
-                onToggled:
-                {
-                    toggleSection(String(FB.FMList.DRIVES_PATH))
-                }
+                checked: appSettings.showStoragePartitions
+                onToggled: appSettings.showStoragePartitions = !appSettings.showStoragePartitions
             }
         }
     }

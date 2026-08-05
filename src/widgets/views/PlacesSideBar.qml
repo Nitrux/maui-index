@@ -29,7 +29,7 @@ Loader
         const sectionType = String(type)
 
         if (isDeviceEntry && isDeviceSection(sectionType))
-            return sectionType === i18n("Removable") ? "drive-removable-media" : "drive-harddisk"
+            return isExternalDeviceSection(sectionType) ? "drive-removable-media" : "drive-harddisk"
 
         if (value === "/" || value === "file:///")
             return "folder-red"
@@ -54,7 +54,33 @@ Loader
     function isDeviceSection(type)
     {
         const value = String(type)
-        return value === i18n("Drives") || value === i18n("Removable")
+        return isStorageSection(value) || value === i18n("Removable")
+    }
+
+    function isRootPath(path)
+    {
+        const value = String(path)
+        return value === "/" || value === "file:///" || value === "file:/"
+    }
+
+    function isStorageSection(type)
+    {
+        const value = String(type)
+        if (value === i18n("Drives") || value === i18n("Storage"))
+            return true
+
+        const placeList = control.list
+        if (!placeList)
+            return false
+
+        for (let i = 0; i < placeList.count; ++i)
+        {
+            const item = placeList.get(i)
+            if (String(item.type) === value && isRootPath(item.path))
+                return true
+        }
+
+        return false
     }
 
     function isExternalDeviceSection(type)
@@ -64,22 +90,27 @@ Loader
 
     function shouldShowPlace(index, type, path, label)
     {
-        if (!isDeviceSection(type))
+        if (!isStorageSection(type))
             return true
 
-        if (!control.list || !control.list.isDevice(index))
-            return false
-
         const url = String(path)
-        const text = String(label)
 
-        if (url === "/" || url === "file:///")
-            return false
+        if (isRootPath(url))
+            return true
 
-        if (text.startsWith("/"))
-            return false
+        return appSettings.showStoragePartitions && control.list && control.list.isDevice(index)
+    }
 
-        return true
+    function placeLabel(path, label, type)
+    {
+        return isStorageSection(type) && isRootPath(path)
+            ? i18n("Root")
+            : String(label)
+    }
+
+    function sectionLabel(type)
+    {
+        return isStorageSection(type) ? i18n("Storage") : String(type)
     }
 
     OpacityAnimator on opacity
@@ -383,6 +414,7 @@ Loader
             delegate: Maui.ListDelegate
             {
                 readonly property bool shownPlace: control.shouldShowPlace(index, model.type, model.path, model.label)
+                readonly property string displayLabel: control.placeLabel(model.path, model.label, model.type)
                 isCurrentItem: ListView.isCurrentItem && _stackView.depth === 1
                 width: _listBrowser.availableWidth
                 height: shownPlace ? implicitHeight : 0
@@ -390,7 +422,8 @@ Loader
                 enabled: shownPlace
 
                 iconSize: Maui.Style.iconSize
-                label: model.label
+                label: displayLabel
+                tooltipText: displayLabel
                 iconName: control.sidebarIcon(model.path, model.icon, model.label, model.type, placesList.isDevice(index))
                 iconVisible: true
                 template.isMask: control.usesSymbolicIcon(model.path, model.icon, model.label, model.type, placesList.isDevice(index)) && iconSize <= Maui.Style.iconSizes.medium
@@ -450,7 +483,7 @@ Loader
             section.delegate: Maui.SectionHeader
             {
                 width: _listBrowser.availableWidth
-                text1: section
+                text1: control.sectionLabel(section)
                 label1.font.weight: Font.Bold
                 label1.font.pixelSize: 14
                 label1.opacity: 1.0

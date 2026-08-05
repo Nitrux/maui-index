@@ -254,6 +254,7 @@ Maui.SplitViewItem
             }
 
             browser.holder.actions: []
+            browser.holder.isMask: browser.holder.emojiSize < Maui.Style.iconSizes.medium
 
             Connections
             {

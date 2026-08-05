@@ -169,6 +169,7 @@ Maui.ApplicationWindow
         property int lastTabIndex : 0
 
         property bool quickSidebarSection : true
+        property bool showStoragePartitions : false
         property string sidebarSections: "13, 1, 3, 2"
 
         function sidebarSectionOrder()
@@ -212,6 +213,9 @@ Maui.ApplicationWindow
                 if (source.includes(candidate))
                     normalized.push(candidate)
             }
+
+            if (!normalized.includes(FB.FMList.DRIVES_PATH))
+                normalized.push(FB.FMList.DRIVES_PATH)
 
             return normalized
         }
