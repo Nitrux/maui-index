@@ -39,6 +39,11 @@ Maui.ApplicationWindow
 
     readonly property alias appSettings : settings
 
+    FB.FileOperationDialog
+    {
+        id: _fileOperationDialog
+    }
+
     property alias currentTabIndex : _browserView.currentTabIndex
     property bool selectionMode: false
 

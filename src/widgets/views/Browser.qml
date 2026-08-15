@@ -84,7 +84,6 @@ Maui.SplitViewItem
     Maui.ContextualMenu
     {
         id: _emptyAreaMenu
-        modal: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         readonly property bool hasClipboardContent: !_browser.readOnly && _browser.currentFMList && _browser.currentFMList.clipboardHasContent
 

@@ -12,7 +12,6 @@ import ".."
 Maui.ContextualMenu
 {
     id: control
-    modal: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     readonly property bool canBookmark: !control.isExec && control.isDir
     readonly property bool hasDirectoryActions: control.isDir

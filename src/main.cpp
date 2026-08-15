@@ -78,6 +78,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     parser.addOption(newWindowOption);
 
+    about.setupCommandLine(&parser);
+
     parser.setApplicationDescription(about.shortDescription());
     parser.process(app);
     about.processCommandLine(&parser);
