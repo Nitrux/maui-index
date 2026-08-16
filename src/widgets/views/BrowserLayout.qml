@@ -33,6 +33,7 @@ Item
 
     readonly property FB.FileBrowser browser : currentItem.browser
     readonly property Maui.SplitView splitView : _splitView
+    readonly property Item actionsBar: _actionsBarLoader.item
 
     Maui.Controls.title: title
     Maui.Controls.toolTipText: browser.currentPath

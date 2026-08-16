@@ -124,7 +124,7 @@ Maui.ContextualMenu
         enabled: currentBrowser && currentBrowser.currentFMList && currentBrowser.currentFMList.clipboardHasContent
         text: i18n("Paste")
         icon.name: "edit-paste"
-        onTriggered: triggerBrowserPaste("file-menu")
+        onTriggered: _browser.paste()
     }
 
     MenuItem

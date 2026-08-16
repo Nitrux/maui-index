@@ -42,6 +42,7 @@ Maui.ApplicationWindow
     FB.FileOperationDialog
     {
         id: _fileOperationDialog
+        anchorItem: root.currentTab ? root.currentTab.actionsBar : null
     }
 
     property alias currentTabIndex : _browserView.currentTabIndex
