@@ -40,17 +40,6 @@ Loader
         return iconName
     }
 
-    function sidebarIcon(path, iconName, label, type, isDeviceEntry)
-    {
-        const resolved = placeIcon(path, iconName, label, type, isDeviceEntry)
-        return resolved === "folder-red" ? resolved : resolved + "-symbolic"
-    }
-
-    function usesSymbolicIcon(path, iconName, label, type, isDeviceEntry)
-    {
-        return placeIcon(path, iconName, label, type, isDeviceEntry) !== "folder-red"
-    }
-
     function isDeviceSection(type)
     {
         const value = String(type)
@@ -324,7 +313,7 @@ Loader
                             {
                                 Maui.Theme.colorSet: Maui.Theme.Button
                                 Maui.Theme.inherit: false
-                                readonly property string resolvedIcon: control.sidebarIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
+                                readonly property string resolvedIcon: control.placeIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
 
                                 Layout.preferredHeight: Math.min(50, width)
                                 Layout.preferredWidth: 50
@@ -335,7 +324,6 @@ Loader
                                 isCurrentItem: modelData.path === "overview:///" ? _stackView.depth === 2 : (currentBrowser.currentPath === modelData.path && _stackView.depth === 1)
                                 iconSource: resolvedIcon
                                 iconSizeHint: 16
-                                template.isMask: control.usesSymbolicIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
                                 label1.text: modelData.label
                                 labelsVisible: false
                                 tooltipText: modelData.label
@@ -424,9 +412,8 @@ Loader
                 iconSize: Maui.Style.iconSize
                 label: displayLabel
                 tooltipText: displayLabel
-                iconName: control.sidebarIcon(model.path, model.icon, model.label, model.type, placesList.isDevice(index))
+                iconName: control.placeIcon(model.path, model.icon, model.label, model.type, placesList.isDevice(index))
                 iconVisible: true
-                template.isMask: control.usesSymbolicIcon(model.path, model.icon, model.label, model.type, placesList.isDevice(index)) && iconSize <= Maui.Style.iconSizes.medium
 
                 template.content: ToolButton
                 {
