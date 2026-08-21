@@ -6,6 +6,7 @@ import QtQml
 import org.mauikit.controls as Maui
 
 import org.mauikit.filebrowsing as FB
+import org.mauikit.archiver as Arc
 
 import ".."
 
@@ -15,7 +16,8 @@ Maui.ContextualMenu
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     readonly property bool canBookmark: !control.isExec && control.isDir
     readonly property bool hasDirectoryActions: control.isDir
-    readonly property bool canExtract: FB.FM.checkFileType(FB.FMList.COMPRESSED, control.item.mime)
+    readonly property url itemUrl: control.item && control.item.path ? control.item.path : ""
+    readonly property bool canExtract: String(control.itemUrl).length > 0 && Arc.StaticArchive.isSupported(control.itemUrl)
     readonly property bool showDirectorySection: canBookmark || hasDirectoryActions
     readonly property var selectedUris: _browser.filterSelection(currentPath, control.item.path)
 
@@ -203,7 +205,6 @@ Maui.ContextualMenu
         onTriggered:
         {
             let props = ({ 'fileUrl': control.item.path,
-                             'dirName' : control.item.label.replace(control.item.suffix, ""),
                              'destination': currentBrowser.currentPath})
             var dialog = _extractDialogComponent.createObject(root, props)
             dialog.open()

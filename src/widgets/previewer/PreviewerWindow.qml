@@ -20,18 +20,19 @@ Maui.DialogWindow
 
     page.showTitle: true
 
+    Shortcut
+    {
+        sequence: "Escape"
+        context: Qt.WindowShortcut
+        onActivated: control.close()
+    }
+
     FilePreviewer
     {
         id: _previewer
         anchors.fill: parent
 
         focus: true
-        Keys.enabled: true
-        Keys.onEscapePressed: (event) =>
-                              {
-                                  control.close()
-                                  event.accepted= true
-                              }
     }
 
     page.headBar.leftContent: [

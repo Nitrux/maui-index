@@ -43,6 +43,7 @@ Maui.ApplicationWindow
     {
         id: _fileOperationDialog
         anchorItem: root.currentTab ? root.currentTab.actionsBar : null
+        onClosed: root.restoreBrowserFocus()
     }
 
     property alias currentTabIndex : _browserView.currentTabIndex
@@ -353,6 +354,7 @@ Maui.ApplicationWindow
 
             taglist.strict: false
             composerList.strict: false
+            onClosed: root.restoreBrowserFocus()
 
             onTagsReady: (tags) =>
                          {
@@ -370,19 +372,40 @@ Maui.ApplicationWindow
     Component
     {
         id: _openWithDialogComponent
-        FB.OpenWithDialog { onClosed: destroy() }
+        FB.OpenWithDialog
+        {
+            onClosed:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
+        }
     }
 
     Component
     {
         id: _configDialogComponent
-        SettingsDialog { onClosed: destroy()}
+        SettingsDialog
+        {
+            onClosed:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
+        }
     }
 
     Component
     {
         id: _shortcutsDialogComponent
-        ShortcutsDialog { onClosed: destroy()}
+        ShortcutsDialog
+        {
+            onClosed:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
+        }
     }
 
     Component
@@ -392,7 +415,11 @@ Maui.ApplicationWindow
         Arc.ExtractDialog
         {
             destination:  currentBrowser.currentPath
-            onClosed: destroy()
+            onClosed:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
         }
     }
 
@@ -405,7 +432,11 @@ Maui.ApplicationWindow
             id: _compressDialog
             destination: currentBrowser.currentPath
             onDone: _compressDialog.compress()
-            onClosed: destroy()
+            onClosed:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
         }
     }
 
@@ -415,7 +446,11 @@ Maui.ApplicationWindow
 
         PreviewerDialog
         {
-            onClosed: destroy()
+            onClosed:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
         }
     }
 
@@ -424,7 +459,11 @@ Maui.ApplicationWindow
         id: _previewerWindowComponent
         PreviewerWindow
         {
-            onClosing: destroy()
+            onClosing:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
         }
     }
 
@@ -967,6 +1006,14 @@ Maui.ApplicationWindow
         }
 
         root.openTab(FB.FM.homePath())
+    }
+
+    function restoreBrowserFocus()
+    {
+        Qt.callLater(() => {
+            if (root.currentBrowser)
+                root.currentBrowser.forceActiveFocus()
+        })
     }
 
     function toogleSplitView()

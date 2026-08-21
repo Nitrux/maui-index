@@ -153,6 +153,11 @@ Maui.SplitViewItem
             }
 
             message: i18n("Are you sure you want to remove this tag? This operation can not be undone.")
+            onClosed:
+            {
+                control.restoreBrowserFocus()
+                destroy()
+            }
             onAccepted:
             {
                 FB.Tagging.removeTag(tag, false)
@@ -467,6 +472,11 @@ Maui.SplitViewItem
         {
             control.forceActiveFocus()
         }
+    }
+
+    function restoreBrowserFocus()
+    {
+        Qt.callLater(() => control.forceActiveFocus())
     }
 
     function forceActiveFocus()

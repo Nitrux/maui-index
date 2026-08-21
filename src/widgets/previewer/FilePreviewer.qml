@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import org.mauikit.controls as Maui
 
 import org.mauikit.filebrowsing as FB
+import org.mauikit.archiver as Arc
 
 Item
 {
@@ -158,7 +159,7 @@ Item
         }else if(FB.FM.checkFileType(FB.FMList.DOCUMENT, iteminfo.mime))
         {
             source = "DocumentPreview.qml"
-        }else if(FB.FM.checkFileType(FB.FMList.COMPRESSED, iteminfo.mime))
+        }else if(Arc.StaticArchive.isSupported(iteminfo.path))
         {
             source = "CompressedPreview.qml"
         }else if(FB.FM.checkFileType(FB.FMList.FONT, iteminfo.mime))
