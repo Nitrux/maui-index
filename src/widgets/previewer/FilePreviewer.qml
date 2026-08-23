@@ -170,8 +170,6 @@ Item
             source = "DefaultPreview.qml"
         }
 
-        console.log("[Index][FilePreviewer] preview source", source, "showInfo=", control.showInfo, "mime=", iteminfo.mime)
-
         if(previewLoader.source == source)
         {
             return
@@ -188,8 +186,8 @@ Item
         infoModel.append({key: "Date", value: Qt.formatDateTime(new Date(iteminfo.date), "d MMM yyyy")})
         infoModel.append({key: "Modified", value: Qt.formatDateTime(new Date(iteminfo.modified), "d MMM yyyy")})
         infoModel.append({key: "Last Read", value: Qt.formatDateTime(new Date(iteminfo.lastread), "d MMM yyyy")})
-        infoModel.append({key: "Owner", value: iteminfo.owner})
-        infoModel.append({key: "Group", value: iteminfo.group})
+        infoModel.append({key: "Owner", value: String(iteminfo.owner || "")})
+        infoModel.append({key: "Group", value: String(iteminfo.group || "")})
         infoModel.append({key: "Size", value: Maui.Handy.formatSize(iteminfo.size)})
         infoModel.append({key: "Symbolic Link", value: displayPath(iteminfo.symlink)})
         infoModel.append({key: "Path", value: displayPath(iteminfo.path)})

@@ -22,7 +22,12 @@ Loader
         id: _imgComponent
         Maui.ImageViewer
         {
-            source: currentUrl
+            readonly property bool needsThumbnailDecoder: String(iteminfo.mime || "") === "image/webp"
+
+            source: needsThumbnailDecoder ? (String(iteminfo.thumbnail || "") || currentUrl) : currentUrl
+            sourceSize: needsThumbnailDecoder
+                ? Qt.size(Math.max(1, width), Math.max(1, height))
+                : Qt.size(-1, -1)
         }
     }
 }
