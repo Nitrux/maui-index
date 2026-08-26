@@ -5,10 +5,6 @@
 
 class QFileSystemWatcher;
 class QTimer;
-namespace FMH
-{
-class FileLoader;
-}
 
 class RecentFilesModel : public MauiList
 {
@@ -36,7 +32,6 @@ public Q_SLOTS:
 
 private:
     FMH::MODEL_LIST m_list;
-    FMH::FileLoader * m_loader;
     QFileSystemWatcher *m_watcher;
     QTimer *m_refreshTimer;
     void setList();

@@ -1,24 +1,16 @@
 #include "recentfilesmodel.h"
 
-#include <MauiKit4/FileBrowsing/fileloader.h>
 #include <MauiKit4/FileBrowsing/fmstatic.h>
 
+#include <QDir>
 #include <QFileSystemWatcher>
 #include <QTimer>
 
 RecentFilesModel::RecentFilesModel(QObject *parent) :
   MauiList(parent)
-, m_loader(new FMH::FileLoader)
 , m_watcher(new QFileSystemWatcher(this))
 , m_refreshTimer(new QTimer(this))
 {
-//  connect(m_loader, &FMH::FileLoader::itemsReady, [&](FMH::MODEL_LIST items)
-//  {
-//    Q_EMIT preItemsAppended(items.size());
-//    this->m_list << items;
-//    Q_EMIT postItemAppended();
-//  });
-
     m_refreshTimer->setSingleShot(true);
 
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &RecentFilesModel::scheduleRefresh);
@@ -63,9 +55,6 @@ void RecentFilesModel::setList()
 {
   if (!m_url.isLocalFile () || !m_url.isValid () || m_url.isEmpty ())
     return;
-
-//  m_loader->informer = &FMH::getFileInfoModel;
-//  m_loader->requestPath({m_url}, true, m_filters.isEmpty () ? QStringList () : m_filters, QDir::Files, 50);
 
   QDir dir(m_url.toLocalFile ());
   dir.setNameFilters (m_filters);

@@ -14,7 +14,7 @@ Item
     property string metaArtworkUrl: ""
     readonly property string fileArtworkUrl: String(iteminfo.thumbnail || "")
     readonly property string defaultAudioIcon: "audio-x-generic"
-    readonly property string defaultCoverSource: "qrc:/assets/cover.png"
+    readonly property string defaultCoverSource: "qrc:/assets/cover_64x64.svg"
     readonly property bool fileArtworkFromThumbnailer: control.fileArtworkUrl.startsWith("image://thumbnailer/")
     readonly property bool fileArtworkProbeFailed: control.fileArtworkFromThumbnailer
         && (_artworkProbe.status === Image.Error

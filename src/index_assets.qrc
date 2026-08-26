@@ -1,8 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>assets/index.svg</file>
-        <file>assets/bookmark-new.svg</file>
         <file>assets/index.png</file>
-        <file>assets/cover.png</file>
+        <file>assets/cover_32x32.svg</file>
+        <file>assets/cover_64x64.svg</file>
     </qresource>
 </RCC>

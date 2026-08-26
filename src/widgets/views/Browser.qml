@@ -246,7 +246,7 @@ Maui.SplitViewItem
             settings.sortBy:  _dirConf.sortKey
             settings.viewType: _dirConf.viewType
 
-            audioFallbackImageSource: "qrc:/assets/cover.png"
+            audioFallbackImageSource: settings.viewType === FB.FMList.LIST_VIEW ? "qrc:/assets/cover_32x32.svg" : "qrc:/assets/cover_64x64.svg"
 
             Index.FolderConfig
             {
