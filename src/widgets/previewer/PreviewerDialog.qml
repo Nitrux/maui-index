@@ -12,17 +12,20 @@ Maui.PopupPage
     title: _previewer.title
     readonly property alias previewer : _previewer
     hint: 1
-    maxWidth: 600
+    maxWidth: Maui.Style.units.gridUnit * 32
     maxHeight: implicitHeight
     focus: true
-    
+
+    page.headerMargins: Maui.Style.defaultPadding
+    page.footerMargins: Maui.Style.defaultPadding
+    page.floatingHeader: true
+
     onOpened: _previewer.forceActiveFocus()
-    
-    stack: FilePreviewer
+
+    FilePreviewer
     {
         id: _previewer
         Layout.fillWidth: true
-        Layout.fillHeight: true
         focus: true
         Keys.enabled: true
         Keys.onEscapePressed: (event) =>
@@ -78,14 +81,6 @@ Maui.PopupPage
         }
     }
     
-    headBar.rightContent: ToolButton
-    {
-        icon.name: "documentinfo"
-        checkable: true
-        checked: _previewer.showInfo
-        onClicked: _previewer.toggleInfo()
-    }
-
     function forceActiveFocus()
     {
         _previewer.forceActiveFocus()

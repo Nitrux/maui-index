@@ -53,27 +53,10 @@ Item
         onSourceChanged:
         {
             control.metaArtworkUrl = ""
-            console.log("[Index][AudioPreview] source changed", source, "artworkSource=", control.artworkSource)
-        }
-
-        onMediaStatusChanged:
-        {
-            console.log("[Index][AudioPreview] mediaStatus", mediaStatus, "duration=", duration, "seekable=", seekable)
-        }
-
-        onPlaybackStateChanged:
-        {
-            console.log("[Index][AudioPreview] playbackState", playbackState, "position=", position)
-        }
-
-        onErrorOccurred: (error, errorString) =>
-        {
-            console.log("[Index][AudioPreview] error", error, errorString)
         }
 
         onTitleChanged:
         {
-            console.log("[Index][AudioPreview] metadata title changed", title, "album=", player.metaData.value(MediaMetaData.AlbumTitle))
             infoModel.clear()
             appendInfoEntry("Title", player.metaData.value(MediaMetaData.Title))
             appendInfoEntry("Artist", player.metaData.value(MediaMetaData.AlbumArtist))
@@ -81,13 +64,14 @@ Item
             appendInfoEntry("Author", player.metaData.value(MediaMetaData.Author))
             appendInfoEntry("Codec", player.metaData.value(MediaMetaData.AudioCodec))
             appendInfoEntry("Copyright", player.metaData.value(MediaMetaData.Copyright))
-            appendInfoEntry("Duration", player.metaData.value(MediaMetaData.Duration))
+            appendInfoEntry("Duration", formatDuration(player.metaData.value(MediaMetaData.Duration)))
             appendInfoEntry("Track", player.metaData.value(MediaMetaData.TrackNumber))
             appendInfoEntry("Year", player.metaData.value(MediaMetaData.Date))
             appendInfoEntry("Genre", player.metaData.value(MediaMetaData.Genre))
         }
 
         onMetaDataChanged: control.updateMetaArtworkUrl()
+        onDurationChanged: control.updateDurationInfo()
     }
 
     ColumnLayout
@@ -177,7 +161,6 @@ Item
         if (control.metaArtworkUrl !== resolved)
         {
             control.metaArtworkUrl = resolved
-            console.log("[Index][AudioPreview] resolved meta artwork", control.metaArtworkUrl)
         }
     }
 
@@ -185,5 +168,28 @@ Item
     {
         const value = rawValue === undefined || rawValue === null ? "" : String(rawValue)
         infoModel.append({key: key, value: value})
+    }
+    function updateDurationInfo()
+    {
+        if (player.duration <= 0)
+            return
+
+        const value = formatDuration(player.duration)
+        for (var i = 0; i < infoModel.count; ++i)
+        {
+            if (infoModel.get(i).key !== "Duration")
+                continue
+
+            infoModel.setProperty(i, "value", value)
+            return
+        }
+
+        infoModel.append({key: "Duration", value: value})
+    }
+
+    function formatDuration(milliseconds)
+    {
+        const value = Number(milliseconds)
+        return isNaN(value) || value <= 0 ? "" : Maui.Handy.formatTime(Math.floor(value / 1000))
     }
 }

@@ -61,20 +61,6 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            enabled: !Maui.Handy.isMobile
-            label1.text: i18n("Open in Window")
-            label2.text: i18n("Show the file previews in a new window.")
-
-            Switch
-            {
-                checkable: true
-                checked:  appSettings.previewerWindow
-                onToggled: appSettings.previewerWindow = !appSettings.previewerWindow
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
             label1.text:  i18n("Autoplay")
             label2.text: i18n("Auto start playing audio and video file previews.")
 

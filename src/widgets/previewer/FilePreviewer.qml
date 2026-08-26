@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 
 import org.mauikit.controls as Maui
@@ -11,17 +10,14 @@ Item
 {
     id: control
     focus: true
-    implicitHeight: 600
+    implicitHeight: previewLayout.implicitHeight
     property url currentUrl: ""
 
     ListModel { id: infoModel }
-
     readonly property string title : String(iteminfo.label || "")
     property var iteminfo : ({})
 
     property bool isDir : false
-
-    property bool showInfo: true
 
     onCurrentUrlChanged:
     {
@@ -43,104 +39,74 @@ Item
 
     ColumnLayout
     {
+        id: previewLayout
         anchors.fill: parent
-        visible: !control.showInfo
+
+        spacing: Maui.Style.defaultSpacing
 
         Loader
         {
             id: previewLoader
-            asynchronous: true
-            Layout.fillHeight: true
             Layout.fillWidth: true
-            // onActiveChanged: if(active) show()
+            Layout.preferredHeight: Maui.Style.units.gridUnit * 24
+            Layout.topMargin: control.isDir ? Maui.Style.space.large : 0
+            asynchronous: true
         }
 
-        Loader
+        FB.TagsBar
         {
-            active: visible || item
             Layout.fillWidth: true
-            asynchronous: true
-            sourceComponent: FB.TagsBar
-            {
-                allowEditMode: true
-                list.urls: [control.currentUrl]
-                list.strict: false
+            visible: count > 0
+            allowEditMode: true
+            list.urls: [control.currentUrl]
+            list.strict: false
 
-                onTagRemovedClicked: (index) => list.removeFromUrls(index)
-                onTagsEdited: (tags) => list.updateToUrls(tags)
-            }
+            onTagRemovedClicked: (index) => list.removeFromUrls(index)
+            onTagsEdited: (tags) => list.updateToUrls(tags)
         }
-    }
 
-    Loader
-    {
-        id: _infoLoader
-        anchors.fill: parent
-        visible: control.showInfo
-        asynchronous: true
-
-        sourceComponent: Maui.ScrollColumn
+        Maui.SectionGroup
         {
-            Item
+            Layout.fillWidth: true
+            Layout.topMargin: Maui.Style.space.medium
+            title: i18n("Details")
+            description: i18n("File information")
+
+            Flow
             {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 150
+                spacing: Maui.Style.defaultSpacing
 
-                Maui.GridItemTemplate
+                Repeater
                 {
-                    height: parent.height * 0.9
-                    width: height
-                    label1.text: String(iteminfo.label || "")
-                    anchors.centerIn: parent
-                    iconSource: String(iteminfo.icon || "")
-                    imageSource: String(iteminfo.thumbnail || "")
-                    iconSizeHint: Maui.Style.iconSizes.large
-                }
-            }
-
-            Maui.SectionGroup
-            {
-                Layout.fillWidth: true
-
-                title: i18n("Details")
-                description: i18n("File information")
-
-                Flow
-                {
-                    Layout.fillWidth: true
-                    spacing: Maui.Style.defaultSpacing
-
-                    Repeater
+                    model: infoModel
+                    delegate: Maui.SectionItem
                     {
-                        model: infoModel
-                        delegate:  Maui.SectionItem
-                        {
-                            flat: false
-                            visible:  model.value ? true : false
-                            label1.text: model.key
-                            label2.text: model.value
-                            label2.wrapMode: Text.Wrap
-                        }
+                        width: model.key === "Path" || model.key === "Symbolic Link"
+                               ? parent.width
+                               : Math.min(implicitWidth, parent.width / 2)
+                        visible: model.value && String(model.value).length > 0
+                        flat: false
+                        label1.text: model.key
+                        label2.text: model.value
+                        label2.wrapMode: Text.WrapAnywhere
+                        label2.elide: Text.ElideNone
                     }
                 }
             }
+        }
 
-            FileProperties
-            {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignCenter
-                url: control.currentUrl
-                spacing: parent.spacing
-            }
+        FileProperties
+        {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignCenter
+            url: control.currentUrl
+            spacing: parent.spacing
         }
     }
 
     function show()
     {
-        // if(!previewLoader.active)
-        //     return
-        // if(control.showInfo)
-
         control.isDir = iteminfo.isdir == "true"
 
         var source = "DefaultPreview.qml"
@@ -175,7 +141,6 @@ Item
             return
         }
         previewLoader.source = source
-        control.showInfo = (source === "DefaultPreview.qml")
     }
 
     function initModel()
@@ -203,11 +168,6 @@ Item
             return decodeURIComponent(value.slice(7))
 
         return value
-    }
-
-    function toggleInfo()
-    {
-        control.showInfo = !control.showInfo
     }
 
     function setData(url)

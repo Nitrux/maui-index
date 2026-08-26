@@ -237,7 +237,6 @@ Maui.ApplicationWindow
 
         property bool dirConf : true
         property bool syncTerminal: true
-        property bool previewerWindow: !Maui.Handy.isMobile
         property bool autoPlayPreviews: true
         property font terminalFont: Maui.Style.monospacedFont
         property string terminalColorScheme: "Maui-Dark"
@@ -447,19 +446,6 @@ Maui.ApplicationWindow
         PreviewerDialog
         {
             onClosed:
-            {
-                root.restoreBrowserFocus()
-                destroy()
-            }
-        }
-    }
-
-    Component
-    {
-        id: _previewerWindowComponent
-        PreviewerWindow
-        {
-            onClosing:
             {
                 root.restoreBrowserFocus()
                 destroy()
@@ -1100,19 +1086,10 @@ Maui.ApplicationWindow
 
     function openPreview(url)
     {
-        if(appSettings.previewerWindow)
-        {
-            var previewer = _previewerWindowComponent.createObject(root)
-            previewer.previewer.setData(url)
-            previewer.forceActiveFocus()
-
-        }else
-        {
-            var dialog = _previewerComponent.createObject(root)
-            dialog.previewer.setData(url)
-            dialog.open()
-            dialog.forceActiveFocus()
-        }
+        var dialog = _previewerComponent.createObject(root)
+        dialog.previewer.setData(url)
+        dialog.open()
+        dialog.forceActiveFocus()
     }
 
     function restoreSession(tabs)

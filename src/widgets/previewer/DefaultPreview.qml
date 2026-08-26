@@ -9,7 +9,7 @@ Item
     {
         anchors.centerIn: parent
         source: iteminfo.icon
-        height: Maui.Style.iconSizes.huge
+        height: Math.min(128, Math.min(parent.width, parent.height))
         width: height
     }
 }

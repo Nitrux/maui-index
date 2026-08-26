@@ -22,25 +22,8 @@ Maui.Page
         audioOutput: AudioOutput {}
         videoOutput: _videoOutput
 
-        onSourceChanged:
-        {
-            console.log("[Index][VideoPreview] source changed", source)
-        }
+        onDurationChanged: control.updateDurationInfo()
 
-        onMediaStatusChanged:
-        {
-            console.log("[Index][VideoPreview] mediaStatus", mediaStatus, "duration=", duration, "seekable=", seekable)
-        }
-
-        onPlaybackStateChanged:
-        {
-            console.log("[Index][VideoPreview] playbackState", playbackState, "position=", position)
-        }
-
-        onErrorOccurred: (error, errorString) =>
-        {
-            console.log("[Index][VideoPreview] error", error, errorString)
-        }
     }
 
     VideoOutput
@@ -50,11 +33,6 @@ Maui.Page
         // This preview is often loaded in a plain Loader (not a StackView), so keep video output visible.
         visible: control.visible
         fillMode: VideoOutput.PreserveAspectFit
-
-        Component.onCompleted:
-        {
-            console.log("[Index][VideoPreview] VideoOutput ready", "width=", width, "height=", height)
-        }
     }
 
     Connections
@@ -62,13 +40,12 @@ Maui.Page
         target: player
         function onMetaDataChanged()
         {
-            console.log("[Index][VideoPreview] metadata changed", player.metaData.value(MediaMetaData.VideoCodec), player.metaData.value(MediaMetaData.Resolution))
             infoModel.append({key: "Title", value: player.metaData.value(MediaMetaData.Title)})
             infoModel.append({key: "Author", value: player.metaData.value(MediaMetaData.Author)})
             infoModel.append({key: "Audio Codec", value: player.metaData.value(MediaMetaData.AudioCodec)})
             infoModel.append({key: "Video Codec", value: player.metaData.value(MediaMetaData.VideoCodec)})
             infoModel.append({key: "Copyright", value: player.metaData.value(MediaMetaData.Copyright)})
-            infoModel.append({key: "Duration", value: player.metaData.value(MediaMetaData.Duration)})
+            control.updateDurationInfo()
             infoModel.append({key: "Framerate", value: player.metaData.value(MediaMetaData.VideoFrameRate)})
             infoModel.append({key: "Year", value: player.metaData.value(MediaMetaData.Date)})
             infoModel.append({key: "Resolution", value: player.metaData.value(MediaMetaData.Resolution)})
@@ -141,5 +118,28 @@ Maui.Page
         value: player.duration > 0 ? (1000 * player.position) / player.duration : 0
 
         onMoved: if (player.duration > 0) player.position = ((_slider.value / 1000) * player.duration)
+    }
+    function updateDurationInfo()
+    {
+        if (player.duration <= 0)
+            return
+
+        const value = formatDuration(player.duration)
+        for (var i = 0; i < infoModel.count; ++i)
+        {
+            if (infoModel.get(i).key !== "Duration")
+                continue
+
+            infoModel.setProperty(i, "value", value)
+            return
+        }
+
+        infoModel.append({key: "Duration", value: value})
+    }
+
+    function formatDuration(milliseconds)
+    {
+        const value = Number(milliseconds)
+        return isNaN(value) || value <= 0 ? "" : Maui.Handy.formatTime(Math.floor(value / 1000))
     }
 }

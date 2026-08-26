@@ -7,6 +7,8 @@ TE.TextViewer
 {
     id: control
     fileUrl: currentUrl
+    body.width: control.width
+    body.wrapMode: TextEdit.Wrap
 
     Connections
     {
