@@ -47,6 +47,7 @@ qt_add_qml_module(${PROJECT_NAME} URI app.maui.index
     widgets/previewer/DefaultPreview.qml
     widgets/previewer/DocumentPreview.qml
     widgets/previewer/FilePreviewer.qml
+    widgets/previewer/MillerPreview.qml
     widgets/previewer/PreviewerDialog.qml
     widgets/previewer/ImagePreview.qml
     widgets/previewer/TextPreview.qml

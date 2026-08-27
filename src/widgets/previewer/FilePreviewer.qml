@@ -10,9 +10,10 @@ import org.maui.index as Index
 Item
 {
     id: control
-    focus: true
+    focus: !control.compact
     implicitHeight: previewLayout.implicitHeight
     property url currentUrl: ""
+    property bool compact: false
 
     ListModel { id: infoModel }
     readonly property string title : String(iteminfo.label || "")
@@ -58,15 +59,15 @@ Item
         {
             id: previewLoader
             Layout.fillWidth: true
-            Layout.preferredHeight: Maui.Style.units.gridUnit * 24
+            Layout.preferredHeight: Maui.Style.units.gridUnit * (control.compact ? 18 : 24)
             Layout.topMargin: control.isDir ? Maui.Style.space.large : 0
-            asynchronous: true
+            asynchronous: false
         }
 
         FB.TagsBar
         {
             Layout.fillWidth: true
-            visible: count > 0
+            visible: !control.compact && count > 0
             allowEditMode: true
             list.urls: [control.currentUrl]
             list.strict: false
@@ -78,6 +79,7 @@ Item
         Maui.SectionGroup
         {
             Layout.fillWidth: true
+            visible: !control.compact
             Layout.topMargin: Maui.Style.space.medium
             title: i18n("Details")
             description: i18n("File information")
@@ -109,6 +111,7 @@ Item
         FileProperties
         {
             Layout.fillWidth: true
+            visible: !control.compact
             Layout.alignment: Qt.AlignCenter
             url: control.currentUrl
             spacing: parent.spacing
@@ -146,10 +149,9 @@ Item
             source = "DefaultPreview.qml"
         }
 
-        if(previewLoader.source == source)
-        {
-            return
-        }
+        if (previewLoader.source == source)
+            previewLoader.source = ""
+
         previewLoader.source = source
     }
 

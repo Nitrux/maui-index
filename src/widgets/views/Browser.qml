@@ -7,6 +7,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 
 import org.mauikit.controls as Maui
 import org.mauikit.filebrowsing as FB
@@ -54,6 +55,14 @@ Maui.SplitViewItem
     FileMenu
     {
         id: itemMenu
+    }
+
+    Component
+    {
+        id: _millerPreviewComponent
+        MillerPreview
+        {
+        }
     }
 
     Maui.ContextualMenu
@@ -193,6 +202,14 @@ Maui.SplitViewItem
         orientation: Qt.Vertical
         background: null
 
+        layer.enabled: GraphicsInfo.api !== GraphicsInfo.Software
+                       && control.SplitView.view.count > 1
+                       && control.SplitView.view.currentIndex !== control.splitIndex
+        layer.effect: MultiEffect
+        {
+            saturation: -1
+        }
+
         FB.FileBrowser
         {
             id: _browser
@@ -203,8 +220,19 @@ Maui.SplitViewItem
             background: null
             footBar.visible: false
 
-            property alias viewType : _dirConf.viewType
+            property int viewType: appSettings.globalViewType ? appSettings.viewType : _dirConf.viewType
             property alias sortBy : _dirConf.sortKey
+
+            function setViewType(value)
+            {
+                if (appSettings.globalViewType)
+                {
+                    appSettings.viewType = value
+                    return
+                }
+
+                _dirConf.viewType = value
+            }
 
             headerContainer.margins: appSettings.floatyUI ? Maui.Style.contentMargins : 0
             headerContainer.topMargin: 0
@@ -244,9 +272,11 @@ Maui.SplitViewItem
             settings.group: sortSettings.group
 
             settings.sortBy:  _dirConf.sortKey
-            settings.viewType: _dirConf.viewType
+            settings.viewType: _browser.viewType
 
-            audioFallbackImageSource: settings.viewType === FB.FMList.LIST_VIEW ? "qrc:/assets/cover_32x32.svg" : "qrc:/assets/cover_64x64.svg"
+            audioFallbackImageSource: (settings.viewType === FB.FMList.LIST_VIEW || settings.viewType === FB.FMList.MILLER_VIEW) ? "qrc:/assets/cover_32x32.svg" : "qrc:/assets/cover_64x64.svg"
+
+            onFileRequested: (path) => openPreview(path)
 
             Index.FolderConfig
             {
@@ -334,7 +364,9 @@ Maui.SplitViewItem
 
                             if(event.key === Qt.Key_Space)
                             {
-                                if(_browser.currentIndex > -1 && _browser.currentView.count > 0)
+                                if(_browser.viewType !== FB.FMList.MILLER_VIEW
+                                        && _browser.currentIndex > -1
+                                        && _browser.currentView.count > 0)
                                 {
                                     openPreview(_browser.currentFMModel.get(_browser.currentIndex).path)
                                 }
@@ -345,6 +377,9 @@ Maui.SplitViewItem
 
             onItemClicked: (index) =>
                            {
+                               if (_browser.viewType === FB.FMList.MILLER_VIEW)
+                                   return
+
                                const item = currentFMModel.get(index)
 
                                //                handleSelectionState(item)
@@ -363,6 +398,9 @@ Maui.SplitViewItem
 
             onItemDoubleClicked: (index) =>
                                  {
+                                     if (_browser.viewType === FB.FMList.MILLER_VIEW)
+                                         return
+
                                      const item = currentFMModel.get(index)
                                      //                handleSelectionState(item)
 
@@ -435,6 +473,8 @@ Maui.SplitViewItem
 
     Component.onCompleted:
     {
+        _browser.millerPreviewComponent = _millerPreviewComponent
+
         //set these values in here to avoid global binding them, so each view can have different sorting settings
         settings.foldersFirst = sortSettings.foldersFirst
         settings.group = sortSettings.group

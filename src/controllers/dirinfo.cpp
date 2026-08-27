@@ -95,11 +95,15 @@ void DirInfo::getSize()
 //    {
 //    });
 
-    connect(m_job, &KIO::DirectorySizeJob::result, [this, m_job](KJob *)
+    connect(m_job, &KIO::DirectorySizeJob::result, this, [this](KJob *job)
     {
-        m_size = m_job->totalSize();
-        m_filesCount = m_job->totalFiles();
-        m_dirCount = m_job->totalSubdirs();
+        const auto directorySizeJob = qobject_cast<KIO::DirectorySizeJob *>(job);
+        if (!directorySizeJob)
+            return;
+
+        m_size = directorySizeJob->totalSize();
+        m_filesCount = directorySizeJob->totalFiles();
+        m_dirCount = directorySizeJob->totalSubdirs();
 
         Q_EMIT this->sizeChanged(m_size);
         Q_EMIT this->filesCountChanged(m_filesCount);

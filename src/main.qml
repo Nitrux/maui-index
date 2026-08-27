@@ -236,6 +236,7 @@ Maui.ApplicationWindow
         property alias sideBarWidth : _sideBarView.sideBar.preferredWidth
 
         property bool dirConf : true
+        property bool globalViewType: false
         property bool syncTerminal: true
         property bool autoPlayPreviews: true
         property font terminalFont: Maui.Style.monospacedFont
@@ -310,6 +311,7 @@ Maui.ApplicationWindow
         text: i18n("Split View")
         icon.name: currentTab.orientation === Qt.Horizontal ? "view-split-left-right" : "view-split-top-bottom"
         checked: currentTab.count === 2
+        enabled: !currentBrowser || FB.FMList.MILLER_VIEW === undefined || currentBrowser.viewType !== FB.FMList.MILLER_VIEW
         checkable: true
         onTriggered: toogleSplitView()
     }
@@ -552,6 +554,59 @@ Maui.ApplicationWindow
                 Qt.callLater(() => root.ensureFooterBarHeight("pageLayout height changed"))
             }
 
+            Component
+            {
+                id: _historyActionsComponent
+                Maui.ToolActions
+                {
+                    autoExclusive: false
+                    checkable: false
+                    display: ToolButton.IconOnly
+
+                    Action
+                    {
+                        icon.name: "go-previous"
+                        onTriggered: root.currentBrowser.goBack()
+                    }
+
+                    Action
+                    {
+                        icon.name: "go-next"
+                        onTriggered: root.currentBrowser.goForward()
+                    }
+                }
+            }
+
+            Component
+            {
+                id: _millerHistoryActionsComponent
+                Maui.ToolActions
+                {
+                    autoExclusive: false
+                    checkable: false
+                    display: ToolButton.IconOnly
+
+                    Action
+                    {
+                        icon.name: "go-previous"
+                        onTriggered: root.currentBrowser.goBack()
+                    }
+
+                    Action
+                    {
+                        text: i18n("Go up")
+                        icon.name: "go-up"
+                        onTriggered: root.currentBrowser.goUp()
+                    }
+
+                    Action
+                    {
+                        icon.name: "go-next"
+                        onTriggered: root.currentBrowser.goForward()
+                    }
+                }
+            }
+
             leftContent:  [
 
                 Loader
@@ -607,39 +662,25 @@ Maui.ApplicationWindow
                 Loader
                 {
                     id: _historyActionsLoader
-                    asynchronous: true
+                    asynchronous: false
                     active: _stackView.depth === 1 && !!root.currentBrowser
                     visible: active
-
-                    sourceComponent: Maui.ToolActions
-                    {
-                        autoExclusive: false
-                        checkable: false
-                        display: ToolButton.IconOnly
-
-                        Action
-                        {
-                            icon.name: "go-previous"
-                            onTriggered : currentBrowser.goBack()
-                        }
-
-                        Action
-                        {
-                            icon.name: "go-next"
-                            onTriggered : currentBrowser.goForward()
-                        }
-                    }
+                    sourceComponent: root.currentBrowser
+                                     && root.currentBrowser.viewType === FB.FMList.MILLER_VIEW
+                                     ? _millerHistoryActionsComponent
+                                     : _historyActionsComponent
                 },
 
                 Loader
                 {
                     id: _viewTypeActionsLoader
-                    asynchronous: true
+                    asynchronous: false
                     active: _stackView.depth === 1 && !!root.currentBrowser
                     visible: active
 
                     sourceComponent: Maui.ToolActions
                     {
+                        enabled: !appSettings.globalViewType
                         autoExclusive: true
                         expanded: root.isWide
                         cyclic: true
@@ -655,7 +696,7 @@ Maui.ApplicationWindow
                             {
                                 if(currentBrowser)
                                 {
-                                    currentBrowser.viewType = FB.FMList.LIST_VIEW
+                                    currentBrowser.setViewType(FB.FMList.LIST_VIEW)
                                 }
                             }
                         }
@@ -671,8 +712,23 @@ Maui.ApplicationWindow
                             {
                                 if(currentBrowser)
                                 {
-                                    currentBrowser.viewType = FB.FMList.ICON_VIEW
+                                    currentBrowser.setViewType(FB.FMList.ICON_VIEW)
                                 }
+                            }
+                        }
+
+                        Action
+                        {
+                            text: i18n("Miller columns")
+                            icon.name: "view-split-miller-column"
+                            checked: currentBrowser.viewType === FB.FMList.MILLER_VIEW
+                            checkable: true
+                            enabled: FB.FMList.MILLER_VIEW !== undefined
+
+                            onTriggered:
+                            {
+                                if(currentBrowser && FB.FMList.MILLER_VIEW !== undefined)
+                                    currentBrowser.setViewType(FB.FMList.MILLER_VIEW)
                             }
                         }
                     }

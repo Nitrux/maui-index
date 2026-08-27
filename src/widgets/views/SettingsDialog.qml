@@ -41,12 +41,76 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
+            label1.text: i18n("Global View Type")
+            label2.text: i18n("Enable to use the selected view type for every directory.")
+
+            Switch
+            {
+                checkable: true
+                checked: settings.globalViewType
+                onToggled: settings.globalViewType = checked
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
+            visible: settings.globalViewType
+            label1.text: i18n("View Type")
+            label2.text: i18n("Select the view type to use globally. This overrides per-directory view types.")
+            label2.wrapMode: Text.Wrap
+
+            Maui.ToolActions
+            {
+                autoExclusive: true
+                expanded: true
+                display: ToolButton.IconOnly
+
+                Action
+                {
+                    text: i18n("List")
+                    icon.name: "view-list-details"
+                    checked: appSettings.viewType === FB.FMList.LIST_VIEW
+                    checkable: true
+                    onTriggered: appSettings.viewType = FB.FMList.LIST_VIEW
+                }
+
+                Action
+                {
+                    text: i18n("Grid")
+                    icon.name: "view-list-icons"
+                    checked: appSettings.viewType === FB.FMList.ICON_VIEW
+                    checkable: true
+                    onTriggered: appSettings.viewType = FB.FMList.ICON_VIEW
+                }
+
+                Action
+                {
+                    text: i18n("Miller columns")
+                    icon.name: "view-file-columns"
+                    checked: appSettings.viewType === FB.FMList.MILLER_VIEW
+                    checkable: true
+                    enabled: FB.FMList.MILLER_VIEW !== undefined
+                    onTriggered:
+                    {
+                        if (FB.FMList.MILLER_VIEW !== undefined)
+                            appSettings.viewType = FB.FMList.MILLER_VIEW
+                    }
+                }
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
+            wide: true
             label1.text: i18n("Terminal Executable")
             label2.text: i18n("Executable used for the external 'Open Terminal Here' action.")
+            label2.wrapMode: Text.Wrap
 
             Maui.TextField
             {
-                implicitWidth: Math.max(Maui.Style.units.gridUnit * 12, 280)
+                implicitWidth: Maui.Style.units.gridUnit * 10
+                Layout.minimumWidth: Maui.Style.units.gridUnit * 8
+                Layout.preferredWidth: Maui.Style.units.gridUnit * 10
                 placeholderText: "/usr/bin/station"
                 text: appSettings.terminalExecutable
                 selectByMouse: true
@@ -100,44 +164,6 @@ Maui.SettingsDialog
                 checkable: true
                 checked:  settings.showThumbnails
                 onToggled: settings.showThumbnails = ! settings.showThumbnails
-            }
-        }
-
-        Maui.FlexSectionItem
-        {
-            label1.text:  i18n("View Type")
-            label2.text: i18n("Default view type.")
-
-            Maui.ToolActions
-            {
-                autoExclusive: true
-                expanded: true
-                display: ToolButton.IconOnly
-
-                Action
-                {
-                    text: i18n("List")
-                    icon.name: "view-list-details"
-                    checked: appSettings.viewType === FB.FMList.LIST_VIEW
-                    checkable: true
-                    onTriggered:
-                    {
-                        appSettings.viewType = FB.FMList.LIST_VIEW
-                    }
-                }
-
-                Action
-                {
-                    text: i18n("Grid")
-                    icon.name: "view-list-icons"
-                    checked:  appSettings.viewType === FB.FMList.ICON_VIEW
-                    checkable: true
-
-                    onTriggered:
-                    {
-                        appSettings.viewType = FB.FMList.ICON_VIEW
-                    }
-                }
             }
         }
 
