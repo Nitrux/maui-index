@@ -5,6 +5,7 @@ import org.mauikit.controls as Maui
 
 import org.mauikit.filebrowsing as FB
 import org.mauikit.archiver as Arc
+import org.maui.index as Index
 
 Item
 {
@@ -32,9 +33,18 @@ Item
             iteminfo.thumbnail = "image://thumbnailer/" + currentUrl
         }
 
+        control.isDir = iteminfo.isdir == "true"
+        directoryInfo.url = control.isDir ? currentUrl : ""
+
         initModel()
 
         show()
+    }
+
+    Index.DirInfo
+    {
+        id: directoryInfo
+        onSizeChanged: control.updateDirectorySize()
     }
 
     ColumnLayout
@@ -153,11 +163,26 @@ Item
         infoModel.append({key: "Last Read", value: Qt.formatDateTime(new Date(iteminfo.lastread), "d MMM yyyy")})
         infoModel.append({key: "Owner", value: String(iteminfo.owner || "")})
         infoModel.append({key: "Group", value: String(iteminfo.group || "")})
-        infoModel.append({key: "Size", value: Maui.Handy.formatSize(iteminfo.size)})
+        infoModel.append({key: control.isDir ? "Contents Size" : "Size", value: control.isDir ? "" : Maui.Handy.formatSize(iteminfo.size)})
         infoModel.append({key: "Symbolic Link", value: displayPath(iteminfo.symlink)})
         infoModel.append({key: "Path", value: displayPath(iteminfo.path)})
         // infoModel.append({key: "Thumbnail", value: iteminfo.thumbnail})
         // infoModel.append({key: "Icon Name", value: iteminfo.icon})
+    }
+
+    function updateDirectorySize()
+    {
+        if (!control.isDir)
+            return
+
+        for (var i = 0; i < infoModel.count; ++i)
+        {
+            if (infoModel.get(i).key !== "Contents Size")
+                continue
+
+            infoModel.setProperty(i, "value", directoryInfo.sizeString)
+            return
+        }
     }
 
     function displayPath(path)
