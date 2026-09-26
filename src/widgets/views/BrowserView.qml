@@ -21,6 +21,9 @@ Maui.Page
     property alias currentTab : _browserList.currentItem
     property Browser currentSplit: currentTab ? currentTab.currentItem : null
     property alias browserList : _browserList
+    readonly property url selectedDirectory: _selectionBar.count === 1
+                                              && _selectionBar.uris.length === 1
+                                              && _selectionBar.uris[0] ? _selectionBar.uris[0] : ""
 
     floatingFooter: true
     headBar.visible: false
@@ -101,6 +104,29 @@ Maui.Page
             onTriggered:
             {
                var dialog = _compressDialogComponent.createObject(root, ({'urls': selectionBar.uris}))
+                dialog.open()
+            }
+        }
+
+        Action
+        {
+            text: i18n("Encrypt directory")
+            icon.name: "object-locked"
+            enabled: _selectionBar.count === 1
+                      && !Maui.Handy.isMobile
+                      && selectedDirectory.toString().length > 0
+                      && FB.FM.isDir(selectedDirectory)
+            onTriggered:
+            {
+                if (!selectedDirectory.toString().length || !FB.FM.isDir(selectedDirectory))
+                    return
+
+                const dialog = _fscryptDialogComponent.createObject(root, ({'directory': selectedDirectory}))
+                dialog.operationCompleted.connect((success) =>
+                {
+                    if (success && currentBrowser.currentFMList)
+                        currentBrowser.currentFMList.refresh()
+                })
                 dialog.open()
             }
         }

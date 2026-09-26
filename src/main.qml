@@ -321,7 +321,7 @@ Maui.ApplicationWindow
         id: _showTerminalAction
         text: i18n("Terminal")
         enabled: currentTab && currentTab.currentItem ? currentTab.currentItem.supportsTerminal : false
-        icon.name: "dialog-scripts"
+        icon.name: "utilities-terminal"
         checked : currentTab && currentBrowser ? currentTab.currentItem.terminalVisible : false
         checkable: true
 
@@ -416,6 +416,20 @@ Maui.ApplicationWindow
         Arc.ExtractDialog
         {
             destination:  currentBrowser.currentPath
+            onClosed:
+            {
+                root.restoreBrowserFocus()
+                destroy()
+            }
+        }
+    }
+
+    Component
+    {
+        id: _fscryptDialogComponent
+
+        FB.FscryptDialog
+        {
             onClosed:
             {
                 root.restoreBrowserFocus()
