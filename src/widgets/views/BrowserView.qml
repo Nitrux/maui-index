@@ -124,8 +124,13 @@ Maui.Page
                 const dialog = _fscryptDialogComponent.createObject(root, ({'directory': selectedDirectory}))
                 dialog.operationCompleted.connect((success) =>
                 {
-                    if (success && currentBrowser.currentFMList)
-                        currentBrowser.currentFMList.refresh()
+                    if (success)
+                    {
+                        _fscrypt.invalidateStatus(selectedDirectory)
+                        if (currentBrowser.currentFMList)
+                            currentBrowser.currentFMList.refresh()
+                        notify("emblem-encrypted-unlocked", i18n("Encryption"), i18n("Directory encrypted and unlocked."))
+                    }
                 })
                 dialog.open()
             }

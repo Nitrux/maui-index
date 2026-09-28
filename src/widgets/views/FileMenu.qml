@@ -1,6 +1,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import QtQml
 
 import org.mauikit.controls as Maui
@@ -19,6 +20,9 @@ Maui.ContextualMenu
     readonly property url itemUrl: control.item && control.item.path ? control.item.path : ""
     readonly property bool canExtract: String(control.itemUrl).length > 0 && Arc.StaticArchive.isSupported(control.itemUrl)
     readonly property bool showDirectorySection: canBookmark || hasDirectoryActions
+    readonly property bool isEncrypted: encryptionStatus === "encrypted_locked" || encryptionStatus === "encrypted_unlocked"
+    readonly property bool isLocked: encryptionStatus === "encrypted_locked"
+    readonly property bool isUnlocked: encryptionStatus === "encrypted_unlocked"
     readonly property var selectedUris: _browser.filterSelection(currentPath, control.item.path)
 
     /**
@@ -40,6 +44,16 @@ Maui.ContextualMenu
       *
       */
     property bool isExec : false
+    property string encryptionStatus: "unknown"
+    property var activeUnlockDialog: null
+    property bool actionInProgress: false
+
+    signal encryptionChanged(url directory)
+
+    FB.Fscrypt
+    {
+        id: _fscrypt
+    }
 
     /**
       *
@@ -197,6 +211,31 @@ Maui.ContextualMenu
 
     MenuItem
     {
+        enabled: control.isEncrypted && control.isUnlocked && !_fscrypt.running
+        visible: control.isEncrypted && control.isUnlocked
+        height: visible ? implicitHeight : -control.spacing
+        text: i18n("Lock directory")
+        icon.name: "emblem-locked"
+        onTriggered:
+        {
+            control.actionInProgress = true
+            _fscrypt.lockDirectory(control.itemUrl)
+            control.close()
+        }
+    }
+
+    MenuItem
+    {
+        enabled: control.isEncrypted && control.isLocked && !_fscrypt.running
+        visible: control.isEncrypted && control.isLocked
+        height: visible ? implicitHeight : -control.spacing
+        text: i18n("Unlock directory")
+        icon.name: "emblem-unlocked"
+        onTriggered: control.openUnlockDialog()
+    }
+
+    MenuItem
+    {
         enabled: canExtract
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
@@ -237,9 +276,162 @@ Maui.ContextualMenu
         }
     }
 
+    Component
+    {
+        id: _unlockDialogComponent
+
+        Maui.InfoDialog
+        {
+            id: _unlockDialog
+            property url directory
+            property string errorMessage: ""
+
+            title: i18n("Unlock Directory")
+            message: i18n("Enter the passphrase to unlock this directory.")
+            standardButtons: Dialog.Apply | Dialog.Cancel
+            template.iconVisible: false
+
+            Maui.PasswordField
+            {
+                id: _unlockPassphrase
+                enabled: !_fscrypt.running
+                Layout.fillWidth: true
+                Maui.Controls.title: i18n("Passphrase")
+                onTextChanged: _unlockDialog.updateButtons()
+                onAccepted: _unlockDialog.submit()
+            }
+
+            Maui.Chip
+            {
+                Layout.fillWidth: true
+                Layout.preferredHeight: visible ? implicitHeight : -_unlockDialog.spacing
+                visible: _unlockDialog.errorMessage.length > 0
+                text: _unlockDialog.errorMessage
+                color: Maui.Theme.negativeBackgroundColor
+                label.horizontalAlignment: Text.AlignHCenter
+                label.wrapMode: Text.Wrap
+            }
+
+            onOpened:
+            {
+                updateButtons()
+                _unlockPassphrase.forceActiveFocus()
+            }
+
+            onApplied: submit()
+
+            function submit()
+            {
+                if (_unlockPassphrase.text.length === 0)
+                {
+                    errorMessage = i18n("Passphrase can not be empty.")
+                    updateButtons()
+                    return
+                }
+
+                errorMessage = ""
+                _fscrypt.unlockDirectory(directory, _unlockPassphrase.text)
+                updateButtons()
+            }
+
+            onRejected:
+            {
+                if (!_fscrypt.running)
+                    close()
+            }
+
+            Connections
+            {
+                target: _fscrypt
+
+                function onRunningChanged()
+                {
+                    _unlockDialog.updateButtons()
+                }
+
+                function onFinished(success, message)
+                {
+                    if (!_unlockDialog.visible)
+                        return
+
+                    if (success)
+                    {
+                        _fscrypt.invalidateStatus(_unlockDialog.directory)
+                        currentBrowser.currentFMList.refresh()
+                        notify("emblem-unlocked", i18n("Encryption"), i18n("Directory unlocked."))
+                        control.encryptionChanged(_unlockDialog.directory)
+                        _unlockDialog.close()
+                    }
+                    else
+                    {
+                        _unlockDialog.errorMessage = message
+                        _unlockDialog.updateButtons()
+                    }
+                }
+            }
+
+            function updateButtons()
+            {
+                const applyButton = standardButton(Dialog.Apply)
+                if (applyButton)
+                    applyButton.enabled = _unlockPassphrase.text.length > 0 && !_fscrypt.running
+
+                const cancelButton = standardButton(Dialog.Cancel)
+                if (cancelButton)
+                    cancelButton.enabled = !_fscrypt.running
+            }
+
+            onClosed:
+            {
+                if (control.activeUnlockDialog === _unlockDialog)
+                    control.activeUnlockDialog = null
+                destroy()
+            }
+        }
+    }
+
+    Connections
+    {
+        target: _fscrypt
+
+        function onStatusChanged(directory, status)
+        {
+            if (String(directory) === String(control.itemUrl))
+                control.encryptionStatus = status
+        }
+
+        function onFinished(success, message)
+        {
+            if (!control.actionInProgress || control.activeUnlockDialog)
+                return
+
+            control.actionInProgress = false
+            if (success)
+            {
+                _fscrypt.invalidateStatus(control.itemUrl)
+                currentBrowser.currentFMList.refresh()
+                notify("emblem-locked", i18n("Encryption"), i18n("Directory locked."))
+                control.encryptionChanged(control.itemUrl)
+            }
+            else
+            {
+                notify("dialog-error", i18n("Encryption"), message)
+            }
+        }
+    }
+
     onClosed:
     {
         control.index = -1
+    }
+
+    function openUnlockDialog()
+    {
+        if (!isLocked || activeUnlockDialog)
+            return
+
+        activeUnlockDialog = _unlockDialogComponent.createObject(root, ({directory: itemUrl}))
+        activeUnlockDialog.open()
     }
 
     function showFor(index)
@@ -253,6 +445,9 @@ Maui.ContextualMenu
             control.index = index
             control.isDir = item.isdir == true || item.isdir == "true"
             control.isExec = item.executable == true || item.executable == "true"
+            control.encryptionStatus = control.isDir ? _fscrypt.cachedStatus(item.path) : "unknown"
+            if (control.isDir)
+                _fscrypt.requestStatus(item.path)
             control.show()
         }
     }

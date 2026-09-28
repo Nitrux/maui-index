@@ -55,6 +55,55 @@ Maui.SplitViewItem
     FileMenu
     {
         id: itemMenu
+        onEncryptionChanged: (directory) => _fscrypt.invalidateStatus(directory)
+    }
+
+    FB.Fscrypt
+    {
+        id: _fscrypt
+    }
+
+    Component
+    {
+        id: _fscryptEmblemComponent
+
+        Item
+        {
+            property var itemData
+            readonly property string path: itemData && itemData.path ? String(itemData.path) : ""
+            readonly property bool isDirectory: itemData && (itemData.isdir === true || itemData.isdir === "true")
+            property string encryptionStatus: _fscrypt.cachedStatus(path)
+
+            implicitWidth: visible ? Maui.Style.iconSizes.small : 0
+            implicitHeight: Maui.Style.iconSizes.small
+            visible: isDirectory && (encryptionStatus === "encrypted_locked" || encryptionStatus === "encrypted_unlocked")
+
+            Maui.Icon
+            {
+                anchors.centerIn: parent
+                width: Maui.Style.iconSizes.small
+                height: width
+                source: encryptionStatus === "encrypted_locked" ? "emblem-locked" : "emblem-encrypted-unlocked"
+                color: Maui.Theme.textColor
+            }
+
+            Component.onCompleted:
+            {
+                if (isDirectory && path.length > 0)
+                    _fscrypt.requestStatus(path)
+            }
+
+            Connections
+            {
+                target: _fscrypt
+
+                function onStatusChanged(directory, status)
+                {
+                    if (String(directory) === path)
+                        encryptionStatus = status
+                }
+            }
+        }
     }
 
     Component
@@ -213,6 +262,7 @@ Maui.SplitViewItem
         FB.FileBrowser
         {
             id: _browser
+            browser.delegateInjector: _fscryptEmblemComponent
 
             SplitView.fillWidth: true
             SplitView.fillHeight: true
