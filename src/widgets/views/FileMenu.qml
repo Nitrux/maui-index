@@ -445,9 +445,9 @@ Maui.ContextualMenu
             control.index = index
             control.isDir = item.isdir == true || item.isdir == "true"
             control.isExec = item.executable == true || item.executable == "true"
-            control.encryptionStatus = control.isDir ? _fscrypt.cachedStatus(item.path) : "unknown"
+            control.encryptionStatus = control.isDir ? _fscrypt.cachedStatus(control.itemUrl) : "unknown"
             if (control.isDir)
-                _fscrypt.requestStatus(item.path)
+                _fscrypt.requestStatus(control.itemUrl)
             control.show()
         }
     }

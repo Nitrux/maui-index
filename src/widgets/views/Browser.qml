@@ -70,9 +70,10 @@ Maui.SplitViewItem
         Item
         {
             property var itemData
-            readonly property string path: itemData && itemData.path ? String(itemData.path) : ""
+            readonly property url itemUrl: itemData && itemData.path ? itemData.path : ""
+            readonly property string path: itemUrl.toString()
             readonly property bool isDirectory: itemData && (itemData.isdir === true || itemData.isdir === "true")
-            property string encryptionStatus: _fscrypt.cachedStatus(path)
+            property string encryptionStatus: _fscrypt.cachedStatus(itemUrl)
 
             implicitWidth: visible ? Maui.Style.iconSizes.small : 0
             implicitHeight: Maui.Style.iconSizes.small
@@ -90,7 +91,7 @@ Maui.SplitViewItem
             Component.onCompleted:
             {
                 if (isDirectory && path.length > 0)
-                    _fscrypt.requestStatus(path)
+                    _fscrypt.requestStatus(itemUrl)
             }
 
             Connections
