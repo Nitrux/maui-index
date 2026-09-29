@@ -25,6 +25,7 @@ Maui.SplitViewItem
     readonly property alias settings : _browser.settings
     readonly property alias title : _browser.title
     readonly property alias emptyTrashAction : _emptyTrashAction
+    readonly property alias fscrypt: _fscrypt
     readonly property bool supportsTerminal: control.currentPath.startsWith("file://")
     readonly property int terminalPanelHeight: _terminalSplitView.visible ? _terminalSplitView.height : 0
 
@@ -55,7 +56,7 @@ Maui.SplitViewItem
     FileMenu
     {
         id: itemMenu
-        onEncryptionChanged: (directory) => _fscrypt.invalidateStatus(directory)
+        fscrypt: _fscrypt
     }
 
     FB.Fscrypt
@@ -72,7 +73,7 @@ Maui.SplitViewItem
             property var itemData
             readonly property url itemUrl: itemData && itemData.path ? itemData.path : ""
             readonly property string path: itemUrl.toString()
-            readonly property bool isDirectory: itemData && (itemData.isdir === true || itemData.isdir === "true")
+            readonly property bool isDirectory: !!itemData && (itemData.isdir === true || itemData.isdir === "true")
             property string encryptionStatus: _fscrypt.cachedStatus(itemUrl)
 
             implicitWidth: visible ? Maui.Style.iconSizes.small : 0
@@ -81,14 +82,16 @@ Maui.SplitViewItem
 
             Maui.Icon
             {
-                anchors.centerIn: parent
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: Maui.Style.space.medium
                 width: Maui.Style.iconSizes.small
                 height: width
-                source: encryptionStatus === "encrypted_locked" ? "emblem-locked" : "emblem-encrypted-unlocked"
+                source: encryptionStatus === "encrypted_locked" ? "emblem-locked" : "emblem-unlocked"
                 color: Maui.Theme.textColor
             }
 
-            Component.onCompleted:
+            onItemDataChanged:
             {
                 if (isDirectory && path.length > 0)
                     _fscrypt.requestStatus(itemUrl)

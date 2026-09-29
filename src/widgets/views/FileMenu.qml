@@ -47,13 +47,7 @@ Maui.ContextualMenu
     property string encryptionStatus: "unknown"
     property var activeUnlockDialog: null
     property bool actionInProgress: false
-
-    signal encryptionChanged(url directory)
-
-    FB.Fscrypt
-    {
-        id: _fscrypt
-    }
+    property FB.Fscrypt fscrypt
 
     /**
       *
@@ -211,7 +205,7 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: control.isEncrypted && control.isUnlocked && !_fscrypt.running
+        enabled: control.isEncrypted && control.isUnlocked && !control.fscrypt.running
         visible: control.isEncrypted && control.isUnlocked
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Lock directory")
@@ -219,14 +213,14 @@ Maui.ContextualMenu
         onTriggered:
         {
             control.actionInProgress = true
-            _fscrypt.lockDirectory(control.itemUrl)
+            control.fscrypt.lockDirectory(control.itemUrl)
             control.close()
         }
     }
 
     MenuItem
     {
-        enabled: control.isEncrypted && control.isLocked && !_fscrypt.running
+        enabled: control.isEncrypted && control.isLocked && !control.fscrypt.running
         visible: control.isEncrypted && control.isLocked
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Unlock directory")
@@ -294,8 +288,10 @@ Maui.ContextualMenu
             Maui.PasswordField
             {
                 id: _unlockPassphrase
-                enabled: !_fscrypt.running
+                enabled: !control.fscrypt.running
                 Layout.fillWidth: true
+                echoMode: TextInput.Password
+                passwordMaskDelay: 0
                 Maui.Controls.title: i18n("Passphrase")
                 onTextChanged: _unlockDialog.updateButtons()
                 onAccepted: _unlockDialog.submit()
@@ -308,7 +304,7 @@ Maui.ContextualMenu
                 visible: _unlockDialog.errorMessage.length > 0
                 text: _unlockDialog.errorMessage
                 color: Maui.Theme.negativeBackgroundColor
-                label.horizontalAlignment: Text.AlignHCenter
+                label.horizontalAlignment: Text.AlignLeft
                 label.wrapMode: Text.Wrap
             }
 
@@ -330,19 +326,22 @@ Maui.ContextualMenu
                 }
 
                 errorMessage = ""
-                _fscrypt.unlockDirectory(directory, _unlockPassphrase.text)
+                control.fscrypt.unlockDirectory(directory, _unlockPassphrase.text)
+                _unlockPassphrase.clear()
                 updateButtons()
             }
 
             onRejected:
             {
-                if (!_fscrypt.running)
-                    close()
+                _unlockPassphrase.clear()
+                if (control.fscrypt.running)
+                    control.fscrypt.cancel()
+                close()
             }
 
             Connections
             {
-                target: _fscrypt
+                target: control.fscrypt
 
                 function onRunningChanged()
                 {
@@ -356,10 +355,8 @@ Maui.ContextualMenu
 
                     if (success)
                     {
-                        _fscrypt.invalidateStatus(_unlockDialog.directory)
-                        currentBrowser.currentFMList.refresh()
+                        _browser.currentFMList.refresh()
                         notify("emblem-unlocked", i18n("Encryption"), i18n("Directory unlocked."))
-                        control.encryptionChanged(_unlockDialog.directory)
                         _unlockDialog.close()
                     }
                     else
@@ -374,11 +371,11 @@ Maui.ContextualMenu
             {
                 const applyButton = standardButton(Dialog.Apply)
                 if (applyButton)
-                    applyButton.enabled = _unlockPassphrase.text.length > 0 && !_fscrypt.running
+                    applyButton.enabled = _unlockPassphrase.text.length > 0 && !control.fscrypt.running
 
                 const cancelButton = standardButton(Dialog.Cancel)
                 if (cancelButton)
-                    cancelButton.enabled = !_fscrypt.running
+                    cancelButton.enabled = true
             }
 
             onClosed:
@@ -392,7 +389,7 @@ Maui.ContextualMenu
 
     Connections
     {
-        target: _fscrypt
+        target: control.fscrypt
 
         function onStatusChanged(directory, status)
         {
@@ -408,13 +405,12 @@ Maui.ContextualMenu
             control.actionInProgress = false
             if (success)
             {
-                _fscrypt.invalidateStatus(control.itemUrl)
-                currentBrowser.currentFMList.refresh()
+                _browser.currentFMList.refresh()
                 notify("emblem-locked", i18n("Encryption"), i18n("Directory locked."))
-                control.encryptionChanged(control.itemUrl)
             }
             else
             {
+                control.fscrypt.invalidateStatus(control.itemUrl)
                 notify("dialog-error", i18n("Encryption"), message)
             }
         }
@@ -445,9 +441,9 @@ Maui.ContextualMenu
             control.index = index
             control.isDir = item.isdir == true || item.isdir == "true"
             control.isExec = item.executable == true || item.executable == "true"
-            control.encryptionStatus = control.isDir ? _fscrypt.cachedStatus(control.itemUrl) : "unknown"
+            control.encryptionStatus = control.isDir ? control.fscrypt.cachedStatus(control.itemUrl) : "unknown"
             if (control.isDir)
-                _fscrypt.requestStatus(control.itemUrl)
+                control.fscrypt.requestStatus(control.itemUrl)
             control.show()
         }
     }
