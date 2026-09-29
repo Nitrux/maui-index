@@ -461,6 +461,7 @@ Maui.ApplicationWindow
 
         PreviewerDialog
         {
+            fscrypt: root.currentSplit ? root.currentSplit.fscrypt : null
             onClosed:
             {
                 root.restoreBrowserFocus()

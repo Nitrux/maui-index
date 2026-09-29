@@ -25,10 +25,6 @@ Maui.Page
                                               && _selectionBar.uris.length === 1
                                               && _selectionBar.uris[0] ? _selectionBar.uris[0] : ""
     property string selectedEncryptionStatus: "unknown"
-    readonly property bool selectedDirectoryIsEncrypted: selectedEncryptionStatus === "encrypted"
-                                                         || selectedEncryptionStatus === "encrypted_locked"
-                                                         || selectedEncryptionStatus === "encrypted_unlocked"
-
     onSelectedDirectoryChanged: updateSelectedEncryptionStatus()
     onCurrentSplitChanged: updateSelectedEncryptionStatus()
 
@@ -149,9 +145,11 @@ Maui.Page
                      && !Maui.Handy.isMobile
                      && selectedDirectory.toString().length > 0
                      && FB.FM.isDir(selectedDirectory)
-                     && !control.selectedDirectoryIsEncrypted
                      && !!control.currentSplit
                      && !!control.currentSplit.fscrypt
+                     && (control.selectedEncryptionStatus === "unencrypted"
+                         || (control.selectedEncryptionStatus === "unknown"
+                             && control.currentSplit.fscrypt.requiresSetup(selectedDirectory)))
                      && !control.currentSplit.fscrypt.running
             onTriggered:
             {

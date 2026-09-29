@@ -14,6 +14,8 @@ Item
     implicitHeight: previewLayout.implicitHeight
     property url currentUrl: ""
     property bool compact: false
+    property FB.Fscrypt fscrypt: null
+    property string encryptionStatus: "unknown"
 
     ListModel { id: infoModel }
     readonly property string title : String(iteminfo.label || "")
@@ -36,6 +38,7 @@ Item
 
         control.isDir = iteminfo.isdir == "true"
         directoryInfo.url = control.isDir ? currentUrl : ""
+        updateEncryptionStatus()
 
         initModel()
 
@@ -46,6 +49,17 @@ Item
     {
         id: directoryInfo
         onSizeChanged: control.updateDirectorySize()
+    }
+
+    Connections
+    {
+        target: control.fscrypt
+
+        function onStatusChanged(directory, status)
+        {
+            if (String(directory) === String(control.currentUrl))
+                control.encryptionStatus = status
+        }
     }
 
     ColumnLayout
@@ -104,6 +118,40 @@ Item
                         label2.wrapMode: Text.WrapAnywhere
                         label2.elide: Text.ElideNone
                     }
+                }
+            }
+        }
+
+        Maui.SectionGroup
+        {
+            Layout.fillWidth: true
+            visible: !control.compact && control.isDir
+            title: i18n("Encryption")
+            description: i18n("Directory encryption status")
+
+            Flow
+            {
+                Layout.fillWidth: true
+                spacing: Maui.Style.defaultSpacing
+
+                Maui.SectionItem
+                {
+                    flat: false
+                    label1.text: i18n("Encrypted")
+                    label2.text: control.encryptionStatus === "unknown"
+                                 ? i18n("Unknown")
+                                 : (control.encryptionStatus === "unencrypted" ? i18n("No") : i18n("Yes"))
+                }
+
+                Maui.SectionItem
+                {
+                    flat: false
+                    label1.text: i18n("Lock state")
+                    label2.text: control.encryptionStatus === "encrypted_locked"
+                                 ? i18n("Locked")
+                                 : (control.encryptionStatus === "encrypted_unlocked"
+                                    ? i18n("Unlocked")
+                                    : (control.encryptionStatus === "unencrypted" ? i18n("Not applicable") : i18n("Unknown")))
                 }
             }
         }
@@ -200,5 +248,17 @@ Item
     function setData(url)
     {
         control.currentUrl = url
+    }
+
+    function updateEncryptionStatus()
+    {
+        if (!control.isDir || !control.fscrypt || String(control.currentUrl).length === 0)
+        {
+            control.encryptionStatus = "unknown"
+            return
+        }
+
+        control.encryptionStatus = control.fscrypt.cachedStatus(control.currentUrl)
+        control.fscrypt.requestStatus(control.currentUrl)
     }
 }

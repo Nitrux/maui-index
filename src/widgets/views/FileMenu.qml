@@ -81,7 +81,7 @@ Maui.ContextualMenu
 
     MenuItem
     {
-        enabled: !control.isExec && !control.isDir
+        enabled: control.isDir || !control.isExec
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Preview and Info")

@@ -11,6 +11,7 @@ Maui.PopupPage
     id: control
     title: _previewer.title
     readonly property alias previewer : _previewer
+    property FB.Fscrypt fscrypt: null
     hint: 1
     maxWidth: Maui.Style.units.gridUnit * 32
     maxHeight: implicitHeight
@@ -25,6 +26,7 @@ Maui.PopupPage
     FilePreviewer
     {
         id: _previewer
+        fscrypt: control.fscrypt
         Layout.fillWidth: true
         focus: true
         Keys.enabled: true
