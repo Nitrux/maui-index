@@ -426,20 +426,6 @@ Maui.ApplicationWindow
 
     Component
     {
-        id: _fscryptDialogComponent
-
-        FB.FscryptDialog
-        {
-            onClosed:
-            {
-                root.restoreBrowserFocus()
-                destroy()
-            }
-        }
-    }
-
-    Component
-    {
         id: _compressDialogComponent
 
         Arc.NewArchiveDialog
@@ -461,7 +447,6 @@ Maui.ApplicationWindow
 
         PreviewerDialog
         {
-            fscrypt: root.currentSplit ? root.currentSplit.fscrypt : null
             onClosed:
             {
                 root.restoreBrowserFocus()

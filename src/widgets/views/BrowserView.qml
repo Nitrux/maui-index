@@ -21,37 +21,6 @@ Maui.Page
     property alias currentTab : _browserList.currentItem
     property Browser currentSplit: currentTab ? currentTab.currentItem : null
     property alias browserList : _browserList
-    readonly property url selectedDirectory: _selectionBar.count === 1
-                                              && _selectionBar.uris.length === 1
-                                              && _selectionBar.uris[0] ? _selectionBar.uris[0] : ""
-    property string selectedEncryptionStatus: "unknown"
-    onSelectedDirectoryChanged: updateSelectedEncryptionStatus()
-    onCurrentSplitChanged: updateSelectedEncryptionStatus()
-
-    Connections
-    {
-        target: control.currentSplit ? control.currentSplit.fscrypt : null
-
-        function onStatusChanged(directory, status)
-        {
-            if (String(directory) === String(control.selectedDirectory))
-                control.selectedEncryptionStatus = status
-        }
-    }
-
-    function updateSelectedEncryptionStatus()
-    {
-        const manager = currentSplit ? currentSplit.fscrypt : null
-        if (!manager || selectedDirectory.toString().length === 0 || !FB.FM.isDir(selectedDirectory))
-        {
-            selectedEncryptionStatus = "unknown"
-            return
-        }
-
-        selectedEncryptionStatus = manager.cachedStatus(selectedDirectory)
-        manager.requestStatus(selectedDirectory)
-    }
-
     floatingFooter: true
     headBar.visible: false
     background: null
@@ -87,8 +56,6 @@ Maui.Page
                        }
 
         onExitClicked: clear()
-        onItemAdded: control.updateSelectedEncryptionStatus()
-        onItemRemoved: control.updateSelectedEncryptionStatus()
 
         listDelegate: Maui.ListBrowserDelegate
         {
@@ -133,42 +100,6 @@ Maui.Page
             onTriggered:
             {
                var dialog = _compressDialogComponent.createObject(root, ({'urls': selectionBar.uris}))
-                dialog.open()
-            }
-        }
-
-        Action
-        {
-            text: i18n("Encrypt directory")
-            icon.name: "object-locked"
-            enabled: _selectionBar.count === 1
-                     && !Maui.Handy.isMobile
-                     && selectedDirectory.toString().length > 0
-                     && FB.FM.isDir(selectedDirectory)
-                     && !!control.currentSplit
-                     && !!control.currentSplit.fscrypt
-                     && (control.selectedEncryptionStatus === "unencrypted"
-                         || (control.selectedEncryptionStatus === "unknown"
-                             && control.currentSplit.fscrypt.requiresSetup(selectedDirectory)))
-                     && !control.currentSplit.fscrypt.running
-            onTriggered:
-            {
-                if (!enabled)
-                    return
-
-                const manager = control.currentSplit.fscrypt
-                const browser = control.currentSplit.browser
-                const directory = selectedDirectory
-                const dialog = _fscryptDialogComponent.createObject(root, ({'directory': directory, 'fscrypt': manager}))
-                dialog.operationCompleted.connect((success) =>
-                {
-                    if (success)
-                    {
-                        if (browser.currentFMList)
-                            browser.currentFMList.refresh()
-                        notify("emblem-unlocked", i18n("Encryption"), i18n("Directory encrypted and unlocked."))
-                    }
-                })
                 dialog.open()
             }
         }
