@@ -86,7 +86,7 @@ Maui.SettingsDialog
                 Action
                 {
                     text: i18n("Miller columns")
-                    icon.name: "view-file-columns"
+                    icon.name: "view-split-miller-column"
                     checked: appSettings.viewType === FB.FMList.MILLER_VIEW
                     checkable: true
                     enabled: FB.FMList.MILLER_VIEW !== undefined

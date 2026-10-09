@@ -39,6 +39,14 @@ Maui.ContextualMenu
       */
     property bool isExec : false
 
+    property var pendingAction: null
+
+    function runAfterClose(action)
+    {
+        control.pendingAction = action
+        control.close()
+    }
+
     /**
       *
       */
@@ -170,7 +178,7 @@ Maui.ContextualMenu
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Open in New Tab")
         icon.name: "tab-new"
-        onTriggered: root.openTab(control.item.path)
+        onTriggered: control.runAfterClose(() => root.openTab(control.item.path))
     }
 
     MenuItem
@@ -180,7 +188,7 @@ Maui.ContextualMenu
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Open in New Window")
         icon.name: "window-new"
-        onTriggered: inx.openNewWindow(control.item.path)
+        onTriggered: control.runAfterClose(() => inx.openNewWindow(control.item.path))
     }
 
     MenuItem
@@ -190,7 +198,7 @@ Maui.ContextualMenu
         height: visible ? implicitHeight : -control.spacing
         text: i18n("Open in Split View")
         icon.name: "view-split-left-right"
-        onTriggered: root.currentTab.split(control.item.path, Qt.Horizontal)
+        onTriggered: control.runAfterClose(() => root.currentTab.split(control.item.path, Qt.Horizontal))
     }
 
     MenuItem
@@ -237,7 +245,11 @@ Maui.ContextualMenu
 
     onClosed:
     {
+        const action = control.pendingAction
+        control.pendingAction = null
         control.index = -1
+        if(action)
+            Qt.callLater(action)
     }
 
     function showFor(index)

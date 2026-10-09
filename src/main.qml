@@ -945,6 +945,13 @@ Maui.ApplicationWindow
 
                             MenuItem
                             {
+                                text: i18n("Edit Path")
+                                icon.name: "document-edit"
+                                onTriggered: _pathBar.showEntryBar()
+                            }
+
+                            MenuItem
+                            {
                                 text: i18n("Bookmark")
                                 icon.name: "bookmark-new"
                                 onTriggered: currentBrowser.bookmarkFolder([_pathBarmenu.path])
