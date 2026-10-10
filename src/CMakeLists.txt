@@ -20,7 +20,7 @@ set(index_SRCS
     models/storagemodel.cpp
     data/data.qrc)
 
-qt_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/index.h org.kde.Index.xml)
+qt_generate_dbus_interface(${CMAKE_CURRENT_SOURCE_DIR}/index_dbus.h org.kde.Index.xml)
 qt_add_dbus_adaptor(index_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Index.xml index.h Index)
 qt_add_dbus_interface(index_dbus_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Index.xml indexinterface)
 

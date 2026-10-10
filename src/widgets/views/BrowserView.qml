@@ -162,7 +162,7 @@ Maui.Page
             }
 
             autoExclusive: true
-            width: tabView.mobile ? ListView.view.width : Math.max(160, Math.min(260, implicitWidth))
+            width: tabView.mobile ? tabView.width : Math.max(160, Math.min(260, implicitWidth))
             checked: mindex === tabView.currentIndex
             text: tabInfo.title || ""
             icon.name: tabInfo.iconName || ""
