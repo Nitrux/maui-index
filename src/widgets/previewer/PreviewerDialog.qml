@@ -20,7 +20,15 @@ Maui.PopupPage
     page.footerMargins: Maui.Style.defaultPadding
     page.floatingHeader: true
 
-    onOpened: _previewer.forceActiveFocus()
+    onOpened:
+    {
+        _previewer.forceActiveFocus()
+        Qt.callLater(() =>
+        {
+            flickable.cancelFlick()
+            flickable.contentY = 0
+        })
+    }
 
     FilePreviewer
     {

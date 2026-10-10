@@ -53,13 +53,14 @@ Item
         id: previewLayout
         anchors.fill: parent
 
-        spacing: Maui.Style.defaultSpacing
+        spacing: Maui.Style.space.medium
 
         Loader
         {
             id: previewLoader
             Layout.fillWidth: true
             Layout.preferredHeight: Maui.Style.units.gridUnit * (control.compact ? 18 : 24)
+            clip: true
             Layout.topMargin: control.isDir ? Maui.Style.space.large : 0
             asynchronous: false
         }
@@ -76,33 +77,54 @@ Item
             onTagsEdited: (tags) => list.updateToUrls(tags)
         }
 
-        Maui.SectionGroup
+        Rectangle
         {
+            id: detailsCard
             Layout.fillWidth: true
             visible: !control.compact
             Layout.topMargin: Maui.Style.space.medium
-            title: i18n("Details")
-            description: i18n("File information")
+            color: Maui.Theme.alternateBackgroundColor
+            radius: Maui.Style.radiusV
+            border.color: Maui.Theme.backgroundColor
+            border.width: 1
+            implicitHeight: detailsLayout.implicitHeight + Maui.Style.contentMargins * 2
 
-            Flow
+            ColumnLayout
             {
-                Layout.fillWidth: true
-                spacing: Maui.Style.defaultSpacing
+                id: detailsLayout
+                anchors.fill: parent
+                anchors.margins: Maui.Style.contentMargins
+                spacing: Maui.Style.space.small
 
-                Repeater
+                Maui.SectionHeader
                 {
-                    model: infoModel
-                    delegate: Maui.SectionItem
+                    Layout.fillWidth: true
+                    text1: i18n("Details")
+                    text2: i18n("File information")
+                    label2.wrapMode: Text.Wrap
+                }
+
+                Flow
+                {
+                    Layout.fillWidth: true
+                    spacing: Maui.Style.space.small
+
+                    Repeater
                     {
-                        width: model.key === "Path" || model.key === "Symbolic Link"
-                               ? parent.width
-                               : Math.min(implicitWidth, parent.width / 2)
-                        visible: model.value && String(model.value).length > 0
-                        flat: false
-                        label1.text: model.key
-                        label2.text: model.value
-                        label2.wrapMode: Text.WrapAnywhere
-                        label2.elide: Text.ElideNone
+                        model: infoModel
+                        delegate: Maui.FlexSectionItem
+                        {
+                            Layout.fillWidth: true
+                            width: model.key === "Path" || model.key === "Symbolic Link"
+                                   ? parent.width
+                                   : Math.min(implicitWidth, parent.width / 2)
+                            visible: model.value && String(model.value).length > 0
+                            flat: true
+                            label1.text: model.key
+                            label2.text: model.value
+                            label2.wrapMode: Text.Wrap
+                            label2.elide: Text.ElideNone
+                        }
                     }
                 }
             }

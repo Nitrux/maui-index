@@ -101,6 +101,20 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
+            visible: Maui.Handy.isLinux
+            label1.text: i18n("Move deleted items to Trash")
+            label2.text: i18n("Use the Trash action instead of permanently deleting items.")
+
+            Switch
+            {
+                checkable: true
+                checked: settings.deleteToTrash
+                onToggled: settings.deleteToTrash = checked
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
             wide: true
             label1.text: i18n("Terminal Executable")
             label2.text: i18n("Executable used for the external 'Open Terminal Here' action.")

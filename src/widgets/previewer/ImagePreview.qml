@@ -13,6 +13,7 @@ Loader
         id: _animatedImgComponent
         Maui.AnimatedImageViewer
         {
+            clip: true
             source: currentUrl
         }
     }
@@ -22,6 +23,7 @@ Loader
         id: _imgComponent
         Maui.ImageViewer
         {
+            clip: true
             readonly property bool needsThumbnailDecoder: String(iteminfo.mime || "") === "image/webp"
 
             source: needsThumbnailDecoder ? (String(iteminfo.thumbnail || "") || currentUrl) : currentUrl

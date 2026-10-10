@@ -37,162 +37,192 @@ ColumnLayout
         user: Index.Permission.OTHER
     }
 
-    Maui.SectionGroup
+    Rectangle
     {
+        id: permissionsCard
         Layout.fillWidth: true
-        title: i18n("Permissions")
-        description: i18n("Set file permissions to access this file")
+        color: Maui.Theme.alternateBackgroundColor
+        radius: Maui.Style.radiusV
+        border.color: Maui.Theme.backgroundColor
+        border.width: 1
+        implicitHeight: permissionsLayout.implicitHeight + Maui.Style.contentMargins * 2
 
-        Flow
+        ColumnLayout
         {
-            Layout.fillWidth: true
-spacing: Maui.Style.defaultSpacing
-        Maui.SectionItem
-        {
-            label1.text: i18n("Owner")
-        flat: false
-            Maui.ToolActions
+            id: permissionsLayout
+            anchors.fill: parent
+            anchors.margins: Maui.Style.contentMargins
+            spacing: Maui.Style.space.small
+
+            Maui.SectionHeader
             {
                 Layout.fillWidth: true
-                autoExclusive: false
-                checkable: false
-
-                Action
-                {
-                    text: i18n("Read")
-                    checked: _ownerPermissions.read
-                    onTriggered: _ownerPermissions.read = !_ownerPermissions.read
-                }
-
-                Action
-                {
-                    text: i18n("Write")
-                    checked: _ownerPermissions.write
-
-                }
-
-                Action
-                {
-                    text: i18n("Execute")
-                    checked: _ownerPermissions.execute
-                }
+                text1: i18n("Permissions")
+                text2: i18n("Set file permissions to access this file")
+                label2.wrapMode: Text.Wrap
             }
-        }
 
-        Maui.SectionItem
-        {
-            label1.text: i18n("Group")
-            flat: false
-            Maui.ToolActions
+            Flow
             {
                 Layout.fillWidth: true
-                autoExclusive: false
-                checkable: false
-                //                checkable: true
+                spacing: Maui.Style.space.small
 
-                Action
+                Maui.FlexSectionItem
                 {
-                    text: i18n("Read")
-                    checked: _groupPermissions.read
+                    Layout.fillWidth: true
+                    width: parent.width
+                    flat: true
+                    label1.text: i18n("Owner")
+                    label2.wrapMode: Text.Wrap
 
+                    Maui.ToolActions
+                    {
+                        Layout.fillWidth: true
+                        autoExclusive: false
+                        checkable: false
+
+                        Action
+                        {
+                            text: i18n("Read")
+                            checked: _ownerPermissions.read
+                            onTriggered: _ownerPermissions.read = !_ownerPermissions.read
+                        }
+
+                        Action
+                        {
+                            text: i18n("Write")
+                            checked: _ownerPermissions.write
+                        }
+
+                        Action
+                        {
+                            text: i18n("Execute")
+                            checked: _ownerPermissions.execute
+                        }
+                    }
                 }
 
-                Action
+                Maui.FlexSectionItem
                 {
-                    text: i18n("Write")
-                    checked: _groupPermissions.write
+                    Layout.fillWidth: true
+                    width: parent.width
+                    flat: true
+                    label1.text: i18n("Group")
+                    label2.wrapMode: Text.Wrap
 
+                    Maui.ToolActions
+                    {
+                        Layout.fillWidth: true
+                        autoExclusive: false
+                        checkable: false
 
+                        Action
+                        {
+                            text: i18n("Read")
+                            checked: _groupPermissions.read
+                        }
+
+                        Action
+                        {
+                            text: i18n("Write")
+                            checked: _groupPermissions.write
+                        }
+
+                        Action
+                        {
+                            text: i18n("Execute")
+                            checked: _groupPermissions.execute
+                        }
+                    }
                 }
 
-                Action
+                Maui.FlexSectionItem
                 {
-                    text: i18n("Execute")
-                    checked: _groupPermissions.execute
+                    Layout.fillWidth: true
+                    width: parent.width
+                    flat: true
+                    label1.text: i18n("Everyone")
+                    label2.wrapMode: Text.Wrap
+
+                    Maui.ToolActions
+                    {
+                        Layout.fillWidth: true
+                        autoExclusive: false
+                        checkable: false
+
+                        Action
+                        {
+                            text: i18n("Read")
+                            checked: _otherPermissions.read
+                        }
+
+                        Action
+                        {
+                            text: i18n("Write")
+                            checked: _otherPermissions.read
+                        }
+
+                        Action
+                        {
+                            text: i18n("Execute")
+                            checked: _otherPermissions.execute
+                        }
+                    }
                 }
             }
-        }
-
-        Maui.SectionItem
-        {
-            label1.text: i18n("Everyone")
-            flat: false
-            Maui.ToolActions
-            {
-                Layout.fillWidth: true
-                autoExclusive: false
-                checkable: false
-
-                Action
-                {
-                    text: i18n("Read")
-                    checked: _otherPermissions.read
-                }
-
-                Action
-                {
-                    text: i18n("Write")
-                    checked: _otherPermissions.read
-                }
-
-                Action
-                {
-                    text: i18n("Execute")
-                    checked: _otherPermissions.execute
-
-                }
-            }
-        }
         }
     }
 
-    Maui.SectionGroup
+    Rectangle
     {
+        id: ownershipCard
         Layout.fillWidth: true
+        color: Maui.Theme.alternateBackgroundColor
+        radius: Maui.Style.radiusV
+        border.color: Maui.Theme.backgroundColor
+        border.width: 1
+        implicitHeight: ownershipLayout.implicitHeight + Maui.Style.contentMargins * 2
 
-        title: i18n("Ownership")
-        description: i18n("Set file permissions to access this file")
-
-        Flow
+        ColumnLayout
         {
-            Layout.fillWidth: true
-            spacing: Maui.Style.defaultSpacing
+            id: ownershipLayout
+            anchors.fill: parent
+            anchors.margins: Maui.Style.contentMargins
+            spacing: Maui.Style.space.small
 
-        Maui.SectionItem
-        {
-            label1.text: i18n("Owner")
-            label2.text: _permissions.owner
-            flat: false
-        }
+            Maui.SectionHeader
+            {
+                Layout.fillWidth: true
+                text1: i18n("Ownership")
+                text2: i18n("Set file ownership.")
+                label2.wrapMode: Text.Wrap
+            }
 
-        Maui.SectionItem
-        {
-            label1.text: i18n("Group")
-            label2.text: _permissions.group
-            flat: false
+            Flow
+            {
+                Layout.fillWidth: true
+                spacing: Maui.Style.space.small
 
-        }
-        // Maui.SectionItem
-        // {
-        //     label1.text: i18n("Users")
-        //     flat: false
-        //
-        //     ComboBox
-        //     {
-        //         model: _permissions.users
-        //     }
-        // }
-        //
-        // Maui.SectionItem
-        // {
-        //     label1.text: i18n("Groups")
-        //     flat: false
-        //
-        //     ComboBox
-        //     {
-        //         model: _permissions.groups
-        //     }
-        // }
+                Maui.FlexSectionItem
+                {
+                    Layout.fillWidth: true
+                    width: parent.width
+                    flat: true
+                    label1.text: i18n("Owner")
+                    label2.text: _permissions.owner
+                    label2.wrapMode: Text.Wrap
+                }
+
+                Maui.FlexSectionItem
+                {
+                    Layout.fillWidth: true
+                    width: parent.width
+                    flat: true
+                    label1.text: i18n("Group")
+                    label2.text: _permissions.group
+                    label2.wrapMode: Text.Wrap
+                }
+            }
         }
     }
 }

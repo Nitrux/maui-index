@@ -167,6 +167,7 @@ Maui.ApplicationWindow
         property bool previewFiles : Maui.Handy.isMobile
         property bool restoreSession:  false
         property bool overviewStart : false
+        property bool deleteToTrash: true
 
         property int viewType : FB.FMList.LIST_VIEW
         property int listSize : 0 // s-m-l-x-xl

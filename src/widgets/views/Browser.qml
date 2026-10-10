@@ -260,6 +260,7 @@ Maui.SplitViewItem
                             }
 
             selectionMode: root.selectionMode
+            deleteToTrash: appSettings.deleteToTrash
             onSelectionModeChanged:
             {
                 root.selectionMode = selectionMode
