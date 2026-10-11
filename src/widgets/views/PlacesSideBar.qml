@@ -242,7 +242,6 @@ Loader
                                 if (_menu.needsSetup)
                                 {
                                     placesList.requestSetup(_menu.bookmarkIndex)
-                                    notify("media-mount", i18n("Storage"), i18n("Mounting device..."))
                                 } else
                                 {
                                     placesList.requestTeardown(_menu.bookmarkIndex)
@@ -427,7 +426,6 @@ Loader
                         if (placesList.setupNeeded(index))
                         {
                             placesList.requestSetup(index)
-                            notify(model.icon, model.label, i18n("Mounting device..."))
                         } else
                         {
                             placesList.requestTeardown(index)
@@ -441,7 +439,6 @@ Loader
                                if( placesList.isDevice(index) && placesList.setupNeeded(index))
                                {
                                    placesList.requestSetup(index)
-                                   notify(model.icon, model.label, i18n("Mounting device..."))
                                    return
                                }
 
