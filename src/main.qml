@@ -810,6 +810,13 @@ Maui.ApplicationWindow
                     }
                 },
 
+                ToolSeparator
+                {
+                    visible: !_pageLayout.split && _searchToggleLoader.active && _mainMenuLoader.active
+                    topPadding: 10
+                    bottomPadding: 10
+                },
+
                 Loader
                 {
                     id: _mainMenuLoader
