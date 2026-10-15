@@ -1,7 +1,10 @@
 #include "dirinfo.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <KIO/DirectorySizeJob>
 #include <KIO/FileSystemFreeSpaceJob>
+#pragma GCC diagnostic pop
 
 #include <MauiKit4/FileBrowsing/fmstatic.h>
 

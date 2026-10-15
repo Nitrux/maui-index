@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QStringList>
+#include <QVariant>
 
 class OrgKdeIndexActionsInterface;
 

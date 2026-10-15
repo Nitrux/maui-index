@@ -18,8 +18,9 @@
 
 #include <KAboutData>
 #include <KLocalizedString>
+#include <KLocalizedQmlContext>
 
-#include "../index_version.h"
+#include "index_version.h"
 
 #include "controllers/filepreviewer.h"
 #include "controllers/dirinfo.h"
@@ -126,7 +127,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
         }, Qt::QueuedConnection);
 
-    engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
+    engine.rootContext()->setContextObject(new KLocalizedQmlContext(&engine));
 
     engine.rootContext()->setContextProperty("initPaths", paths);
 
