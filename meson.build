@@ -52,4 +52,22 @@ qt_sources = qt6.preprocess(qresources: ['src/data/data.qrc', 'src/index_assets.
 executable('index', index_sources + [dbus_adaptor, dbus_interface] + qt_sources + [index_version], dependencies: [qt, kf6_core, kf6_i18n, kf6_archive, kf6_kio, mauikit, archiver, documents, filebrowsing, terminal, texteditor], include_directories: index_includes, cpp_args: cpp_args, install: true)
 install_data('src/org.maui.index.desktop', install_dir: get_option('datadir') / 'applications')
 install_data('org.maui.index.appdata.xml', install_dir: get_option('datadir') / 'metainfo')
+install_data('src/assets/index.svg', install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps')
 install_data('src/data/org.kde.index.notifyrc', install_dir: get_option('datadir') / 'knotifications6')
+
+translation_domain = 'index-fm'
+msgfmt = find_program('msgfmt')
+po_files = run_command('find', 'po', '-mindepth', '2', '-maxdepth', '2', '-type', 'f', '-name', translation_domain + '.po', check: true).stdout().strip().split('\n')
+foreach po_file : po_files
+    if po_file != ''
+        locale = po_file.split('/')[1]
+        custom_target(
+            'translation-' + locale,
+            input: po_file,
+            output: locale / (translation_domain + '.mo'),
+            command: [msgfmt, '--check', '-o', '@OUTPUT@', '@INPUT@'],
+            install: true,
+            install_dir: get_option('localedir') / locale / 'LC_MESSAGES',
+            install_tag: 'i18n')
+    endif
+endforeach
