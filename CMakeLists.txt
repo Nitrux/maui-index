@@ -17,6 +17,8 @@ set(CMAKE_AUTORCC ON)
 
 project(index VERSION ${INDEX_VERSION})
 
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
 
@@ -58,6 +60,8 @@ include(FeatureSummary)
 
 find_package(Qt6 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core DBus Multimedia Qml Quick QuickControls2 Sql Widgets)
 find_package(KF6 ${REQUIRED_KF_VERSION} REQUIRED COMPONENTS I18n CoreAddons Archive KIO)
+set(QT_NO_PRIVATE_MODULE_WARNING ON CACHE BOOL
+    "MauiKit uses Qt's private WaylandClient API" FORCE)
 find_package(MauiKit4 ${REQUIRED_MAUIKIT_VERSION} REQUIRED COMPONENTS FileBrowsing Archiver Documents Terminal TextEditor)
 
 ecm_find_qmlmodule(org.mauikit.terminal)

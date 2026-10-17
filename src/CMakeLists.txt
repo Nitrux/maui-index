@@ -95,7 +95,8 @@ target_link_libraries(${PROJECT_NAME}
     Qt6::Sql
     KF6::Archive
     KF6::CoreAddons
-    KF6::I18n)
+    KF6::I18n
+    KF6::I18nQml)
 
 #TODO: port to ecm_install_icons()
 install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
