@@ -1009,7 +1009,7 @@ Maui.ApplicationWindow
 
                             MenuItem
                             {
-                                text: i18n("Open in New Tab")
+                                text: i18n("Open in new tab")
                                 icon.name: "tab-new"
                                 onTriggered: openTab(_pathBarmenu.path)
                             }

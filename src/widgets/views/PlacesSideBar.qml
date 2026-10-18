@@ -213,14 +213,14 @@ Loader
 
                         property Action openInNewTabAction: Action
                         {
-                            text: i18n("Open in New Tab")
+                            text: i18n("Open in new tab")
                             icon.name: "tab-new"
                             onTriggered: openTab(_menu.path)
                         }
 
                         property Action openInNewWindowAction: Action
                         {
-                            text: i18n("Open in New Window")
+                            text: i18n("Open in new window")
                             icon.name: "window-new"
                             onTriggered: inx.openNewWindow(_menu.path)
                         }

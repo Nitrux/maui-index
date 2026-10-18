@@ -159,7 +159,7 @@ Maui.SettingsDialog
 
         Maui.FlexSectionItem
         {
-            label1.text: i18n("Select All")
+            label1.text: i18n("Select all")
 
             Maui.ToolActions
             {

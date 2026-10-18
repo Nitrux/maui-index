@@ -131,7 +131,7 @@ Maui.SplitViewItem
 
         MenuItem
         {
-            text: i18n("Select All")
+            text: i18n("Select all")
             icon.name: "edit-select-all"
             onTriggered: _browser.selectAll()
         }
