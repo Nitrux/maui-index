@@ -107,9 +107,9 @@ msgid "Paste"
 msgstr ""
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
-#, kde-format
-msgid "Select All"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Select all"
+msgstr "Roghnaigh gach rud"
 
 #: src/main.qml:490
 #, kde-format
@@ -173,9 +173,9 @@ msgstr ""
 
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
-#, kde-format
-msgid "Open in New Tab"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Open in new tab"
+msgstr "Oscail i gcluaisín nua"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
 #: src/widgets/views/PlacesSideBar.qml:98
@@ -349,14 +349,14 @@ msgid "Select"
 msgstr ""
 
 #: src/widgets/views/FileMenu.qml:120 src/widgets/views/HomeView.qml:41
-#, kde-format
+#, fuzzy, kde-format
 msgid "Open with"
-msgstr ""
+msgstr "Oscail le"
 
 #: src/widgets/views/FileMenu.qml:132
-#, kde-format
-msgid "Preview and Info"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Preview and info"
+msgstr "Réamhamharc agus eolas"
 
 #: src/widgets/views/FileMenu.qml:152
 #, kde-format
@@ -379,9 +379,9 @@ msgid "Fav"
 msgstr ""
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
-#, kde-format
-msgid "Open in New Window"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Open in new window"
+msgstr "Oscail i bhfuinneog nua"
 
 #: src/widgets/views/FileMenu.qml:253
 #, kde-format

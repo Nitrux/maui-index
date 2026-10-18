@@ -113,7 +113,7 @@ msgstr "ਚੇਪੋ"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "ਸਭ ਚੁਣੋ"
 
 #: src/main.qml:490
@@ -183,7 +183,7 @@ msgstr "ਬੁੱਕਮਾਰਕ"
 #: src/widgets/views/PlacesSideBar.qml:83
 #, fuzzy, kde-format
 #| msgid "Open in new tab"
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "ਨਵੀਂ ਟੈਬ ਵਿੱਚ ਖੋਲ੍ਹੋ"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -368,7 +368,7 @@ msgstr "ਇਸ ਨਾਲ ਖੋਲ੍ਹੋ"
 #: src/widgets/views/FileMenu.qml:132
 #, fuzzy, kde-format
 #| msgid "Preview and info"
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "ਝਲਕ ਤੇ ਜਾਣਕਾਰੀ"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -394,7 +394,7 @@ msgstr "ਪਸੰਦ"
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, fuzzy, kde-format
 #| msgid "Open in new tab"
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "ਨਵੀਂ ਟੈਬ ਵਿੱਚ ਖੋਲ੍ਹੋ"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -872,9 +872,6 @@ msgstr ""
 
 #~ msgid "New"
 #~ msgstr "ਨਵਾਂ"
-
-#~ msgid "Select all"
-#~ msgstr "ਸਭ ਚੁਣੋ"
 
 #~ msgid "Go to"
 #~ msgstr "ਜਾਓ"

@@ -110,7 +110,7 @@ msgstr "Επικόλληση"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Επιλογή όλων"
 
 #: src/main.qml:490
@@ -176,7 +176,7 @@ msgstr "Σελιδοδείκτης"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Άνοιγμα σε νέα καρτέλα"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -361,7 +361,7 @@ msgstr "Άνοιγμα με"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Προεπισκόπηση και πληροφορίες"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -386,7 +386,7 @@ msgstr "Προτιμ"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Άνοιγμα σε νέο παράθυρο"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -902,9 +902,6 @@ msgstr ""
 
 #~ msgid "New"
 #~ msgstr "Νέο"
-
-#~ msgid "Select all"
-#~ msgstr "Επιλογή όλων"
 
 #~ msgid "Go to"
 #~ msgstr "Μετάβαση"

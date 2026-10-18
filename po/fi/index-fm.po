@@ -107,7 +107,7 @@ msgstr "Liitä"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Valitse kaikki"
 
 #: src/main.qml:490
@@ -173,7 +173,7 @@ msgstr "Kirjanmerkki"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Avaa uuteen välilehteen"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -356,7 +356,7 @@ msgstr "Avaa ohjelmalla"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Esikatselu ja tiedot"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -381,7 +381,7 @@ msgstr "Suosikki"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Avaa uuteen ikkunaan"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -884,9 +884,6 @@ msgstr "Tahdista"
 
 #~ msgid "New"
 #~ msgstr "Uusi"
-
-#~ msgid "Select all"
-#~ msgstr "Valitse kaikki"
 
 #~ msgid "Go to"
 #~ msgstr "Siirry"

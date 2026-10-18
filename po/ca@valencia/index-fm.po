@@ -110,7 +110,7 @@ msgstr "Apega"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Selecciona-ho tot"
 
 #: src/main.qml:490
@@ -176,7 +176,7 @@ msgstr "Adreça d'interés"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Obri en una pestanya nova"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -358,7 +358,7 @@ msgstr "Obri amb"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Vista prèvia i informació"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -383,7 +383,7 @@ msgstr "Preferit"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Obri en una finestra nova"
 
 #: src/widgets/views/FileMenu.qml:253

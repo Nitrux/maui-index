@@ -108,7 +108,7 @@ msgstr "Wklej"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Zaznacz wszystko"
 
 #: src/main.qml:490
@@ -174,7 +174,7 @@ msgstr "Zakładka"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Otwórz w nowej karcie"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -356,7 +356,7 @@ msgstr "Otwórz w"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Podgląd i szczegóły"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -381,7 +381,7 @@ msgstr "Ulubione"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Otwórz w nowym oknie"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -889,9 +889,6 @@ msgstr "Zsynchronizuj"
 
 #~ msgid "New"
 #~ msgstr "Nowy"
-
-#~ msgid "Select all"
-#~ msgstr "Zaznacz wszystko"
 
 #~ msgid "Go to"
 #~ msgstr "Przejdź do"

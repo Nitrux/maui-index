@@ -115,9 +115,9 @@ msgid "Paste"
 msgstr ""
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
-#, kde-format
-msgid "Select All"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Select all"
+msgstr "Összes kijelölése"
 
 #: src/main.qml:490
 #, fuzzy, kde-format
@@ -186,7 +186,7 @@ msgstr ""
 #: src/widgets/views/PlacesSideBar.qml:83
 #, fuzzy, kde-format
 #| msgid "Open in new tab"
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Megnyitás új lapon"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -370,7 +370,7 @@ msgstr "Megnyitás mással"
 #: src/widgets/views/FileMenu.qml:132
 #, fuzzy, kde-format
 #| msgid "Preview Files"
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Fájlok előnézete"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -396,7 +396,7 @@ msgstr ""
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, fuzzy, kde-format
 #| msgid "Open in new tab"
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Megnyitás új lapon"
 
 #: src/widgets/views/FileMenu.qml:253

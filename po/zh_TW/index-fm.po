@@ -110,7 +110,7 @@ msgstr "貼上"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "全部選取"
 
 #: src/main.qml:490
@@ -176,7 +176,7 @@ msgstr "書籤"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "在新分頁開啟"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -357,7 +357,7 @@ msgstr "開啟方式"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "預覽與資訊"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -382,7 +382,7 @@ msgstr "加到最愛"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "在新分頁開啟"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -864,9 +864,6 @@ msgstr "同步"
 
 #~ msgid "New"
 #~ msgstr "新增"
-
-#~ msgid "Select all"
-#~ msgstr "全部選取"
 
 #~ msgid "Go to"
 #~ msgstr "跳到"

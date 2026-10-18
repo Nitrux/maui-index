@@ -110,7 +110,7 @@ msgstr "Itsatsi"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Hautatu denak"
 
 #: src/main.qml:490
@@ -176,7 +176,7 @@ msgstr "Laster-markak"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Ireki fitxa berrian"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -359,7 +359,7 @@ msgstr "Ireki honekin"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Aurreikusi eta informazioa"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -384,7 +384,7 @@ msgstr "Gog"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Ireki leiho berrian"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -895,9 +895,6 @@ msgstr "Sink"
 
 #~ msgid "New"
 #~ msgstr "Berria"
-
-#~ msgid "Select all"
-#~ msgstr "Hautatu dena"
 
 #~ msgid "Go to"
 #~ msgstr "Joan hona"

@@ -107,7 +107,7 @@ msgstr "粘贴"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "全部选择"
 
 #: src/main.qml:490
@@ -172,9 +172,9 @@ msgstr "书签"
 
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
-#, kde-format
-msgid "Open in New Tab"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Open in new tab"
+msgstr "在新标签页中打开"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
 #: src/widgets/views/PlacesSideBar.qml:98
@@ -353,9 +353,9 @@ msgid "Open with"
 msgstr "打开方式"
 
 #: src/widgets/views/FileMenu.qml:132
-#, kde-format
-msgid "Preview and Info"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Preview and info"
+msgstr "预览和信息"
 
 #: src/widgets/views/FileMenu.qml:152
 #, kde-format
@@ -378,9 +378,9 @@ msgid "Fav"
 msgstr "收藏"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
-#, kde-format
-msgid "Open in New Window"
-msgstr ""
+#, fuzzy, kde-format
+msgid "Open in new window"
+msgstr "在新窗口中打开"
 
 #: src/widgets/views/FileMenu.qml:253
 #, kde-format

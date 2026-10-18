@@ -108,7 +108,7 @@ msgstr "Prilepi"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Izberi vse"
 
 #: src/main.qml:490
@@ -174,7 +174,7 @@ msgstr "Zaznamek"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Odpri v novem zavihku"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -357,7 +357,7 @@ msgstr "Odpri z"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Predogled in informacije"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -382,7 +382,7 @@ msgstr "Med priljubljene"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Odpri v novem oknu"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -892,9 +892,6 @@ msgstr "Sinhroniziraj"
 
 #~ msgid "New"
 #~ msgstr "Novo"
-
-#~ msgid "Select all"
-#~ msgstr "Izberi vse"
 
 #~ msgid "Go to"
 #~ msgstr "Pojdi na"

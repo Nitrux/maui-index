@@ -107,7 +107,7 @@ msgstr "Yapıştır"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Tümünü Seç"
 
 #: src/main.qml:490
@@ -173,7 +173,7 @@ msgstr "Yer imi"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Yeni Sekmede Aç"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -355,7 +355,7 @@ msgstr "Şununla aç"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Önizleme ve Bilgi"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -380,7 +380,7 @@ msgstr "Sık kullanılanlara ekle"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Yeni Pencerede Aç"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -887,9 +887,6 @@ msgstr "Eşzamanla"
 
 #~ msgid "New"
 #~ msgstr "Yeni"
-
-#~ msgid "Select all"
-#~ msgstr "Tümünü seç"
 
 #~ msgid "Go to"
 #~ msgstr "Git"

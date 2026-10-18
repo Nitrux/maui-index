@@ -107,7 +107,7 @@ msgstr "Klistra in"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Markera alla"
 
 #: src/main.qml:490
@@ -173,7 +173,7 @@ msgstr "Bokmärke"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Öppna under ny flik"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -355,7 +355,7 @@ msgstr "Öppna med"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Förhandsgranskning och information"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -380,7 +380,7 @@ msgstr "Favorit"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Öppna i nytt fönster"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -881,9 +881,6 @@ msgstr "Synkronisera"
 
 #~ msgid "New"
 #~ msgstr "Ny"
-
-#~ msgid "Select all"
-#~ msgstr "Markera alla"
 
 #~ msgid "Go to"
 #~ msgstr "Gå till"

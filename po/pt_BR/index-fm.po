@@ -109,7 +109,7 @@ msgstr "Colar"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Selecionar tudo"
 
 #: src/main.qml:490
@@ -175,7 +175,7 @@ msgstr "Favoritos"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "Abrir em nova aba"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -359,7 +359,7 @@ msgstr "Abrir com"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Pré-visualização e informações"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -384,7 +384,7 @@ msgstr "Favoritar"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "Abrir em nova janela"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -895,9 +895,6 @@ msgstr "Sincronizar"
 
 #~ msgid "New"
 #~ msgstr "Novo"
-
-#~ msgid "Select all"
-#~ msgstr "Selecionar tudo"
 
 #~ msgid "Go to"
 #~ msgstr "Ir para"

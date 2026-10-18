@@ -110,7 +110,7 @@ msgstr "Einfügen"
 
 #: src/main.qml:479 src/widgets/views/ShortcutsDialog.qml:163
 #, kde-format
-msgid "Select All"
+msgid "Select all"
 msgstr "Alles auswählen"
 
 #: src/main.qml:490
@@ -176,7 +176,7 @@ msgstr "Lesezeichen"
 #: src/main.qml:686 src/widgets/views/FileMenu.qml:221
 #: src/widgets/views/PlacesSideBar.qml:83
 #, kde-format
-msgid "Open in New Tab"
+msgid "Open in new tab"
 msgstr "In neuem Unterfenster öffnen"
 
 #: src/main.qml:694 src/widgets/views/FileMenu.qml:241
@@ -357,7 +357,7 @@ msgstr "Öffnen mit"
 
 #: src/widgets/views/FileMenu.qml:132
 #, kde-format
-msgid "Preview and Info"
+msgid "Preview and info"
 msgstr "Vorschau und Informationen"
 
 #: src/widgets/views/FileMenu.qml:152
@@ -382,7 +382,7 @@ msgstr "Zu Favoriten hinzufügen"
 
 #: src/widgets/views/FileMenu.qml:231 src/widgets/views/PlacesSideBar.qml:90
 #, kde-format
-msgid "Open in New Window"
+msgid "Open in new window"
 msgstr "In neuem Fenster öffnen"
 
 #: src/widgets/views/FileMenu.qml:253
@@ -871,9 +871,6 @@ msgstr ""
 
 #~ msgid "New"
 #~ msgstr "Neu"
-
-#~ msgid "Select all"
-#~ msgstr "Alle auswählen"
 
 #~ msgid "Go to"
 #~ msgstr "Gehe zu"
