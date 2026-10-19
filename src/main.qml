@@ -48,7 +48,6 @@ Maui.ApplicationWindow
 
     property alias currentTabIndex : _browserView.currentTabIndex
     property bool selectionMode: false
-
     function resolveFooterBar()
     {
         const footerContainerChild = resolveFooterContainerChild()
@@ -518,6 +517,7 @@ Maui.ApplicationWindow
             {
                 root.setSidebarVisible(false)
             }
+
         }
 
         Maui.PageLayout
@@ -532,7 +532,6 @@ Maui.ApplicationWindow
             altHeader: Maui.Handy.isMobile
             Maui.Controls.showCSD: true
 
-            headBar.visible: true
             headBar.forceCenterMiddleContent: true
             headerMargins: Maui.Handy.isMobile ? 0 : Maui.Style.contentMargins
             footerMargins: headerMargins
@@ -1080,6 +1079,7 @@ Maui.ApplicationWindow
 
     Component.onCompleted:
     {
+        console.log("[Index] main loaded", Qt.resolvedUrl("main.qml"), "window=" + width + "x" + height)
         settings.sidebarSections = settings.sidebarSectionsToString(settings.sidebarSections)
 
         if(settings.overviewStart)

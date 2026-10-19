@@ -25,6 +25,8 @@ Maui.Page
     headBar.visible: false
     background: null
 
+    Component.onCompleted: console.log("[Index BrowserView] loaded", Qt.resolvedUrl("BrowserView.qml"), "tabView=" + _browserList, "geometry=" + width + "x" + height)
+
     footer: Maui.SelectionBar
     {
         id: _selectionBar
@@ -119,8 +121,8 @@ Maui.Page
     {
         id: _browserList
         anchors.fill: parent
-        tabBar.margins: settings.floatyUI ? Maui.Style.contentMargins : 0
-        tabBar.topMargin: Maui.Handy.isMobile ? Maui.Style.contentMargins  : 0
+        tabBarMargins: settings.floatyUI ? Maui.Style.contentMargins : 0
+        tabBar.topMargin: 0
         showDefaultMenuEntries: false
         currentIndex : -1
         onNewTabClicked: openTab(currentBrowser ? currentBrowser.currentPath : FB.FM.homePath())
@@ -259,7 +261,6 @@ Maui.Page
                 display: ToolButton.TextOnly
                 font.bold: true
                 font.pointSize: Maui.Style.fontSizes.small
-                onClicked: _browserList.openOverview()
 
                 background: Rectangle
                 {
