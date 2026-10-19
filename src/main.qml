@@ -1079,7 +1079,6 @@ Maui.ApplicationWindow
 
     Component.onCompleted:
     {
-        console.log("[Index] main loaded", Qt.resolvedUrl("main.qml"), "window=" + width + "x" + height)
         settings.sidebarSections = settings.sidebarSectionsToString(settings.sidebarSections)
 
         if(settings.overviewStart)

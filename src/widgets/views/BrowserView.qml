@@ -25,8 +25,6 @@ Maui.Page
     headBar.visible: false
     background: null
 
-    Component.onCompleted: console.log("[Index BrowserView] loaded", Qt.resolvedUrl("BrowserView.qml"), "tabView=" + _browserList, "geometry=" + width + "x" + height)
-
     footer: Maui.SelectionBar
     {
         id: _selectionBar
