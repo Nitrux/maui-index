@@ -365,7 +365,10 @@ Maui.ApplicationWindow
                                  _taggedNotification.dispatch()
                              }
 
-                             settings.lastUsedTag = tags[0]
+                             settings.lastUsedTag = tags.length > 0 ? tags[0] : ""
+
+                             if(root.currentBrowser && root.currentBrowser.currentFMList)
+                                 root.currentBrowser.currentFMList.refresh()
                          }
         }
     }
