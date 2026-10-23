@@ -487,21 +487,27 @@ Maui.ApplicationWindow
         anchors.fill: parent
         sideBar.preferredWidth: Maui.Style.units.gridUnit * 12
         sideBar.minimumWidth: Maui.Style.units.gridUnit * 12
-        Maui.Theme.colorSet: Maui.Theme.View
+        Maui.Theme.colorSet: Maui.Theme.Window
 
         background: null
 
-        sideBar.autoShow: settings.sidebarVisible
+        sideBar.autoShow: true
         sideBar.floats: sideBar.collapsed
         sideBar.autoHide: true
-        sideBarContent: PlacesSideBar
+        sideBarContent: Item
         {
-            id: placesSidebar
-            focus: false
-            focusPolicy: Qt.NoFocus
             anchors.fill: parent
-            anchors.margins: settings.floatyUI ? Maui.Style.contentMargins : 0
+            anchors.margins: Maui.Style.contentMargins
             anchors.rightMargin: 0
+
+            PlacesSideBar
+            {
+                id: placesSidebar
+                focus: false
+                focusPolicy: Qt.NoFocus
+                anchors.fill: parent
+                anchors.rightMargin: 0
+            }
         }
 
         Connections

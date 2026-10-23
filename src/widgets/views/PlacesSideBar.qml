@@ -136,8 +136,8 @@ Loader
         background: Rectangle
         {
             color: Maui.Theme.alternateBackgroundColor
-            radius: settings.floatyUI ? Maui.Style.radiusV : 0
-            border.color: settings.floatyUI ? Maui.Theme.backgroundColor : "transparent"
+            radius: Maui.Style.radiusV
+            border.color: Maui.Theme.backgroundColor
         }
 
         contentItem: Maui.ListBrowser
