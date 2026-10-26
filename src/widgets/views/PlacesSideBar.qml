@@ -318,7 +318,6 @@ Loader
                                 Layout.preferredWidth: 50
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
-                                Layout.columnSpan: modelData.path === "overview:///" ? 2 : 1
 
                                 isCurrentItem: modelData.path === "overview:///" ? _stackView.depth === 2 : (currentBrowser.currentPath === modelData.path && _stackView.depth === 1)
                                 iconSource: resolvedIcon
@@ -478,7 +477,6 @@ Loader
 
     function openPlace(path, mouse)
     {
-
         if(mouse.modifiers & Qt.ControlModifier)
         {
             openTab(path)

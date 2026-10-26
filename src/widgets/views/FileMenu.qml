@@ -1,8 +1,10 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtCore
 
 import org.mauikit.controls as Maui
+import org.mauikit.filebrowsing as FB
 
 import org.mauikit.archiver as Arc
 
@@ -15,6 +17,7 @@ Maui.ContextualMenu
     readonly property bool canBookmark: !control.isExec && control.isDir
     readonly property bool hasDirectoryActions: control.isDir
     readonly property url itemUrl: control.item && control.item.path ? control.item.path : ""
+    readonly property bool canDownload: !control.isDir && ["smb", "sftp", "ftp", "ftps", "dav", "davs", "fish"].indexOf(String(control.itemUrl).split(":")[0]) >= 0
     readonly property bool canExtract: String(control.itemUrl).length > 0 && Arc.StaticArchive.isSupported(control.itemUrl)
     readonly property bool showDirectorySection: canBookmark || hasDirectoryActions
     readonly property var selectedUris: _browser.filterSelection(currentPath, control.item.path)
@@ -74,6 +77,19 @@ Maui.ContextualMenu
         onTriggered:
         {
             openWith(_browser.filterSelection(currentPath, control.item.path))
+        }
+    }
+
+    MenuItem
+    {
+        visible: control.canDownload
+        enabled: visible
+        text: i18n("Download")
+        icon.name: "download"
+        onTriggered:
+        {
+            FB.FM.copy(control.selectedUris, "file://" + StandardPaths.writableLocation(StandardPaths.DownloadLocation))
+            control.close()
         }
     }
 

@@ -10,6 +10,7 @@
 #include <QQmlApplicationEngine>
 
 #include <QFileInfo>
+#include <QDir>
 
 #include <QProcess>
 #include <QStandardPaths>
@@ -324,6 +325,12 @@ QVariantList Index::quickPaths()
                         {FMH::MODEL_KEY::LABEL, i18n("Overview")},
                         {FMH::MODEL_KEY::TYPE, "Quick"},
                         {FMH::MODEL_KEY::COLOR, "green"}};
+
+    appendQuickPlace(QDir(QStandardPaths::writableLocation(QStandardPaths::HomeLocation)).filePath(QStringLiteral("Applications")),
+                     i18n("Applications"),
+                     QStringLiteral("system-run"),
+                     QStringLiteral("orange"),
+                     true);
 
     paths << FMH::MODEL {{FMH::MODEL_KEY::PATH, "tags:///"},
                         {FMH::MODEL_KEY::ICON, "tag"},

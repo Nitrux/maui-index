@@ -29,6 +29,32 @@ Maui.ApplicationWindow
     Maui.Handy.singleClick: Maui.Handy.hasTransientTouchInput
 
     property QtObject tagsDialog : null
+    property var pendingNetworkServer: null
+    property string initialNetworkRefreshBasePath: ""
+    property bool networkAuthenticationErrorNotified: false
+
+    Timer
+    {
+        id: _initialNetworkRefreshTimer
+        interval: 250
+        repeat: false
+        onTriggered:
+        {
+            const list = root.currentBrowser ? root.currentBrowser.currentFMList : null
+            const basePath = root.initialNetworkRefreshBasePath
+            root.initialNetworkRefreshBasePath = ""
+            if (!list || !basePath)
+                return
+
+            let currentPath = String(list.path)
+            while (currentPath.endsWith("/"))
+                currentPath = currentPath.substring(0, currentPath.length - 1)
+            if (currentPath !== basePath && !currentPath.startsWith(basePath + "/"))
+                return
+
+            list.refresh()
+        }
+    }
 
     readonly property alias selectionBar : _browserView.selectionBar
     readonly property alias pathBar: _headBarMiddleLoader.item
@@ -43,7 +69,251 @@ Maui.ApplicationWindow
     {
         id: _fileOperationDialog
         anchorItem: _fileOperationIndicator
+        replaceConflicts: appSettings.replaceConflicts
         onClosed: root.restoreBrowserFocus()
+    }
+
+    Component
+    {
+        id: _networkDialogComponent
+
+        Maui.InfoDialog
+        {
+            id: networkDialog
+            implicitWidth: Math.min(root.width - Maui.Style.contentMargins * 2, Maui.Style.units.gridUnit * 30)
+            title: editServer ? i18n("Edit server") : credentialsOnly ? i18n("Enter server credentials") : i18n("Connect to a server")
+            standardButtons: Dialog.Ok | Dialog.Cancel
+            Component.onCompleted:
+            {
+                standardButton(Dialog.Ok).text = editServer ? i18n("Save") : i18n("Connect")
+                if (initialProtocol.length)
+                    protocolCombo.currentIndex = ["smb", "sftp", "ftp", "dav"].indexOf(initialProtocol)
+                addressField.text = initialAddress
+                usernameField.text = initialUsername
+                rememberPassword = initialRememberPassword
+            }
+
+            property string initialProtocol: ""
+            property string initialAddress: ""
+            property string initialUsername: ""
+            property bool credentialsOnly: false
+            property bool initialRememberPassword: false
+            property int openTarget: 0
+            property bool editServer: false
+            property var editingServer: null
+            property bool rememberPassword: false
+            property string selectedProtocol: ["smb", "sftp", "ftp", "dav"][protocolCombo.currentIndex]
+
+            function connectToServer()
+            {
+                let host = addressField.text.trim()
+                if (!host.length)
+                    return
+
+                const schemeSeparator = host.indexOf("://")
+                if (schemeSeparator >= 0)
+                    host = host.substring(schemeSeparator + 3)
+
+                const credentialsSeparator = host.lastIndexOf("@")
+                if (credentialsSeparator >= 0)
+                    host = host.substring(credentialsSeparator + 1)
+
+                const server = ({protocol: networkDialog.selectedProtocol, address: host, username: usernameField.text.trim()})
+                const password = passwordField.text
+                if (networkDialog.editServer)
+                {
+                    root.updateNetworkServer(networkDialog.editingServer, server)
+                    if (server.username.length > 0 && password.length > 0)
+                        Index.NetworkPasswordManager.prepare(server.protocol, server.address, server.username, password)
+                    if (server.username.length > 0 && networkDialog.rememberPassword && password.length > 0)
+                        Index.NetworkPasswordManager.save(server.protocol, server.address, server.username, password)
+                    else if (server.username.length > 0 && !networkDialog.rememberPassword)
+                        Index.NetworkPasswordManager.remove(server.protocol, server.address, server.username)
+                    networkDialog.close()
+                    return
+                }
+                if (server.username.length > 0)
+                    Index.NetworkPasswordManager.prepare(server.protocol, server.address, server.username, password)
+                if (rememberPassword && server.username.length > 0)
+                    Index.NetworkPasswordManager.save(server.protocol, server.address, server.username, password)
+                if (networkDialog.openTarget === 0)
+                    root.pendingNetworkServer = ({protocol: server.protocol, address: server.address, username: server.username, rememberPassword: rememberPassword, path: server.protocol + "://" + server.address})
+                const url = root.networkServerUrl(server)
+                root.openNetworkUrl(url, networkDialog.openTarget)
+                networkDialog.close()
+            }
+
+            onAccepted: networkDialog.connectToServer()
+            onRejected: networkDialog.close()
+            onClosed: networkDialog.destroy()
+
+            Maui.FlexSectionItem
+            {
+                label1.text: i18n("Protocol")
+                label2.text: i18n("Protocol used to connect to the server.")
+                label2.wrapMode: Text.Wrap
+
+                ComboBox
+                {
+                    id: protocolCombo
+                    Layout.fillWidth: true
+                    model: [i18n("SMB"), i18n("SFTP"), i18n("FTP"), i18n("WebDAV")]
+                }
+            }
+
+            Maui.FlexSectionItem
+            {
+                label1.text: i18n("Server address")
+                label2.text: i18n("Address and optional path of the server.")
+                label2.wrapMode: Text.Wrap
+
+                Maui.TextField
+                {
+                    id: addressField
+                    Layout.fillWidth: true
+                    placeholderText: i18n("server.example.com/share")
+                    inputMethodHints: Qt.ImhUrlCharactersOnly
+                }
+            }
+
+            Maui.FlexSectionItem
+            {
+                label1.text: i18n("Username")
+                label2.text: i18n("Username used to authenticate with the server.")
+                label2.wrapMode: Text.Wrap
+
+                Maui.TextField
+                {
+                    id: usernameField
+                    Layout.fillWidth: true
+                    placeholderText: i18n("Username")
+                }
+            }
+
+            Maui.FlexSectionItem
+            {
+                label1.text: i18n("Password")
+                label2.text: i18n("Password used to authenticate with the server.")
+                label2.wrapMode: Text.Wrap
+
+                Maui.PasswordField
+                {
+                    id: passwordField
+                    Layout.fillWidth: true
+                    placeholderText: i18n("Password")
+                    echoMode: TextInput.Password
+                    actions: []
+                    passwordMaskDelay: 0
+                }
+            }
+
+            Maui.FlexSectionItem
+            {
+                label1.text: i18n("Remember password")
+                label2.text: i18n("Store this server password in the system Secret Service.")
+                label2.wrapMode: Text.Wrap
+
+                Switch
+                {
+                    checkable: true
+                    checked: networkDialog.rememberPassword
+                    onToggled: networkDialog.rememberPassword = checked
+                }
+            }
+        }
+    }
+
+    Component
+    {
+        id: _disconnectDialogComponent
+
+        Maui.InfoDialog
+        {
+            id: disconnectDialog
+            property var server: null
+            title: server ? i18n("Remove server") : i18n("Disconnect from server")
+            message: server ? i18n("Do you want to remove this server from the Network view?") : i18n("Do you want to disconnect from this server?")
+            standardButtons: Dialog.Yes | Dialog.Cancel
+            Component.onCompleted: standardButton(Dialog.Yes).text = server ? i18n("Remove") : i18n("Disconnect")
+
+            onAccepted:
+            {
+                if (server)
+                    root.removeNetworkServer(server)
+                else
+                    root.currentBrowser.openFolder("remote:/")
+                disconnectDialog.close()
+            }
+
+            onRejected: disconnectDialog.close()
+            onClosed: disconnectDialog.destroy()
+        }
+    }
+
+    Connections
+    {
+        target: root.currentBrowser ? root.currentBrowser.currentFMList : null
+
+        function onStatusChanged()
+        {
+            if (!root.pendingNetworkServer || !target)
+                return
+
+            const server = root.pendingNetworkServer
+            const expectedPath = String(server.path).replace(/\/+$/, "")
+            const targetPath = String(target.path).replace(/\/+$/, "")
+            const pathMatchesServer = targetPath === expectedPath || targetPath.startsWith(expectedPath + "/")
+            if (!pathMatchesServer)
+                return
+
+            const connectionFailed = target.status.code === FB.PathStatus.ERROR
+                                     || (target.status.code === FB.PathStatus.READY
+                                         && target.status.empty
+                                         && target.count <= 0)
+
+            if (connectionFailed)
+            {
+                _initialNetworkRefreshTimer.stop()
+                root.initialNetworkRefreshBasePath = ""
+                if (!root.networkAuthenticationErrorNotified)
+                {
+                    root.networkAuthenticationErrorNotified = true
+                    root.notify("dialog-error", i18n("Connection failed"), i18n("The server rejected the credentials or could not be reached."))
+                    Qt.callLater(() => root.networkAuthenticationErrorNotified = false)
+                }
+                root.handleNetworkAuthenticationFailure(String(target.path))
+                root.pendingNetworkServer = null
+                return
+            }
+
+            if (target.status.code === FB.PathStatus.READY)
+            {
+                root.pendingNetworkServer = null
+                root.addNetworkServer(server.protocol, server.address, server.username)
+                root.initialNetworkRefreshBasePath = expectedPath
+                _initialNetworkRefreshTimer.restart()
+            }
+        }
+
+        function onAuthenticationError()
+        {
+            const path = target ? String(target.path) : ""
+            if (!root.networkAuthenticationErrorNotified)
+            {
+                root.networkAuthenticationErrorNotified = true
+                root.notify("dialog-error", i18n("Authentication failed"), i18n("The server rejected the password."))
+                Qt.callLater(() => root.networkAuthenticationErrorNotified = false)
+            }
+            root.handleNetworkAuthenticationFailure(path)
+        }
+
+        function onWarning(message)
+        {
+            if (!message || !root.currentBrowser || !root.currentBrowser.isRemoteConnection || root.networkAuthenticationErrorNotified)
+                return
+
+            root.notify("dialog-error", i18n("Server error"), message)
+        }
     }
 
     property alias currentTabIndex : _browserView.currentTabIndex
@@ -167,6 +437,8 @@ Maui.ApplicationWindow
         property bool restoreSession:  false
         property bool overviewStart : false
         property bool deleteToTrash: true
+        property bool replaceConflicts: false
+        property var networkServers: []
 
         property int viewType : FB.FMList.LIST_VIEW
         property int listSize : 0 // s-m-l-x-xl
@@ -753,6 +1025,13 @@ Maui.ApplicationWindow
 
             rightContent: [
 
+                ToolSeparator
+                {
+                    visible: !_pageLayout.split && _fileOperationIndicator.visible
+                    topPadding: 10
+                    bottomPadding: 10
+                },
+
                 FB.FileOperationIndicator
                 {
                     id: _fileOperationIndicator
@@ -797,7 +1076,30 @@ Maui.ApplicationWindow
 
                 ToolSeparator
                 {
-                    visible: !_pageLayout.split && _viewTypeActionsLoader.active && _searchToggleLoader.active
+                    visible: !_pageLayout.split && _viewTypeActionsLoader.active && _networkConnectLoader.active
+                    topPadding: 10
+                    bottomPadding: 10
+                },
+
+                Loader
+                {
+                    id: _networkConnectLoader
+                    asynchronous: true
+                    active: _stackView.depth === 1 && !!root.currentSplit && (root.currentSplit.isNetworkView === true || root.currentSplit.isRemoteConnection === true)
+                    visible: active
+
+                    sourceComponent: ToolButton
+                    {
+                        icon.name: root.currentSplit.isRemoteConnection ? "network-disconnect" : "folder-network"
+                        ToolTip.visible: hovered
+                        ToolTip.text: root.currentSplit.isRemoteConnection ? i18n("Disconnect from server") : i18n("Connect to a server")
+                        onClicked: root.currentSplit.isRemoteConnection ? root.openDisconnectDialog() : root.openNetworkDialog()
+                    }
+                },
+
+                ToolSeparator
+                {
+                    visible: _viewTypeActionsLoader.active && _searchToggleLoader.active
                     topPadding: 10
                     bottomPadding: 10
                 },
@@ -820,9 +1122,10 @@ Maui.ApplicationWindow
 
                 ToolSeparator
                 {
-                    visible: !_pageLayout.split && _searchToggleLoader.active && _mainMenuLoader.active
+                    visible: _searchToggleLoader.active && _mainMenuLoader.active
                     topPadding: 10
                     bottomPadding: 10
+                    Layout.preferredWidth: visible ? implicitWidth : 0
                 },
 
                 Loader
@@ -1146,6 +1449,166 @@ Maui.ApplicationWindow
     {
         for(var path of paths)
             root.openTab(path)
+    }
+
+
+    function cleanNetworkAddress(address)
+    {
+        let value = String(address || "").trim()
+        const schemeSeparator = value.indexOf("://")
+        if (schemeSeparator >= 0)
+            value = value.substring(schemeSeparator + 3)
+
+        const credentialsSeparator = value.lastIndexOf("@")
+        if (credentialsSeparator >= 0)
+            value = value.substring(credentialsSeparator + 1)
+
+        return value
+    }
+
+    function addNetworkServer(protocol, address, username)
+    {
+        const cleanAddress = root.cleanNetworkAddress(address)
+        const servers = (appSettings.networkServers || []).slice()
+        const existing = servers.findIndex((server) => server.protocol === protocol && root.cleanNetworkAddress(server.address) === cleanAddress)
+        const entry = ({protocol: protocol, address: cleanAddress, username: username})
+
+        if (existing >= 0)
+            servers[existing] = entry
+        else
+            servers.push(entry)
+
+        appSettings.networkServers = servers
+    }
+
+    function updateNetworkServer(original, updated)
+    {
+        const oldProtocol = original ? original.protocol : ""
+        const oldAddress = original ? root.cleanNetworkAddress(original.address) : ""
+        const oldUsername = original ? original.username : ""
+        const newAddress = root.cleanNetworkAddress(updated.address)
+        const servers = (appSettings.networkServers || []).filter((entry) => {
+            const address = root.cleanNetworkAddress(entry.address)
+            const isOldEntry = entry.protocol === oldProtocol && address === oldAddress
+            const isNewEntry = entry.protocol === updated.protocol && address === newAddress
+            return !isOldEntry && !isNewEntry
+        })
+        servers.push({protocol: updated.protocol, address: newAddress, username: updated.username})
+        appSettings.networkServers = servers
+
+        if (original && oldUsername && (oldProtocol !== updated.protocol || oldAddress !== newAddress || oldUsername !== updated.username))
+            Index.NetworkPasswordManager.remove(oldProtocol, oldAddress, oldUsername)
+    }
+
+    function networkServerUrl(server)
+    {
+        const address = root.cleanNetworkAddress(server.address)
+        return server.protocol + "://" + address
+    }
+
+    function openNetworkUrl(url, target = 0)
+    {
+        Qt.callLater(() => {
+            if (target === 1)
+                root.openTab(url)
+            else if (target === 2)
+                inx.openNewWindow(url)
+            else
+                root.currentBrowser.openFolder(url)
+        })
+    }
+
+    function openTrackedNetworkServer(server)
+    {
+        const url = root.networkServerUrl(server)
+        root.pendingNetworkServer = ({protocol: server.protocol, address: root.cleanNetworkAddress(server.address), username: server.username || "", rememberPassword: true, path: url})
+        root.openNetworkUrl(url)
+    }
+
+    function openNetworkServer(server)
+    {
+        if (!server.username || Index.NetworkPasswordManager.prepareStored(server.protocol, root.cleanNetworkAddress(server.address), server.username))
+            root.openTrackedNetworkServer(server)
+        else
+            root.openNetworkDialog(server, true)
+    }
+
+    function openNetworkServerInNewTab(server)
+    {
+        if (!server.username || Index.NetworkPasswordManager.prepareStored(server.protocol, root.cleanNetworkAddress(server.address), server.username))
+            root.openNetworkUrl(root.networkServerUrl(server), 1)
+        else
+            root.openNetworkDialog(server, true, 1)
+    }
+
+    function openNetworkServerInNewWindow(server)
+    {
+        if (!server.username || Index.NetworkPasswordManager.prepareStored(server.protocol, root.cleanNetworkAddress(server.address), server.username))
+            root.openNetworkUrl(root.networkServerUrl(server), 2)
+        else
+            root.openNetworkDialog(server, true, 2)
+    }
+
+    function disconnectNetworkServer(server)
+    {
+        const dialog = _disconnectDialogComponent.createObject(root, ({'server': server}))
+        dialog.open()
+    }
+
+    function removeNetworkServer(server)
+    {
+        const cleanAddress = root.cleanNetworkAddress(server.address)
+        const servers = (appSettings.networkServers || []).filter((entry) => entry.protocol !== server.protocol || root.cleanNetworkAddress(entry.address) !== cleanAddress)
+        appSettings.networkServers = servers
+        if (server.username)
+            Index.NetworkPasswordManager.remove(server.protocol, root.cleanNetworkAddress(server.address), server.username)
+
+        if (root.currentBrowser.isRemoteConnection && String(root.currentBrowser.currentPath).includes(server.address))
+            root.currentBrowser.openFolder("remote:/")
+    }
+
+    function handleNetworkAuthenticationFailure(path)
+    {
+        const pendingServer = root.pendingNetworkServer
+        if (pendingServer && pendingServer.username)
+        {
+            Index.NetworkPasswordManager.remove(pendingServer.protocol, root.cleanNetworkAddress(pendingServer.address), pendingServer.username)
+            root.pendingNetworkServer = null
+            root.initialNetworkRefreshBasePath = ""
+            _initialNetworkRefreshTimer.stop()
+            return
+        }
+
+        const currentPath = String(path).replace(/\/+$/, "")
+        const server = (appSettings.networkServers || []).find((entry) => {
+            const serverPath = root.networkServerUrl(entry).replace(/\/+$/, "")
+            return currentPath === serverPath || currentPath.startsWith(serverPath + "/")
+        })
+
+        if (server && server.username)
+            Index.NetworkPasswordManager.remove(server.protocol, root.cleanNetworkAddress(server.address), server.username)
+    }
+
+    function openNetworkDialog(server, credentialsOnly = false, openTarget = 0, editServer = false)
+    {
+        const dialog = _networkDialogComponent.createObject(root, server ? {
+            initialProtocol: server.protocol,
+            initialAddress: root.cleanNetworkAddress(server.address),
+            initialUsername: server.username,
+            credentialsOnly: credentialsOnly,
+            openTarget: openTarget,
+            editServer: editServer,
+            editingServer: server,
+            initialRememberPassword: server && server.username
+                                      && Index.NetworkPasswordManager.hasCredentials(server.protocol, root.cleanNetworkAddress(server.address), server.username)
+        } : {openTarget: openTarget, editServer: editServer})
+        dialog.open()
+    }
+
+    function openDisconnectDialog()
+    {
+        const dialog = _disconnectDialogComponent.createObject(root)
+        dialog.open()
     }
 
     function openTab(path, path2 = "")

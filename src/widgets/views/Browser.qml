@@ -26,12 +26,23 @@ Maui.SplitViewItem
     readonly property alias title : _browser.title
     readonly property alias emptyTrashAction : _emptyTrashAction
     readonly property bool supportsTerminal: control.currentPath.startsWith("file://")
+    readonly property bool isNetworkView: String(control.currentPath).startsWith("remote:")
+    readonly property bool isRemoteConnection: ["smb", "sftp", "ftp", "ftps", "dav", "davs", "fish"].indexOf(String(control.currentPath).split(":")[0]) >= 0
+    readonly property bool remoteLoading: control.isRemoteConnection
+                                      && _browser.currentFMList !== null
+                                      && _browser.currentFMList.status.code === FB.PathStatus.LOADING
     readonly property int terminalPanelHeight: _terminalSplitView.visible ? _terminalSplitView.height : 0
 
     property alias currentPath: _browser.currentPath
     property alias terminalVisible : _dirConf.terminalVisible
+    property string remoteEmptyRefreshPath: ""
 
-    Maui.Controls.title : currentPath
+    function safePath(path)
+    {
+        return String(path || "").replace(/^([^:]+:\/\/)(?:[^/@]*@)/, "$1")
+    }
+
+    Maui.Controls.title : safePath(currentPath)
     Keys.enabled: true
     Keys.forwardTo: _browser
 
@@ -39,6 +50,8 @@ Maui.SplitViewItem
 
     onCurrentPathChanged:
     {
+        if (String(control.currentPath) !== control.remoteEmptyRefreshPath)
+            control.remoteEmptyRefreshPath = ""
         if (currentBrowser)
         {
             if (supportsTerminal)
@@ -289,6 +302,86 @@ Maui.SplitViewItem
             }
 
             browser.holder.actions: []
+            browser.holder.visible: control.remoteLoading ? true : control.isNetworkView ? appSettings.networkServers.length === 0 : (browser.currentFMList.status.code === FB.PathStatus.ERROR || (browser.currentFMList.status.code === FB.PathStatus.READY && browser.currentFMList.status.empty) && browser.currentFMList.count <= 0)
+            browser.holder.emoji: control.remoteLoading ? "folder-network" : control.isNetworkView ? "folder-network" : browser.currentFMList.status.icon
+            browser.holder.title: control.remoteLoading ? i18n("Loading server contents…") : control.isNetworkView ? i18n("No server connected") : browser.currentFMList.status.title
+            browser.holder.body: control.remoteLoading ? i18n("Retrieving the server contents.") : control.isNetworkView ? i18n("Use the Connect to a server button to browse a network location.") : browser.currentFMList.status.message
+
+            Maui.ContextualMenu
+            {
+                id: _networkServerMenu
+                property var server: null
+                onClosed: server = null
+
+                MenuItem
+                {
+                    text: i18n("Open in new tab")
+                    icon.name: "tab-new"
+                    onTriggered: root.openNetworkServerInNewTab(_networkServerMenu.server)
+                }
+
+                MenuItem
+                {
+                    text: i18n("Open in new window")
+                    icon.name: "window-new"
+                    onTriggered: root.openNetworkServerInNewWindow(_networkServerMenu.server)
+                }
+
+                MenuSeparator {}
+
+                MenuItem
+                {
+                    text: i18n("Remove server")
+                    icon.name: "network-disconnect"
+                    onTriggered: root.disconnectNetworkServer(_networkServerMenu.server)
+                }
+            }
+
+            Loader
+            {
+                id: _networkServerGridLoader
+                anchors.fill: parent
+                z: 1
+                active: control.isNetworkView
+                        && appSettings.networkServers.length > 0
+                        && _browser.settings.viewType === FB.FMList.ICON_VIEW
+                visible: active
+
+
+                sourceComponent: Maui.GridBrowser
+                {
+                    anchors.fill: parent
+                    itemSize: _browser.gridItemSize
+                    adaptContent: false
+                    model: appSettings.networkServers
+                    Keys.enabled: true
+                    Keys.onPressed: (event) =>
+                    {
+                        if (event.key === Qt.Key_T && (event.modifiers & Qt.ControlModifier))
+                        {
+                            root.openTab(control.currentPath)
+                            event.accepted = true
+                        }
+                    }
+
+
+                    delegate: FB.NetworkServerDelegate
+                    {
+                        width: GridView.view.cellWidth
+                        height: GridView.view.cellHeight
+                        gridItemSize: GridView.view.itemSize
+                        serverAddress: root.cleanNetworkAddress(modelData.address)
+                        serverProtocol: String(modelData.protocol).toUpperCase()
+                        onClicked: root.openNetworkServer(modelData)
+                        onRightClicked:
+                        {
+                            _networkServerMenu.server = modelData
+                            _networkServerMenu.show()
+                        }
+                    }
+                }
+            }
+
 
             Connections
             {
@@ -429,7 +522,7 @@ Maui.SplitViewItem
                                         _tagMenu.show()
                                     }
 
-                                    if(_browser.currentFMList.pathType !== FB.FMList.TRASH_PATH && _browser.currentFMList.pathType !== FB.FMList.REMOTE_PATH)
+                                    if(_browser.currentFMList.pathType !== FB.FMList.TRASH_PATH)
                                     {
                                         itemMenu.showFor(itemIndex)
                                     }
@@ -470,6 +563,54 @@ Maui.SplitViewItem
             }
 
         }
+    }
+
+    Maui.ProgressIndicator
+    {
+        id: _remoteLoadingProgress
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        z: 20
+        visible: control.remoteLoading
+    }
+
+    Loader
+    {
+        id: _networkPlaceholderLoader
+        anchors.fill: parent
+        z: 10
+        active: control.isNetworkView && appSettings.networkServers.length === 0
+        visible: active
+
+
+        sourceComponent: Maui.Holder
+        {
+            anchors.fill: parent
+            emoji: "folder-network"
+            title: i18n("No server connected")
+            body: i18n("Use the Connect to a server button to browse a network location.")
+        }
+    }
+
+    Connections
+    {
+        target: _browser.currentFMList
+        function onStatusChanged()
+        {
+            const path = String(control.currentPath)
+            if (!control.isRemoteConnection
+                    || (target.status.code !== FB.PathStatus.READY && target.status.code !== FB.PathStatus.ERROR)
+                    || target.count > 0
+                    || control.remoteEmptyRefreshPath === path)
+                return
+
+            control.remoteEmptyRefreshPath = path
+            Qt.callLater(() => {
+                target.refresh()
+            })
+        }
+
     }
 
     Component.onCompleted:

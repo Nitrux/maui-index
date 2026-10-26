@@ -290,7 +290,7 @@ Item
         if(value.startsWith("file://"))
             return decodeURIComponent(value.replace(/^file:\/\//, ""))
 
-        return value
+        return value.replace(/^([^:]+:\/\/)(?:[^/@]*@)/, "$1")
     }
 
     function normalizePathInput(path)

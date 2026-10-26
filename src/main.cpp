@@ -27,6 +27,7 @@
 #include "controllers/folderconfig.h"
 #include "controllers/fileproperties.h"
 #include "controllers/patharrowbackground.h"
+#include "controllers/networkpasswordmanager.h"
 
 #include "index.h"
 
@@ -141,6 +142,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qmlRegisterType<FileProperties>(INDEX_URI, 1, 0, "FileProperties");
     qmlRegisterType<Permission>(INDEX_URI, 1, 0, "Permission");
     qmlRegisterType<PathArrowBackground>(INDEX_URI, 1, 0, "PathArrowBackground");
+    qmlRegisterSingletonInstance<NetworkPasswordManager>(INDEX_URI, 1, 0, "NetworkPasswordManager", &NetworkPasswordManager::instance());
 
     engine.load(url);
     return app.exec();

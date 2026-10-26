@@ -26,7 +26,7 @@ Item
 
     readonly property alias currentItem : _splitView.currentItem
     readonly property alias model : _splitView.contentModel
-    readonly property string title : count === 2 ?  model.get(0).browser.title + "  -  " + model.get(1).browser.title : browser.title
+    readonly property string title : count === 2 ? safeTitle(model.get(0).browser.title + "  -  " + model.get(1).browser.title) : safeTitle(browser.title)
     readonly property var actionsBarActions: currentItem && currentItem.browser.currentFMList && currentItem.browser.currentFMList.pathType === FB.FMList.TRASH_PATH
                                              ? [_newTabAction, currentItem.emptyTrashAction, _splitViewAction, _showTerminalAction]
                                              : [_newTabAction, _viewHiddenAction, _splitViewAction, _showTerminalAction]
@@ -36,8 +36,13 @@ Item
     readonly property Item actionsBar: _actionsBarLoader.item
 
     Maui.Controls.title: title
-    Maui.Controls.toolTipText: browser.currentPath
+    Maui.Controls.toolTipText: safeTitle(browser.currentPath)
     Maui.Controls.iconName: "folder"
+
+    function safeTitle(value)
+    {
+        return String(value || "").replace(/([^:]+:\/\/)(?:[^/@]*@)/g, "$1")
+    }
 
     Maui.SplitView
     {

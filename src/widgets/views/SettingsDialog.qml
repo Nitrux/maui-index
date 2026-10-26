@@ -4,10 +4,25 @@ import QtQuick.Layouts
 
 import org.mauikit.controls as Maui
 import org.mauikit.filebrowsing as FB
+import org.maui.index as Index
 
 Maui.SettingsDialog
 {
     id: control
+
+    function cleanNetworkAddress(address)
+    {
+        let value = String(address || "").trim()
+        const schemeSeparator = value.indexOf("://")
+        if (schemeSeparator >= 0)
+            value = value.substring(schemeSeparator + 3)
+
+        const credentialsSeparator = value.lastIndexOf("@")
+        if (credentialsSeparator >= 0)
+            value = value.substring(credentialsSeparator + 1)
+
+        return value
+    }
 
     Maui.SectionGroup
     {
@@ -110,6 +125,19 @@ Maui.SettingsDialog
                 checkable: true
                 checked: settings.deleteToTrash
                 onToggled: settings.deleteToTrash = checked
+            }
+        }
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Replace conflicting files")
+            label2.text: i18n("Use Replace instead of Rename when a copied item already exists.")
+
+            Switch
+            {
+                checkable: true
+                checked: settings.replaceConflicts
+                onToggled: settings.replaceConflicts = checked
             }
         }
 
@@ -449,6 +477,24 @@ Maui.SettingsDialog
 
     Maui.SectionGroup
     {
+        title: i18n("Security")
+
+        Maui.FlexSectionItem
+        {
+            label1.text: i18n("Network credentials")
+            label2.text: i18n("Manage saved server passwords.")
+
+            ToolButton
+            {
+                checkable: true
+                icon.name: "go-next"
+                onToggled: control.addPage(_networkCredentialsPageComponent)
+            }
+        }
+    }
+
+    Maui.SectionGroup
+    {
         title: i18n("Embedded Terminal")
 
         Maui.FlexSectionItem
@@ -487,6 +533,74 @@ Maui.SettingsDialog
                 checkable: true
                 icon.name: "go-next"
                 onToggled: control.addPage(_terminalColorSchemesPageComponent)
+            }
+        }
+    }
+
+    Component
+    {
+        id: _networkCredentialsPageComponent
+
+        Maui.SettingsPage
+        {
+            title: i18n("Network credentials")
+
+            Maui.SectionGroup
+            {
+                title: i18n("Secure storage")
+
+                Maui.FlexSectionItem
+                {
+                    label1.text: i18n("Secret Service")
+                    label2.text: Index.NetworkPasswordManager.available
+                                  ? i18n("Passwords are stored in the system Secret Service.")
+                                  : i18n("No system Secret Service is available; passwords cannot be stored.")
+                    label2.wrapMode: Text.Wrap
+                }
+            }
+
+            Maui.SectionGroup
+            {
+                title: i18n("Saved servers")
+
+                Repeater
+                {
+                    model: appSettings.networkServers
+
+                    delegate: Maui.FlexSectionItem
+                    {
+                        id: credentialItem
+                        required property var modelData
+                        property bool hasPassword: Index.NetworkPasswordManager.revision >= 0
+                                                   && modelData.username
+                                                   && Index.NetworkPasswordManager.hasCredentials(modelData.protocol, control.cleanNetworkAddress(modelData.address), modelData.username)
+
+                        label1.text: control.cleanNetworkAddress(modelData.address)
+                        label2.text: modelData.protocol.toUpperCase() + (modelData.username ? " · " + modelData.username : "")
+                        label2.wrapMode: Text.Wrap
+
+                        Button
+                        {
+                            text: i18n("Edit")
+                            onClicked: Maui.App.rootComponent.openNetworkDialog(modelData, false, 0, true)
+                        }
+
+                        Button
+                        {
+                            text: hasPassword ? i18n("Forget") : i18n("Remove")
+                            onClicked:
+                            {
+                                if (hasPassword)
+                                {
+                                    if (Index.NetworkPasswordManager.remove(modelData.protocol, control.cleanNetworkAddress(modelData.address), modelData.username))
+                                        credentialItem.hasPassword = false
+                                }
+                                else
+                                    Maui.App.rootComponent.removeNetworkServer(modelData)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
