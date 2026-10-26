@@ -14,6 +14,8 @@ class NetworkPasswordManager : public QObject
 public:
     static NetworkPasswordManager &instance();
 
+    ~NetworkPasswordManager() override;
+
     bool available() const;
     int revision() const;
 

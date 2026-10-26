@@ -2,6 +2,8 @@
 
 #include <QDebug>
 #include <QHash>
+#include <QRegularExpression>
+#include <QStringList>
 #include <QUrl>
 
 #include <kio/authinfo.h>
@@ -43,7 +45,36 @@ const SecretSchema *indexSchema()
 
 bool validAttribute(const QString &value)
 {
+    return !value.isEmpty() && !value.contains(QChar(0)) && !value.contains(QRegularExpression(QStringLiteral("[\\x00-\\x1F\\x7F]")));
+}
+
+bool validSecret(const QString &value)
+{
     return !value.contains(QChar(0));
+}
+
+bool normalizeEndpoint(const QString &protocol, const QString &address, const QString &username, QString *normalizedProtocol, QString *normalizedAddress, QUrl *url)
+{
+    const QString normalizedScheme = protocol.trimmed().toLower();
+    static const QStringList supportedSchemes = {QStringLiteral("smb"), QStringLiteral("sftp"), QStringLiteral("ftp"), QStringLiteral("ftps"), QStringLiteral("dav"), QStringLiteral("davs"), QStringLiteral("fish"), QStringLiteral("afc")};
+    if (!supportedSchemes.contains(normalizedScheme) || !validAttribute(username.trimmed()))
+        return false;
+
+    const QString normalizedHost = address.trimmed();
+    if (!validAttribute(normalizedHost) || normalizedHost.contains(QStringLiteral("://")))
+        return false;
+
+    const QUrl endpoint(QStringLiteral("%1://%2").arg(normalizedScheme, normalizedHost), QUrl::StrictMode);
+    if (!endpoint.isValid() || endpoint.host().isEmpty() || !endpoint.userInfo().isEmpty() || endpoint.hasQuery() || endpoint.hasFragment())
+        return false;
+
+    if (normalizedProtocol)
+        *normalizedProtocol = normalizedScheme;
+    if (normalizedAddress)
+        *normalizedAddress = normalizedHost;
+    if (url)
+        *url = endpoint;
+    return true;
 }
 
 QString credentialLabel(const QString &protocol, const QString &address, const QString &username)
@@ -73,6 +104,13 @@ NetworkPasswordManager::NetworkPasswordManager(QObject *parent)
     : QObject(parent)
 {}
 
+NetworkPasswordManager::~NetworkPasswordManager()
+{
+    for (auto it = m_sessionCredentials.begin(); it != m_sessionCredentials.end(); ++it)
+        it.value().fill(QChar(0));
+    m_sessionCredentials.clear();
+}
+
 int NetworkPasswordManager::revision() const
 {
     return m_revision;
@@ -101,15 +139,18 @@ QVariantMap NetworkPasswordManager::find(const QString &protocol,
     QVariantMap result;
     result[QStringLiteral("found")] = false;
 
-    if (!validAttribute(protocol) || !validAttribute(address) || !validAttribute(username))
+    QString normalizedProtocol;
+    QString normalizedAddress;
+    const QString normalizedUsername = username.trimmed();
+    if (!normalizeEndpoint(protocol, address, normalizedUsername, &normalizedProtocol, &normalizedAddress, nullptr))
         return result;
 
     GError *error = nullptr;
     GHashTable *attributes = secret_attributes_build(
         indexSchema(),
-        "protocol", protocol.toUtf8().constData(),
-        "address", address.toUtf8().constData(),
-        "username", username.toUtf8().constData(),
+        "protocol", normalizedProtocol.toUtf8().constData(),
+        "address", normalizedAddress.toUtf8().constData(),
+        "username", normalizedUsername.toUtf8().constData(),
         nullptr);
 
     GList *items = secret_service_search_sync(
@@ -147,14 +188,26 @@ bool NetworkPasswordManager::prepare(const QString &protocol,
                                      const QString &username,
                                      const QString &password)
 {
-    if (!validAttribute(protocol) || !validAttribute(address) || !validAttribute(username))
+    QString normalizedProtocol;
+    QString normalizedAddress;
+    QString normalizedUsername = username.trimmed();
+    QUrl endpoint;
+    if (!normalizeEndpoint(protocol, address, normalizedUsername, &normalizedProtocol, &normalizedAddress, &endpoint)
+            || !validSecret(password))
         return false;
 
-    m_sessionCredentials.insert(credentialKey(protocol, address, username), password);
+    const auto key = credentialKey(normalizedProtocol, normalizedAddress, normalizedUsername);
+    auto sessionCredential = m_sessionCredentials.find(key);
+    if (sessionCredential != m_sessionCredentials.end()) {
+        sessionCredential.value().fill(QChar(0));
+        sessionCredential.value() = password;
+    } else {
+        m_sessionCredentials.insert(key, password);
+    }
 
     KIO::AuthInfo info;
-    info.url = QUrl(QStringLiteral("%1://%2").arg(protocol, address));
-    info.username = username;
+    info.url = endpoint;
+    info.username = normalizedUsername;
     info.password = password;
     info.keepPassword = false;
 
@@ -167,18 +220,21 @@ bool NetworkPasswordManager::prepareStored(const QString &protocol,
                                             const QString &address,
                                             const QString &username)
 {
-    if (!validAttribute(protocol) || !validAttribute(address) || !validAttribute(username))
+    QString normalizedProtocol;
+    QString normalizedAddress;
+    const QString normalizedUsername = username.trimmed();
+    if (!normalizeEndpoint(protocol, address, normalizedUsername, &normalizedProtocol, &normalizedAddress, nullptr))
         return false;
 
-    const auto sessionCredentials = m_sessionCredentials.constFind(credentialKey(protocol, address, username));
+    const auto sessionCredentials = m_sessionCredentials.constFind(credentialKey(normalizedProtocol, normalizedAddress, normalizedUsername));
     if (sessionCredentials != m_sessionCredentials.constEnd())
-        return prepare(protocol, address, username, sessionCredentials.value());
+        return prepare(normalizedProtocol, normalizedAddress, normalizedUsername, sessionCredentials.value());
 
-    const QVariantMap credentials = find(protocol, address, username);
+    const QVariantMap credentials = find(normalizedProtocol, normalizedAddress, normalizedUsername);
     if (!credentials.value(QStringLiteral("found")).toBool())
         return false;
 
-    return prepare(protocol, address, username, credentials.value(QStringLiteral("password")).toString());
+    return prepare(normalizedProtocol, normalizedAddress, normalizedUsername, credentials.value(QStringLiteral("password")).toString());
 }
 
 bool NetworkPasswordManager::hasCredentials(const QString &protocol,
@@ -193,7 +249,11 @@ bool NetworkPasswordManager::save(const QString &protocol,
                                   const QString &username,
                                   const QString &password)
 {
-    if (!validAttribute(protocol) || !validAttribute(address) || !validAttribute(username)) {
+    QString normalizedProtocol;
+    QString normalizedAddress;
+    const QString normalizedUsername = username.trimmed();
+    if (!normalizeEndpoint(protocol, address, normalizedUsername, &normalizedProtocol, &normalizedAddress, nullptr)
+            || !validSecret(password)) {
         qWarning() << "NetworkPasswordManager::save: invalid credential attributes";
         return false;
     }
@@ -202,13 +262,13 @@ bool NetworkPasswordManager::save(const QString &protocol,
     secret_password_store_sync(
         indexSchema(),
         SECRET_COLLECTION_DEFAULT,
-        credentialLabel(protocol, address, username).toUtf8().constData(),
+        credentialLabel(normalizedProtocol, normalizedAddress, normalizedUsername).toUtf8().constData(),
         password.toUtf8().constData(),
         nullptr,
         &error,
-        "protocol", protocol.toUtf8().constData(),
-        "address", address.toUtf8().constData(),
-        "username", username.toUtf8().constData(),
+        "protocol", normalizedProtocol.toUtf8().constData(),
+        "address", normalizedAddress.toUtf8().constData(),
+        "username", normalizedUsername.toUtf8().constData(),
         nullptr);
 
     if (error) {
@@ -226,25 +286,33 @@ bool NetworkPasswordManager::remove(const QString &protocol,
                                     const QString &address,
                                     const QString &username)
 {
-    if (!validAttribute(protocol) || !validAttribute(address) || !validAttribute(username)) {
+    QString normalizedProtocol;
+    QString normalizedAddress;
+    const QString normalizedUsername = username.trimmed();
+    QUrl endpoint;
+    if (!normalizeEndpoint(protocol, address, normalizedUsername, &normalizedProtocol, &normalizedAddress, &endpoint)) {
         qWarning() << "NetworkPasswordManager::remove: invalid credential attributes";
         return false;
     }
 
-    m_sessionCredentials.remove(credentialKey(protocol, address, username));
+    const auto key = credentialKey(normalizedProtocol, normalizedAddress, normalizedUsername);
+    auto sessionCredential = m_sessionCredentials.find(key);
+    if (sessionCredential != m_sessionCredentials.end()) {
+        sessionCredential.value().fill(QChar(0));
+        m_sessionCredentials.erase(sessionCredential);
+    }
 
     static KPasswdServerClient client;
-    const QUrl url(QStringLiteral("%1://%2").arg(protocol, address));
-    client.removeAuthInfo(url.host(), protocol, username);
+    client.removeAuthInfo(endpoint.host(), normalizedProtocol, normalizedUsername);
 
     GError *error = nullptr;
     secret_password_clear_sync(
         indexSchema(),
         nullptr,
         &error,
-        "protocol", protocol.toUtf8().constData(),
-        "address", address.toUtf8().constData(),
-        "username", username.toUtf8().constData(),
+        "protocol", normalizedProtocol.toUtf8().constData(),
+        "address", normalizedAddress.toUtf8().constData(),
+        "username", normalizedUsername.toUtf8().constData(),
         nullptr);
 
     if (error) {

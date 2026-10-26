@@ -1487,14 +1487,23 @@ Maui.ApplicationWindow
         const oldAddress = original ? root.cleanNetworkAddress(original.address) : ""
         const oldUsername = original ? original.username : ""
         const newAddress = root.cleanNetworkAddress(updated.address)
-        const servers = (appSettings.networkServers || []).filter((entry) => {
+        const servers = (appSettings.networkServers || []).slice()
+        const displaced = servers.find((entry) => {
+            const address = root.cleanNetworkAddress(entry.address)
+            const isOldEntry = entry.protocol === oldProtocol && address === oldAddress
+            return !isOldEntry && entry.protocol === updated.protocol && address === newAddress
+        })
+        const filteredServers = servers.filter((entry) => {
             const address = root.cleanNetworkAddress(entry.address)
             const isOldEntry = entry.protocol === oldProtocol && address === oldAddress
             const isNewEntry = entry.protocol === updated.protocol && address === newAddress
             return !isOldEntry && !isNewEntry
         })
-        servers.push({protocol: updated.protocol, address: newAddress, username: updated.username})
-        appSettings.networkServers = servers
+        filteredServers.push({protocol: updated.protocol, address: newAddress, username: updated.username})
+        appSettings.networkServers = filteredServers
+
+        if (displaced && displaced.username)
+            Index.NetworkPasswordManager.remove(displaced.protocol, root.cleanNetworkAddress(displaced.address), displaced.username)
 
         if (original && oldUsername && (oldProtocol !== updated.protocol || oldAddress !== newAddress || oldUsername !== updated.username))
             Index.NetworkPasswordManager.remove(oldProtocol, oldAddress, oldUsername)
