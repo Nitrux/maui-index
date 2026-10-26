@@ -21,6 +21,7 @@ Maui.Page
     property alias currentTab : _browserList.currentItem
     property Browser currentSplit: currentTab ? currentTab.currentItem : null
     property alias browserList : _browserList
+    readonly property bool compactToolbarLayout: !root.isWide
     floatingFooter: true
     headBar.visible: false
     background: null
@@ -125,7 +126,16 @@ Maui.Page
         currentIndex : -1
         onNewTabClicked: openTab(currentBrowser ? currentBrowser.currentPath : FB.FM.homePath())
         onCloseTabClicked: (index) => closeTab(index)
+        tabBar.visible: !compactToolbarLayout && _browserList.count > 1
         tabBar.showNewTabButton: false
+        tabBar.topPadding: Maui.Style.defaultPadding
+        tabBar.bottomPadding: Maui.Style.defaultPadding
+        tabBar.implicitHeight: Math.max(
+            tabBar.count > 0 && tabBar.itemAt(0) ? tabBar.itemAt(0).implicitHeight : 0,
+            Maui.Style.rowHeightAlt,
+            Maui.Style.rowHeight,
+            Maui.Style.iconSize + Maui.Style.defaultPadding * 2
+        ) + tabBar.topPadding + tabBar.bottomPadding
         Keys.enabled: true
         Keys.forwardTo: currentTab ? [currentTab] : []
         background: null
@@ -269,18 +279,20 @@ Maui.Page
 
             ToolSeparator
             {
+                height: Maui.Style.space.medium
                 visible: _browserList.count > 1
-                topPadding: 10
-                bottomPadding: 10
+                topPadding: 0
+                bottomPadding: 0
             }
         ]
 
         tabBar.rightContent: [
             ToolSeparator
             {
+                height: Maui.Style.space.medium
                 visible: _browserList.count > 1
-                topPadding: 10
-                bottomPadding: 10
+                topPadding: 0
+                bottomPadding: 0
             },
 
             ToolButton

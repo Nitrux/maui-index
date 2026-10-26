@@ -346,25 +346,14 @@ Maui.ApplicationWindow
         if (!_pageLayout || !_pageLayout.split || _pageLayout.splitIn !== ToolBar.Footer)
             return
 
-        const footerContainer = _pageLayout.footerContainer
         const footerBar = resolveFooterBar()
         if (!footerBar)
             return
 
-        const footerImplicitContentHeight = footerBar.implicitContentHeight !== undefined
-                ? footerBar.implicitContentHeight
-                : -1
-
-        if (footerImplicitContentHeight <= 0)
-            return
-
-        if (footerContainer && footerContainer.forceLayout)
-            footerContainer.forceLayout()
-
-        if (footerBar.preferredHeight !== undefined && footerBar.preferredHeight !== footerImplicitContentHeight)
-        {
-            footerBar.preferredHeight = footerImplicitContentHeight
-        }
+        footerBar.preferredHeight = root.isWide ? Maui.Style.rowHeightAlt : Maui.Style.rowHeight
+        footerBar.position = ToolBar.Footer
+        footerBar.topPadding = root.isWide ? Maui.Style.defaultPadding : Maui.Style.space.small
+        footerBar.bottomPadding = root.isWide ? Maui.Style.defaultPadding : Maui.Style.space.small
     }
 
     onWidthChanged:
@@ -814,6 +803,9 @@ Maui.ApplicationWindow
             Maui.Controls.showCSD: true
 
             headBar.forceCenterMiddleContent: true
+            headBar.preferredHeight: root.isWide ? Maui.Style.rowHeightAlt : Maui.Style.rowHeight
+            headBar.topPadding: root.isWide ? Maui.Style.defaultPadding : Maui.Style.space.small
+            headBar.bottomPadding: root.isWide ? Maui.Style.defaultPadding : Maui.Style.space.small
             headerMargins: Maui.Handy.isMobile ? 0 : Maui.Style.contentMargins
             footerMargins: headerMargins
 
@@ -1099,7 +1091,7 @@ Maui.ApplicationWindow
 
                 ToolSeparator
                 {
-                    visible: _viewTypeActionsLoader.active && _searchToggleLoader.active
+                    visible: root.isWide && _viewTypeActionsLoader.active && _searchToggleLoader.active
                     topPadding: 10
                     bottomPadding: 10
                 },
@@ -1108,7 +1100,7 @@ Maui.ApplicationWindow
                 {
                     id: _searchToggleLoader
                     asynchronous: true
-                    active: _stackView.depth === 1 && !!root.currentBrowser
+                    active: root.isWide && _stackView.depth === 1 && !!root.currentBrowser
                     visible: active
 
                     sourceComponent: ToolButton
@@ -1122,10 +1114,25 @@ Maui.ApplicationWindow
 
                 ToolSeparator
                 {
-                    visible: _searchToggleLoader.active && _mainMenuLoader.active
+                    visible: root.isWide && _searchToggleLoader.active && _mainMenuLoader.active
                     topPadding: 10
                     bottomPadding: 10
                     Layout.preferredWidth: visible ? implicitWidth : 0
+                },
+
+                Loader
+                {
+                    asynchronous: true
+                    active: !root.isWide && _browserView.browserList.count > 1
+                    visible: active
+                    sourceComponent: _tabOverviewButtonComponent
+                },
+
+                ToolSeparator
+                {
+                    visible: !root.isWide && _browserView.browserList.count > 1
+                    topPadding: 10
+                    bottomPadding: 10
                 },
 
                 Loader
@@ -1218,6 +1225,16 @@ Maui.ApplicationWindow
                             }
                         }
 
+                        MenuItem
+                        {
+                            visible: !root.isWide
+                            text: i18n("Search")
+                            icon.name: "edit-find"
+                            checkable: true
+                            checked: currentBrowser ? currentBrowser.headBar.visible : false
+                            onTriggered: currentBrowser.toggleSearchBar()
+                        }
+
                         MenuSeparator {}
 
                         MenuItem
@@ -1247,6 +1264,59 @@ Maui.ApplicationWindow
                     }
                 }
             ]
+
+            Component
+            {
+                id: _tabOverviewButtonComponent
+
+                ToolButton
+                {
+                    display: ToolButton.IconOnly
+                    onClicked: _browserView.browserList.openOverview()
+                    Layout.alignment: Qt.AlignVCenter
+                    height: Maui.Style.rowHeight
+                    leftPadding: Maui.Style.space.small
+                    rightPadding: Maui.Style.space.small
+                    topPadding: 0
+                    bottomPadding: 0
+
+                    contentItem: RowLayout
+                    {
+                        spacing: Maui.Style.space.small
+
+                        Maui.Icon
+                        {
+                            Layout.alignment: Qt.AlignVCenter
+                            Layout.preferredWidth: Maui.Style.iconSizes.small
+                            Layout.preferredHeight: Maui.Style.iconSizes.small
+                            source: "view-grid"
+                            color: Maui.Theme.textColor
+                        }
+
+                        ToolButton
+                        {
+                            Layout.alignment: Qt.AlignVCenter
+                            text: _browserView.browserList.count
+                            display: ToolButton.TextOnly
+                            font.bold: true
+                            font.pointSize: Maui.Style.fontSizes.small
+                            ToolTip.visible: false
+                            onClicked: {}
+
+                            background: Rectangle
+                            {
+                                color: Maui.Theme.alternateBackgroundColor
+                                radius: Maui.Style.radiusV
+                            }
+                        }
+                    }
+
+                    ToolTip.delay: 1000
+                    ToolTip.timeout: 5000
+                    ToolTip.visible: hovered
+                    ToolTip.text: i18n("Show tabs")
+                }
+            }
 
             headBar.middleContent: Loader
             {
