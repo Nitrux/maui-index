@@ -383,6 +383,40 @@ Maui.SplitViewItem
             }
 
 
+            Loader
+            {
+                id: _networkServerListLoader
+                anchors.fill: parent
+                z: 1
+                active: control.isNetworkView
+                        && appSettings.networkServers.length > 0
+                        && _browser.settings.viewType !== FB.FMList.ICON_VIEW
+                visible: active
+
+                sourceComponent: Maui.ListBrowser
+                {
+                    anchors.fill: parent
+                    model: appSettings.networkServers
+
+                    delegate: Maui.ListDelegate
+                    {
+                        width: ListView.view.width
+                        iconName: "folder-network"
+                        label: root.cleanNetworkAddress(modelData.address)
+                        label2: String(modelData.protocol).toUpperCase()
+                        tooltipText: root.cleanNetworkAddress(modelData.address)
+
+                        onClicked: root.openNetworkServer(modelData)
+                        onRightClicked:
+                        {
+                            _networkServerMenu.server = modelData
+                            _networkServerMenu.show()
+                        }
+                    }
+                }
+            }
+
+
             Connections
             {
                 target: _browser.dropArea

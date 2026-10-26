@@ -83,6 +83,7 @@ Maui.ContextualMenu
     MenuItem
     {
         visible: control.canDownload
+        height: visible ? implicitHeight : -control.spacing
         enabled: visible
         text: i18n("Download")
         icon.name: "download"

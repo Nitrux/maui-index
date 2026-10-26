@@ -87,7 +87,7 @@ Maui.Page
         {
             text: i18n("Rename")
             icon.name: "edit-rename"
-            enabled: _selectionBar.count === 1
+            enabled: _selectionBar.count > 0
             onTriggered:
             {
                 currentBrowser.renameItem()

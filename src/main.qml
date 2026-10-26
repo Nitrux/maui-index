@@ -1228,6 +1228,7 @@ Maui.ApplicationWindow
                         MenuItem
                         {
                             visible: !root.isWide
+                            height: visible ? implicitHeight : 0
                             text: i18n("Search")
                             icon.name: "edit-find"
                             checkable: true
