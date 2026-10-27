@@ -233,10 +233,10 @@ Maui.ApplicationWindow
             property var server: null
             title: server ? i18n("Remove server") : i18n("Disconnect from server")
             message: server ? i18n("Do you want to remove this server from the Network view?") : i18n("Do you want to disconnect from this server?")
-            standardButtons: Dialog.Yes | Dialog.Cancel
-            Component.onCompleted: standardButton(Dialog.Yes).text = server ? i18n("Remove") : i18n("Disconnect")
+            standardButtons: Dialog.Discard | Dialog.Cancel
+            Component.onCompleted: standardButton(Dialog.Discard).text = server ? i18n("Remove") : i18n("Disconnect")
 
-            onAccepted:
+            onDiscarded:
             {
                 if (server)
                     root.removeNetworkServer(server)
