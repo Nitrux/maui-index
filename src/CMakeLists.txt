@@ -33,9 +33,6 @@ qt_add_executable(${PROJECT_NAME}
     ${index_dbus_SRCS}
     ${index_RSCRS})
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(libsecret REQUIRED IMPORTED_TARGET libsecret-1)
-
 qt_add_qml_module(${PROJECT_NAME} URI app.maui.index
     NO_PLUGIN
     NO_IMPORT_SCAN
@@ -88,6 +85,7 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     MauiKit4
+    MauiKit4::Accounts
     MauiKit4::Archiver
     MauiKit4::Documents
     MauiKit4::FileBrowsing
@@ -100,8 +98,7 @@ target_link_libraries(${PROJECT_NAME}
     KF6::Archive
     KF6::CoreAddons
     KF6::I18n
-    KF6::I18nQml
-    PkgConfig::libsecret)
+    KF6::I18nQml)
 
 #TODO: port to ecm_install_icons()
 install(TARGETS ${PROJECT_NAME} ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

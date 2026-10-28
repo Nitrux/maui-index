@@ -9,40 +9,10 @@
 #include <kio/authinfo.h>
 #include <kpasswdserverclient.h>
 
-#ifdef signals
-#pragma push_macro("signals")
-#undef signals
-#define INDEX_RESTORE_QT_SIGNALS
-#endif
-extern "C" {
-#include <libsecret/secret.h>
-}
-#ifdef INDEX_RESTORE_QT_SIGNALS
-#pragma pop_macro("signals")
-#undef INDEX_RESTORE_QT_SIGNALS
-#endif
+#include <MauiKit4/Accounts/mauisecretstore.h>
 
 namespace
 {
-const SecretSchema *indexSchema()
-{
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-    static const SecretSchema schema = {
-        "org.maui.index.network",
-        SECRET_SCHEMA_NONE,
-        {
-            { "protocol", SECRET_SCHEMA_ATTRIBUTE_STRING },
-            { "address",  SECRET_SCHEMA_ATTRIBUTE_STRING },
-            { "username", SECRET_SCHEMA_ATTRIBUTE_STRING },
-            { nullptr,     SECRET_SCHEMA_ATTRIBUTE_STRING }
-        }
-    };
-#pragma GCC diagnostic pop
-
-    return &schema;
-}
-
 bool validAttribute(const QString &value)
 {
     return !value.isEmpty() && !value.contains(QChar(0)) && !value.contains(QRegularExpression(QStringLiteral("[\\x00-\\x1F\\x7F]")));
@@ -102,7 +72,9 @@ NetworkPasswordManager &NetworkPasswordManager::instance()
 
 NetworkPasswordManager::NetworkPasswordManager(QObject *parent)
     : QObject(parent)
-{}
+{
+    MauiSecretStore::instance()->migrateLegacy(QStringLiteral("org.maui.index.network"), {QStringLiteral("protocol"), QStringLiteral("address"), QStringLiteral("username")}, QStringLiteral("index"), QStringLiteral("network"));
+}
 
 NetworkPasswordManager::~NetworkPasswordManager()
 {
@@ -118,18 +90,7 @@ int NetworkPasswordManager::revision() const
 
 bool NetworkPasswordManager::available() const
 {
-    GError *error = nullptr;
-    SecretService *service = secret_service_get_sync(SECRET_SERVICE_NONE, nullptr, &error);
-
-    if (error) {
-        g_error_free(error);
-        return false;
-    }
-
-    const bool result = service != nullptr;
-    if (service)
-        g_object_unref(service);
-    return result;
+    return MauiSecretStore::instance()->available();
 }
 
 QVariantMap NetworkPasswordManager::find(const QString &protocol,
@@ -138,48 +99,15 @@ QVariantMap NetworkPasswordManager::find(const QString &protocol,
 {
     QVariantMap result;
     result[QStringLiteral("found")] = false;
-
     QString normalizedProtocol;
     QString normalizedAddress;
     const QString normalizedUsername = username.trimmed();
     if (!normalizeEndpoint(protocol, address, normalizedUsername, &normalizedProtocol, &normalizedAddress, nullptr))
         return result;
-
-    GError *error = nullptr;
-    GHashTable *attributes = secret_attributes_build(
-        indexSchema(),
-        "protocol", normalizedProtocol.toUtf8().constData(),
-        "address", normalizedAddress.toUtf8().constData(),
-        "username", normalizedUsername.toUtf8().constData(),
-        nullptr);
-
-    GList *items = secret_service_search_sync(
-        nullptr,
-        indexSchema(),
-        attributes,
-        static_cast<SecretSearchFlags>(SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK | SECRET_SEARCH_LOAD_SECRETS),
-        nullptr,
-        &error);
-
-    g_hash_table_unref(attributes);
-
-    if (error) {
-        qWarning() << "NetworkPasswordManager::find:" << error->message;
-        g_error_free(error);
-        return result;
-    }
-
-    if (items) {
-        SecretItem *item = SECRET_ITEM(items->data);
-        SecretValue *value = secret_item_get_secret(item);
-        if (value) {
-            result[QStringLiteral("found")] = true;
-            result[QStringLiteral("password")] = QString::fromUtf8(secret_value_get(value, nullptr));
-            secret_value_unref(value);
-        }
-    }
-
-    g_list_free_full(items, g_object_unref);
+    const auto credentials = MauiSecretStore::instance()->find(QStringLiteral("index"), QStringLiteral("network"), {{QStringLiteral("protocol"), normalizedProtocol}, {QStringLiteral("address"), normalizedAddress}, {QStringLiteral("username"), normalizedUsername}});
+    if (credentials.value(QStringLiteral("found")).toBool())
+        result[QStringLiteral("password")] = credentials.value(QStringLiteral("secret"));
+    result[QStringLiteral("found")] = credentials.value(QStringLiteral("found")).toBool();
     return result;
 }
 
@@ -258,24 +186,9 @@ bool NetworkPasswordManager::save(const QString &protocol,
         return false;
     }
 
-    GError *error = nullptr;
-    secret_password_store_sync(
-        indexSchema(),
-        SECRET_COLLECTION_DEFAULT,
-        credentialLabel(normalizedProtocol, normalizedAddress, normalizedUsername).toUtf8().constData(),
-        password.toUtf8().constData(),
-        nullptr,
-        &error,
-        "protocol", normalizedProtocol.toUtf8().constData(),
-        "address", normalizedAddress.toUtf8().constData(),
-        "username", normalizedUsername.toUtf8().constData(),
-        nullptr);
-
-    if (error) {
-        qWarning() << "NetworkPasswordManager::save:" << error->message;
-        g_error_free(error);
+    const bool stored = MauiSecretStore::instance()->save(QStringLiteral("index"), QStringLiteral("network"), QVariantMap{{QStringLiteral("protocol"), normalizedProtocol}, {QStringLiteral("address"), normalizedAddress}, {QStringLiteral("username"), normalizedUsername}}, password, credentialLabel(normalizedProtocol, normalizedAddress, normalizedUsername));
+    if (!stored)
         return false;
-    }
 
     ++m_revision;
     Q_EMIT credentialsChanged();
@@ -305,21 +218,8 @@ bool NetworkPasswordManager::remove(const QString &protocol,
     static KPasswdServerClient client;
     client.removeAuthInfo(endpoint.host(), normalizedProtocol, normalizedUsername);
 
-    GError *error = nullptr;
-    secret_password_clear_sync(
-        indexSchema(),
-        nullptr,
-        &error,
-        "protocol", normalizedProtocol.toUtf8().constData(),
-        "address", normalizedAddress.toUtf8().constData(),
-        "username", normalizedUsername.toUtf8().constData(),
-        nullptr);
-
-    if (error) {
-        qWarning() << "NetworkPasswordManager::remove:" << error->message;
-        g_error_free(error);
+    if (!MauiSecretStore::instance()->remove(QStringLiteral("index"), QStringLiteral("network"), QVariantMap{{QStringLiteral("protocol"), normalizedProtocol}, {QStringLiteral("address"), normalizedAddress}, {QStringLiteral("username"), normalizedUsername}}))
         return false;
-    }
 
     ++m_revision;
     Q_EMIT credentialsChanged();

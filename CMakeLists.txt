@@ -63,6 +63,7 @@ find_package(KF6 ${REQUIRED_KF_VERSION} REQUIRED COMPONENTS I18n CoreAddons Arch
 set(QT_NO_PRIVATE_MODULE_WARNING ON CACHE BOOL
     "MauiKit uses Qt's private WaylandClient API" FORCE)
 find_package(MauiKit4 ${REQUIRED_MAUIKIT_VERSION} REQUIRED COMPONENTS FileBrowsing Archiver Documents Terminal TextEditor)
+find_package(MauiKitAccounts4 ${REQUIRED_MAUIKIT_VERSION} REQUIRED)
 
 ecm_find_qmlmodule(org.mauikit.terminal)
 
