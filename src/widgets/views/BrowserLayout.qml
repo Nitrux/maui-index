@@ -34,10 +34,33 @@ Item
     readonly property FB.FileBrowser browser : currentItem.browser
     readonly property Maui.SplitView splitView : _splitView
     readonly property Item actionsBar: _actionsBarLoader.item
+    property url previewSource: ""
+    property var previewResult: null
 
     Maui.Controls.title: title
     Maui.Controls.toolTipText: safeTitle(browser.currentPath)
     Maui.Controls.iconName: "folder"
+
+    function capturePreview()
+    {
+        if (!control.visible || control.width <= 0 || control.height <= 0)
+            return
+
+        control.grabToImage(function(result)
+        {
+            if (result && result.url)
+            {
+                control.previewResult = result
+                control.previewSource = result.url
+            }
+        })
+    }
+
+    onVisibleChanged:
+    {
+        if (visible)
+            Qt.callLater(control.capturePreview)
+    }
 
     function safeTitle(value)
     {
