@@ -552,7 +552,7 @@ Maui.ApplicationWindow
     {
         id: _newTabAction
         icon.name: "tab-new"
-        text: i18n("New tab")
+        text: i18n("New Tab")
         onTriggered: root.openTab(currentBrowser.currentPath)
     }
 
