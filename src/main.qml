@@ -81,7 +81,7 @@ Maui.ApplicationWindow
         {
             id: networkDialog
             implicitWidth: Math.min(root.width - Maui.Style.contentMargins * 2, Maui.Style.units.gridUnit * 30)
-            title: editServer ? i18n("Edit server") : credentialsOnly ? i18n("Enter server credentials") : i18n("Connect to a server")
+            title: editServer ? i18n("Edit Server") : credentialsOnly ? i18n("Enter Server Credentials") : i18n("Connect to Server")
             standardButtons: Dialog.Ok | Dialog.Cancel
             Component.onCompleted:
             {
@@ -231,7 +231,7 @@ Maui.ApplicationWindow
         {
             id: disconnectDialog
             property var server: null
-            title: server ? i18n("Remove server") : i18n("Disconnect from server")
+            title: server ? i18n("Remove Server") : i18n("Disconnect from Server")
             message: server ? i18n("Do you want to remove this server from the Network view?") : i18n("Do you want to disconnect from this server?")
             standardButtons: Dialog.Discard | Dialog.Cancel
             Component.onCompleted: standardButton(Dialog.Discard).text = server ? i18n("Remove") : i18n("Disconnect")
