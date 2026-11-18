@@ -71,7 +71,7 @@ Maui.ContextualMenu
     {
         id: openWithMenuItem
         enabled: !control.isExec
-        text: i18n("Open with")
+        text: i18n("Open With")
         icon.name: "document-open"
 
         onTriggered:
@@ -99,7 +99,7 @@ Maui.ContextualMenu
         enabled: control.isDir || !control.isExec
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
-        text: i18n("Preview and info")
+        text: i18n("Preview and Info")
         icon.name: "view-preview"
         onTriggered:
         {
@@ -193,7 +193,7 @@ Maui.ContextualMenu
         enabled: hasDirectoryActions
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
-        text: i18n("Open in new tab")
+        text: i18n("Open in New Tab")
         icon.name: "tab-new"
         onTriggered: control.runAfterClose(() => root.openTab(control.item.path))
     }
@@ -203,7 +203,7 @@ Maui.ContextualMenu
         enabled: hasDirectoryActions
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
-        text: i18n("Open in new window")
+        text: i18n("Open in New Window")
         icon.name: "window-new"
         onTriggered: control.runAfterClose(() => inx.openNewWindow(control.item.path))
     }

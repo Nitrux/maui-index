@@ -39,7 +39,7 @@ Maui.Page
 
         MenuItem
         {
-            text: i18n("Open with")
+            text: i18n("Open With")
             onTriggered: openWith([_fileItemMenu.url])
         }
 
@@ -51,7 +51,7 @@ Maui.Page
 
         MenuItem
         {
-            text: i18n("Open folder")
+            text: i18n("Open Folder")
             onTriggered: openTab(FB.FM.fileDir(_fileItemMenu.url))
         }
     }

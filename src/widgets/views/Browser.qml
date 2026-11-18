@@ -144,7 +144,7 @@ Maui.SplitViewItem
 
         MenuItem
         {
-            text: i18n("Select all")
+            text: i18n("Select All")
             icon.name: "edit-select-all"
             onTriggered: _browser.selectAll()
         }
@@ -330,14 +330,14 @@ Maui.SplitViewItem
 
                 MenuItem
                 {
-                    text: i18n("Open in new tab")
+                    text: i18n("Open in New Tab")
                     icon.name: "tab-new"
                     onTriggered: root.openNetworkServerInNewTab(_networkServerMenu.server)
                 }
 
                 MenuItem
                 {
-                    text: i18n("Open in new window")
+                    text: i18n("Open in New Window")
                     icon.name: "window-new"
                     onTriggered: root.openNetworkServerInNewWindow(_networkServerMenu.server)
                 }
@@ -346,7 +346,7 @@ Maui.SplitViewItem
 
                 MenuItem
                 {
-                    text: i18n("Remove server")
+                    text: i18n("Remove Server")
                     icon.name: "network-disconnect"
                     onTriggered: root.disconnectNetworkServer(_networkServerMenu.server)
                 }
