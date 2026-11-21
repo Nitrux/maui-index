@@ -33,6 +33,14 @@ qt_add_executable(${PROJECT_NAME}
     ${index_dbus_SRCS}
     ${index_RSCRS})
 
+target_precompile_headers(${PROJECT_NAME} PRIVATE
+    <QDebug>
+    <QFileInfo>
+    <QGuiApplication>
+    <QQmlEngine>
+    <QQuickWindow>
+)
+
 qt_add_qml_module(${PROJECT_NAME} URI app.maui.index
     NO_PLUGIN
     NO_IMPORT_SCAN

@@ -186,15 +186,10 @@ Loader
                     property int bookmarkIndex : -1
                     property bool hasBookmarkEntry: bookmarkIndex >= 0
                     property bool isDeviceEntry: hasBookmarkEntry && placesList.isDevice(bookmarkIndex)
-                    property bool isExternalDeviceEntry: isDeviceEntry && control.isExternalDeviceSection(placeType)
-                    property bool needsSetup: isExternalDeviceEntry && placesList.setupNeeded(bookmarkIndex)
-                    property bool showDeviceAction: isExternalDeviceEntry
                     property bool showRemoveAction: hasBookmarkEntry && !isDeviceEntry
                     readonly property var menuActionList:
                     {
                         const actions = [_actions.openInNewTabAction, _actions.openInNewWindowAction, _actions.openInSplitViewAction]
-                        if (_menu.showDeviceAction)
-                            actions.push(_actions.deviceAction)
                         if (_menu.showRemoveAction)
                             actions.push(_actions.removeAction)
                         return actions
@@ -231,23 +226,6 @@ Loader
                             text: i18n("Open in Split View")
                             icon.name: "view-split-left-right"
                             onTriggered: currentTab.split(_menu.path, Qt.Horizontal)
-                        }
-
-                        property Action deviceAction: Action
-                        {
-                            text: _menu.needsSetup ? i18n("Mount") : i18n("Unmount")
-                            icon.name: _menu.needsSetup ? "media-mount" : "media-eject"
-                            onTriggered:
-                            {
-                                if (_menu.needsSetup)
-                                {
-                                    placesList.requestSetup(_menu.bookmarkIndex)
-                                } else
-                                {
-                                    placesList.requestTeardown(_menu.bookmarkIndex)
-                                    notify("media-eject", i18n("Storage"), i18n("Unmounting device..."))
-                                }
-                            }
                         }
 
                         property Action removeAction: Action
@@ -387,6 +365,28 @@ Loader
                 }
             }
 
+            Maui.InfoDialog
+            {
+                id: _unmountDialog
+                property int deviceIndex: -1
+                property string deviceLabel: ""
+
+                title: i18n("Unmount")
+                message: i18n("Are you sure you want to unmount %1?", deviceLabel)
+                standardButtons: Dialog.Discard | Dialog.Cancel
+
+                Component.onCompleted: standardButton(Dialog.Discard).text = i18n("Unmount")
+
+                onDiscarded:
+                {
+                    placesList.requestTeardown(deviceIndex)
+                    notify("media-eject", deviceLabel, i18n("Unmounting device..."))
+                    close()
+                }
+
+                onRejected: close()
+            }
+
             Component.onCompleted:
             {
                 _listBrowser.flickable.highlightFollowsCurrentItem = false
@@ -402,7 +402,7 @@ Loader
                 contentItem.z: 1
                 readonly property bool shownPlace: control.shouldShowPlace(index, model.type, model.path, model.label)
                 readonly property string displayLabel: control.placeLabel(model.path, model.label, model.type)
-                isCurrentItem: ListView.isCurrentItem && _stackView.depth === 1
+                isCurrentItem: currentBrowser.currentPath === model.path && _stackView.depth === 1
                 width: _listBrowser.availableWidth
                 height: shownPlace ? implicitHeight : 0
                 visible: shownPlace
@@ -418,33 +418,26 @@ Loader
                 {
                     visible: placesList.isDevice(index) && control.isExternalDeviceSection(model.type)
                     icon.name: placesList.setupNeeded(index) ? "media-mount" : "media-eject"
+                    display: AbstractButton.IconOnly
                     flat: true
                     icon.height: Maui.Style.iconSizes.small
                     icon.width: Maui.Style.iconSizes.small
+
                     onClicked:
                     {
-                        console.warn("Storage button clicked:", index, model.path, "setup needed:", placesList.setupNeeded(index))
                         if (placesList.setupNeeded(index))
                         {
                             placesList.requestSetup(index)
                         } else
                         {
-                            placesList.requestTeardown(index)
-                            notify(model.icon, model.label, i18n("Unmounting device..."))
+                            _unmountDialog.deviceIndex = index
+                            _unmountDialog.deviceLabel = model.label
+                            _unmountDialog.open()
                         }
                     }
                 }
 
-                onClicked: (mouse) =>
-                           {
-                               if( placesList.isDevice(index) && placesList.setupNeeded(index))
-                               {
-                                   placesList.requestSetup(index)
-                                   return
-                               }
-
-                               openPlace(model.path, mouse)
-                           }
+                onClicked: (mouse) => openPlace(model.path, mouse)
 
                 onRightClicked:
                 {
