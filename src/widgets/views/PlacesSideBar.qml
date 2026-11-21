@@ -37,7 +37,7 @@ Loader
         if ((value.startsWith("/") || value.startsWith("file:///")) && text.startsWith("/"))
             return "folder"
 
-        return iconName
+        return iconName || ""
     }
 
     function isDeviceSection(type)
@@ -399,6 +399,7 @@ Loader
 
             delegate: Maui.ListDelegate
             {
+                contentItem.z: 1
                 readonly property bool shownPlace: control.shouldShowPlace(index, model.type, model.path, model.label)
                 readonly property string displayLabel: control.placeLabel(model.path, model.label, model.type)
                 isCurrentItem: ListView.isCurrentItem && _stackView.depth === 1
@@ -422,6 +423,7 @@ Loader
                     icon.width: Maui.Style.iconSizes.small
                     onClicked:
                     {
+                        console.warn("Storage button clicked:", index, model.path, "setup needed:", placesList.setupNeeded(index))
                         if (placesList.setupNeeded(index))
                         {
                             placesList.requestSetup(index)
