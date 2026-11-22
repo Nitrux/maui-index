@@ -19,6 +19,7 @@ FB.PlacesSideBar
     quickPlaces: inx.quickPaths()
     quickPlacesEnabled: appSettings.quickSidebarSection
     showStoragePartitions: appSettings.showStoragePartitions
+    mountRemovableOnClick: true
     currentPath: _stackView.depth === 1 && currentBrowser ? currentBrowser.currentPath : ""
     currentQuickPath: _stackView.depth === 2 ? "overview:///" : ""
 
@@ -61,6 +62,7 @@ FB.PlacesSideBar
     }
 
     onDeviceUnmounting: (label) => notify("media-eject", label, i18n("Unmounting device..."))
+    onDevicePathUnavailable: (fallbackPath) => currentBrowser.openFolder(fallbackPath.length > 0 ? fallbackPath : FB.FM.homePath())
 
     Maui.ContextualMenu
     {
