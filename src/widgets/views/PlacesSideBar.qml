@@ -3,104 +3,24 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-
 import QtQuick
-import QtQml
-
 import QtQuick.Controls
-import QtQuick.Layouts
 
 import org.mauikit.controls as Maui
 import org.mauikit.filebrowsing as FB
 
-Loader
+FB.PlacesSideBar
 {
     id: control
+
     asynchronous: true
-    active: (control.enabled && control.visible) || item
-    Keys.enabled: false
-    focus: false
-    readonly property var list: item && item.list ? item.list : null
-
-    function placeIcon(path, iconName, label, type, isDeviceEntry)
-    {
-        const value = String(path)
-        const text = String(label)
-        const sectionType = String(type)
-
-        if (isDeviceEntry && isDeviceSection(sectionType))
-            return isExternalDeviceSection(sectionType) ? "drive-removable-media" : "drive-harddisk"
-
-        if (value === "/" || value === "file:///")
-            return "folder-red"
-
-        if ((value.startsWith("/") || value.startsWith("file:///")) && text.startsWith("/"))
-            return "folder"
-
-        return iconName || ""
-    }
-
-    function isDeviceSection(type)
-    {
-        const value = String(type)
-        return isStorageSection(value) || value === i18n("Removable")
-    }
-
-    function isRootPath(path)
-    {
-        const value = String(path)
-        return value === "/" || value === "file:///" || value === "file:/"
-    }
-
-    function isStorageSection(type)
-    {
-        const value = String(type)
-        if (value === i18n("Drives") || value === i18n("Storage"))
-            return true
-
-        const placeList = control.list
-        if (!placeList)
-            return false
-
-        for (let i = 0; i < placeList.count; ++i)
-        {
-            const item = placeList.get(i)
-            if (String(item.type) === value && isRootPath(item.path))
-                return true
-        }
-
-        return false
-    }
-
-    function isExternalDeviceSection(type)
-    {
-        return String(type) === i18n("Removable")
-    }
-
-    function shouldShowPlace(index, type, path, label)
-    {
-        if (!isStorageSection(type))
-            return true
-
-        const url = String(path)
-
-        if (isRootPath(url))
-            return true
-
-        return appSettings.showStoragePartitions && control.list && control.list.isDevice(index)
-    }
-
-    function placeLabel(path, label, type)
-    {
-        return isStorageSection(type) && isRootPath(path)
-            ? i18n("Root")
-            : String(label)
-    }
-
-    function sectionLabel(type)
-    {
-        return isStorageSection(type) ? i18n("Storage") : String(type)
-    }
+    active: (enabled && visible) || item
+    groups: appSettings.normalizeSidebarSections(appSettings.sidebarSections)
+    quickPlaces: inx.quickPaths()
+    quickPlacesEnabled: appSettings.quickSidebarSection
+    showStoragePartitions: appSettings.showStoragePartitions
+    currentPath: _stackView.depth === 1 && currentBrowser ? currentBrowser.currentPath : ""
+    currentQuickPath: _stackView.depth === 2 ? "overview:///" : ""
 
     OpacityAnimator on opacity
     {
@@ -110,388 +30,125 @@ Loader
         running: control.status === Loader.Ready
     }
 
-    sourceComponent: Pane
+    onPlaceClicked: (path, mouse) =>
     {
-        id: _sideBarPane
-        readonly property alias list: _listBrowser.list
-        padding: 0
-        focus: false
-        clip: true
-        Maui.Theme.colorSet: Maui.Theme.Window
-
-        function syncCurrentPlaceSelection(preserveContentY = true)
+        if (path === "overview:///")
         {
-            if (!currentBrowser)
-                return
-
-            const targetIndex = placesList.indexOfPath(currentBrowser.currentPath)
-            const previousContentY = _listBrowser.flickable.contentY
-
-            _listBrowser.currentIndex = targetIndex
-
-            if (preserveContentY)
-                _listBrowser.flickable.contentY = previousContentY
+            _stackView.push(_homeViewComponent)
+            if (_sideBarView.sideBar.collapsed)
+                _sideBarView.sideBar.close()
+            return
         }
 
-        background: Rectangle
+        openPlace(path, mouse)
+    }
+
+    onContextMenuRequested: (path, type, index) =>
+    {
+        if (path === "overview:///")
+            return
+
+        menu.path = path
+        menu.placeType = type
+        menu.bookmarkIndex = index
+        menu.show()
+    }
+
+    onOperationError: (message) =>
+    {
+        const text = String(message).trim().length ? message : i18n("The storage operation failed.")
+        notify("dialog-error", i18n("Storage"), text)
+    }
+
+    onDeviceUnmounting: (label) => notify("media-eject", label, i18n("Unmounting device..."))
+
+    Maui.ContextualMenu
+    {
+        id: menu
+
+        property string path
+        property string placeType
+        property int bookmarkIndex: -1
+        property bool hasBookmarkEntry: bookmarkIndex >= 0
+        property bool isDeviceEntry: hasBookmarkEntry && control.list.isDevice(bookmarkIndex)
+        property bool showRemoveAction: hasBookmarkEntry && !isDeviceEntry
+        readonly property var menuActionList:
         {
-            color: Maui.Theme.alternateBackgroundColor
-            radius: Maui.Style.radiusV
-            border.color: Maui.Theme.backgroundColor
+            const actions = [actionsObject.openInNewTabAction, actionsObject.openInNewWindowAction, actionsObject.openInSplitViewAction]
+            if (menu.showRemoveAction)
+                actions.push(actionsObject.removeAction)
+            return actions
         }
 
-        contentItem: Maui.ListBrowser
+        onClosed:
         {
-            id: _listBrowser
-            verticalScrollBarPolicy: ScrollBar.AlwaysOff
-            focus: false
-            focusPolicy: Qt.NoFocus
-            Keys.enabled: false
+            menu.bookmarkIndex = -1
+            menu.path = ""
+            menu.placeType = ""
+        }
 
-            readonly property alias list : placesList
+        QtObject
+        {
+            id: actionsObject
 
-            holder.visible: count === 0
-            holder.title: i18n("Bookmarks")
-            holder.body: i18n("Your bookmarks will be listed here")
-
-            Connections
+            property Action openInNewTabAction: Action
             {
-                target: root
-                function onCurrentBrowserChanged()
-                {
-                    Qt.callLater(() => _sideBarPane.syncCurrentPlaceSelection(true))
-                }
+                text: i18n("Open in New Tab")
+                icon.name: "tab-new"
+                onTriggered: openTab(menu.path)
             }
 
-            Connections
+            property Action openInNewWindowAction: Action
             {
-                target: currentBrowser ? currentBrowser : null
-                function onCurrentPathChanged()
-                {
-                    Qt.callLater(() => _sideBarPane.syncCurrentPlaceSelection(true))
-                }
+                text: i18n("Open in New Window")
+                icon.name: "window-new"
+                onTriggered: inx.openNewWindow(menu.path)
             }
 
-            Loader
+            property Action openInSplitViewAction: Action
             {
-                id: _menuLoader
-
-                asynchronous: true
-                sourceComponent: Maui.ContextualMenu
-                {
-                    id: _menu
-
-                    property string path
-                    property string placeType
-                    property int bookmarkIndex : -1
-                    property bool hasBookmarkEntry: bookmarkIndex >= 0
-                    property bool isDeviceEntry: hasBookmarkEntry && placesList.isDevice(bookmarkIndex)
-                    property bool showRemoveAction: hasBookmarkEntry && !isDeviceEntry
-                    readonly property var menuActionList:
-                    {
-                        const actions = [_actions.openInNewTabAction, _actions.openInNewWindowAction, _actions.openInSplitViewAction]
-                        if (_menu.showRemoveAction)
-                            actions.push(_actions.removeAction)
-                        return actions
-                    }
-
-                    onClosed:
-                    {
-                        _menu.bookmarkIndex = -1
-                        _menu.path = ""
-                        _menu.placeType = ""
-                    }
-
-                    QtObject
-                    {
-                        id: _actions
-
-                        property Action openInNewTabAction: Action
-                        {
-                            text: i18n("Open in New Tab")
-                            icon.name: "tab-new"
-                            onTriggered: openTab(_menu.path)
-                        }
-
-                        property Action openInNewWindowAction: Action
-                        {
-                            text: i18n("Open in New Window")
-                            icon.name: "window-new"
-                            onTriggered: inx.openNewWindow(_menu.path)
-                        }
-
-                        property Action openInSplitViewAction: Action
-                        {
-                            enabled: root.currentTab.count === 1
-                            text: i18n("Open in Split View")
-                            icon.name: "view-split-left-right"
-                            onTriggered: currentTab.split(_menu.path, Qt.Horizontal)
-                        }
-
-                        property Action removeAction: Action
-                        {
-                            text: i18n("Remove")
-                            icon.name: "edit-delete"
-                            Maui.Controls.status: Maui.Controls.Negative
-                            onTriggered: placesList.removePlace(_menu.bookmarkIndex)
-                        }
-                    }
-
-                    Repeater
-                    {
-                        model: _menu.menuActionList
-                        delegate: MenuItem
-                        {
-                            action: modelData
-                        }
-                    }
-                }
+                enabled: root.currentTab.count === 1
+                text: i18n("Open in Split View")
+                icon.name: "view-split-left-right"
+                onTriggered: currentTab.split(menu.path, Qt.Horizontal)
             }
 
-            // flickable.topMargin: Maui.Style.contentMargins
-            // flickable.bottomMargin: Maui.Style.contentMargins
-            flickable.header: ColumnLayout
+            property Action removeAction: Action
             {
-                width: parent.width
-                spacing: Maui.Style.space.small
-
-                Loader
-                {
-                    id: _quickSectionLoader
-                    asynchronous: true
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: Maui.Style.space.medium
-                    height: implicitHeight + _listBrowser.spacing*2
-                    active: appSettings.quickSidebarSection
-
-                    OpacityAnimator on opacity
-                    {
-                        from: 0
-                        to: 1
-                        duration: Maui.Style.units.longDuration
-                        running: _quickSectionLoader.status === Loader.Ready
-                    }
-
-                    sourceComponent: GridLayout
-                    {
-                        id: _quickSection
-
-                        rows: 3
-                        columns: 3
-
-                        columnSpacing: Maui.Style.defaultSpacing
-                        rowSpacing: Maui.Style.defaultSpacing
-
-                        Repeater
-                        {
-                            model: inx.quickPaths()
-
-                            delegate: Maui.GridBrowserDelegate
-                            {
-                                Maui.Theme.colorSet: Maui.Theme.Button
-                                Maui.Theme.inherit: false
-                                readonly property string resolvedIcon: control.placeIcon(modelData.path, modelData.icon, modelData.label, modelData.type, false)
-
-                                Layout.preferredHeight: Math.min(50, width)
-                                Layout.preferredWidth: 50
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-
-                                isCurrentItem: modelData.path === "overview:///" ? _stackView.depth === 2 : (currentBrowser.currentPath === modelData.path && _stackView.depth === 1)
-                                iconSource: resolvedIcon
-                                iconSizeHint: 16
-                                label1.text: modelData.label
-                                labelsVisible: false
-                                tooltipText: modelData.label
-                                flat: false
-
-                                onClicked: (mouse) =>
-                                           {
-                                               if(modelData.path === "overview:///")
-                                               {
-                                                   _stackView.push(_homeViewComponent)
-                                                   if(control.collapsed)
-                                                   control.close()
-                                                   return
-                                               }
-
-                                               openPlace(modelData.path, mouse)
-
-                                           }
-
-                                onRightClicked:
-                                {
-                                    if (modelData.path === "overview:///")
-                                        return
-                                    _menuLoader.item.path = modelData.path
-                                    _menuLoader.item.placeType = ""
-                                    _menuLoader.item.bookmarkIndex = -1
-                                    _menuLoader.item.show()
-                                }
-
-                                onPressAndHold:
-                                {
-                                    if (modelData.path === "overview:///")
-                                        return
-                                    _menuLoader.item.path = modelData.path
-                                    _menuLoader.item.placeType = ""
-                                    _menuLoader.item.bookmarkIndex = -1
-                                    _menuLoader.item.show()
-                                }
-                            }
-                        }
-                    }
-                }
-
+                text: i18n("Remove")
+                icon.name: "edit-delete"
+                Maui.Controls.status: Maui.Controls.Negative
+                onTriggered: control.list.removePlace(menu.bookmarkIndex)
             }
+        }
 
-            model: Maui.BaseModel
+        Repeater
+        {
+            model: menu.menuActionList
+            delegate: MenuItem
             {
-                id: placesModel
-                list: FB.PlacesList
-                {
-                    id: placesList
-                    groups: appSettings.normalizeSidebarSections(appSettings.sidebarSections)
-                }
-            }
-
-            Connections
-            {
-                target: placesList
-                function onOperationError(message)
-                {
-                    const text = String(message).trim().length ? message : i18n("The storage operation failed.")
-                    notify("dialog-error", i18n("Storage"), text)
-                }
-            }
-
-            Maui.InfoDialog
-            {
-                id: _unmountDialog
-                property int deviceIndex: -1
-                property string deviceLabel: ""
-
-                title: i18n("Unmount")
-                message: i18n("Are you sure you want to unmount %1?", deviceLabel)
-                standardButtons: Dialog.Discard | Dialog.Cancel
-
-                Component.onCompleted: standardButton(Dialog.Discard).text = i18n("Unmount")
-
-                onDiscarded:
-                {
-                    placesList.requestTeardown(deviceIndex)
-                    notify("media-eject", deviceLabel, i18n("Unmounting device..."))
-                    close()
-                }
-
-                onRejected: close()
-            }
-
-            Component.onCompleted:
-            {
-                _listBrowser.flickable.highlightFollowsCurrentItem = false
-                Qt.callLater(() =>
-                {
-                    _listBrowser.flickable.positionViewAtBeginning()
-                    _sideBarPane.syncCurrentPlaceSelection(true)
-                })
-            }
-
-            delegate: Maui.ListDelegate
-            {
-                contentItem.z: 1
-                readonly property bool shownPlace: control.shouldShowPlace(index, model.type, model.path, model.label)
-                readonly property string displayLabel: control.placeLabel(model.path, model.label, model.type)
-                isCurrentItem: currentBrowser.currentPath === model.path && _stackView.depth === 1
-                width: _listBrowser.availableWidth
-                height: shownPlace ? implicitHeight : 0
-                visible: shownPlace
-                enabled: shownPlace
-
-                iconSize: Maui.Style.iconSize
-                label: displayLabel
-                tooltipText: displayLabel
-                iconName: control.placeIcon(model.path, model.icon, model.label, model.type, placesList.isDevice(index))
-                iconVisible: true
-
-                template.content: ToolButton
-                {
-                    visible: placesList.isDevice(index) && control.isExternalDeviceSection(model.type)
-                    icon.name: placesList.setupNeeded(index) ? "media-mount" : "media-eject"
-                    display: AbstractButton.IconOnly
-                    flat: true
-                    icon.height: Maui.Style.iconSizes.small
-                    icon.width: Maui.Style.iconSizes.small
-
-                    onClicked:
-                    {
-                        if (placesList.setupNeeded(index))
-                        {
-                            placesList.requestSetup(index)
-                        } else
-                        {
-                            _unmountDialog.deviceIndex = index
-                            _unmountDialog.deviceLabel = model.label
-                            _unmountDialog.open()
-                        }
-                    }
-                }
-
-                onClicked: (mouse) => openPlace(model.path, mouse)
-
-                onRightClicked:
-                {
-                    _menuLoader.item.path = model.path
-                    _menuLoader.item.placeType = model.type
-                    _menuLoader.item.bookmarkIndex = index
-                    _menuLoader.item.show()
-                }
-
-                onPressAndHold:
-                {
-                    _menuLoader.item.path = model.path
-                    _menuLoader.item.placeType = model.type
-                    _menuLoader.item.bookmarkIndex = index
-                    _menuLoader.item.show()
-                }
-            }
-
-            section.property: "type"
-            section.criteria: ViewSection.FullString
-            section.delegate: Maui.SectionHeader
-            {
-                width: _listBrowser.availableWidth
-                text1: control.sectionLabel(section)
-                label1.font.weight: Font.Bold
-                label1.font.pixelSize: 14
-                label1.opacity: 1.0
-                label2.visible: false
+                action: modelData
             }
         }
     }
 
     function openPlace(path, mouse)
     {
-        if(mouse.modifiers & Qt.ControlModifier)
+        if (mouse.modifiers & Qt.ControlModifier)
         {
             openTab(path)
-        }else if(mouse.modifiers & Qt.AltModifier)
+        } else if (mouse.modifiers & Qt.AltModifier)
         {
             currentTab.split(path)
-        }
-        else
+        } else
         {
             currentBrowser.openFolder(path)
         }
 
-        if(_sideBarView.sideBar.collapsed)
+        if (_sideBarView.sideBar.collapsed)
             _sideBarView.sideBar.close()
 
-        if(_stackView.depth === 2)
+        if (_stackView.depth === 2)
             _stackView.pop()
-
-        if(control.collapsed)
-            control.close()
-
     }
 }
