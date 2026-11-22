@@ -97,7 +97,7 @@ FB.PlacesSideBar
             {
                 text: i18n("Open in New Tab")
                 icon.name: "tab-new"
-                onTriggered: openTab(menu.path)
+                onTriggered: control.openMenuPlace(path => openTab(path))
             }
 
             property Action openInNewWindowAction: Action
@@ -132,6 +132,18 @@ FB.PlacesSideBar
                 action: modelData
             }
         }
+    }
+
+    function openMenuPlace(callback)
+    {
+        const index = menu.bookmarkIndex
+        if (index >= 0 && control.list.isDevice(index) && control.list.setupNeeded(index))
+        {
+            control.requestDeviceSetup(index, control.list.get(index).udi, Qt.NoModifier, callback)
+            return
+        }
+
+        callback(menu.path)
     }
 
     function openPlace(path, mouse)
