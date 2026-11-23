@@ -1028,7 +1028,7 @@ Maui.ApplicationWindow
                 {
                     id: _fileOperationIndicator
                     transferCenter: _fileOperationDialog
-                    Maui.Controls.badgeText: ""
+                    Maui.Controls.badgeText: _fileOperationIndicator.transferCount > 1 ? String(_fileOperationIndicator.transferCount) : ""
 
                     contentItem: RowLayout
                     {
@@ -1041,27 +1041,6 @@ Maui.ApplicationWindow
                             Layout.preferredHeight: Maui.Style.iconSize
                             source: _fileOperationIndicator.icon.name
                             color: _fileOperationIndicator.color
-                        }
-
-                        ToolButton
-                        {
-                            visible: _fileOperationIndicator.transferCount > 1
-                            text: _fileOperationIndicator.transferCount
-                            display: ToolButton.TextOnly
-                            implicitHeight: Maui.Style.iconSize
-                            topPadding: 0
-                            bottomPadding: 0
-                            font.bold: true
-                            font.pointSize: Maui.Style.fontSizes.small
-                            ToolTip.visible: false
-                            ToolTip.text: ""
-                            onClicked: {}
-
-                            background: Rectangle
-                            {
-                                color: Maui.Theme.alternateBackgroundColor
-                                radius: Maui.Style.radiusV
-                            }
                         }
                     }
                 },
