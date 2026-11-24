@@ -577,6 +577,25 @@ Maui.SplitViewItem
                                     }
                                 }
 
+            Connections
+            {
+                target: _browser
+                ignoreUnknownSignals: true
+
+                function onMillerItemRightClicked(item, list)
+                {
+                    if(String(item.path || "").startsWith("tags://"))
+                    {
+                        _tagMenu.tag = item.label
+                        _tagMenu.show()
+                    }
+                    else if(_browser.currentFMList.pathType !== FB.FMList.TRASH_PATH)
+                    {
+                        itemMenu.showForItem(item, list)
+                    }
+                }
+            }
+
             onRightClicked:
             {
                 _emptyAreaMenu.show()

@@ -20,7 +20,7 @@ Maui.ContextualMenu
     readonly property bool canDownload: !control.isDir && ["smb", "sftp", "ftp", "ftps", "dav", "davs", "fish"].indexOf(String(control.itemUrl).split(":")[0]) >= 0
     readonly property bool canExtract: String(control.itemUrl).length > 0 && Arc.StaticArchive.isSupported(control.itemUrl)
     readonly property bool showDirectorySection: canBookmark || hasDirectoryActions
-    readonly property var selectedUris: _browser.filterSelection(currentPath, control.item.path)
+    readonly property var selectedUris: control.item && control.item.path ? _browser.filterSelection(targetList ? String(targetList.path) : currentPath, String(control.item.path)) : []
 
     /**
       *
@@ -43,6 +43,8 @@ Maui.ContextualMenu
     property bool isExec : false
 
     property var pendingAction: null
+    property var targetList: null
+    property bool explicitItem: false
 
     function runAfterClose(action)
     {
@@ -116,7 +118,10 @@ Maui.ContextualMenu
         icon.name: "edit-rename"
         onTriggered:
         {
-            currentBrowser.renameItem()
+            if (control.explicitItem)
+                currentBrowser.renameItem([control.item])
+            else
+                currentBrowser.renameItem()
         }
     }
 
@@ -249,13 +254,13 @@ Maui.ContextualMenu
         visible: enabled
         height: visible ? implicitHeight : -control.spacing
         Binding on folderColor {
-            value: control.item.icon
+            value: control.item && control.item.icon ? String(control.item.icon) : "folder"
             restoreMode: Binding.RestoreBindingOrValue
         }
 
         onFolderColorPicked:
         {
-            _browser.currentFMList.setDirIcon(control.index, color)
+            (control.targetList || currentBrowser.currentFMList).setDirIcon(control.index, color)
             control.close()
         }
     }
@@ -265,13 +270,17 @@ Maui.ContextualMenu
         const action = control.pendingAction
         control.pendingAction = null
         control.index = -1
+        control.targetList = null
+        control.explicitItem = false
         if(action)
             Qt.callLater(action)
     }
 
     function showFor(index)
     {
-        control.item = _browser.currentFMList.get(index)
+        control.targetList = _browser.currentFMList
+        control.explicitItem = false
+        control.item = control.targetList.get(index)
         if(item.path.startsWith("tags://") || item.path.startsWith("applications://"))
             return
 
@@ -282,5 +291,23 @@ Maui.ContextualMenu
             control.isExec = item.executable == true || item.executable == "true"
             control.show()
         }
+    }
+
+    function showForItem(item, list)
+    {
+        if (!item || !list)
+            return
+
+        control.item = item
+        control.targetList = list
+        control.explicitItem = true
+        control.index = list.indexOfFile(String(item.path || ""))
+
+        if(item.path.startsWith("tags://") || item.path.startsWith("applications://"))
+            return
+
+        control.isDir = item.isdir == true || item.isdir == "true"
+        control.isExec = item.executable == true || item.executable == "true"
+        control.show()
     }
 }

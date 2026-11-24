@@ -15,6 +15,7 @@ ColumnLayout
     readonly property bool isDir: iteminfo.isdir == "true"
 
     implicitHeight: previewLayout.implicitHeight
+    height: implicitHeight
 
     ListModel
     {
@@ -82,7 +83,6 @@ ColumnLayout
                 {
                     id: _preview
                     Layout.fillWidth: true
-                    Layout.bottomMargin: previewHeader.implicitHeight + previewCardLayout.spacing
                     compact: true
                 }
             }
@@ -140,6 +140,15 @@ ColumnLayout
                     }
                 }
             }
+        }
+
+        FileProperties
+        {
+            Layout.fillWidth: true
+            Layout.leftMargin: Maui.Style.space.small
+            Layout.rightMargin: Maui.Style.space.small
+            url: control.currentUrl
+            spacing: previewLayout.spacing
         }
     }
 

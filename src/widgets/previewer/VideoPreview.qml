@@ -95,6 +95,7 @@ Maui.Page
 
     footBar.visible: true
     footBar.background: null
+    footBar.forceCenterMiddleContent: false
 
     footBar.leftContent: ToolButton
     {

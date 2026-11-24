@@ -77,16 +77,16 @@ Item
     ColumnLayout
     {
         anchors.centerIn: parent
-        width: Math.min(parent.width, 200)
+        width: parent.width
         spacing: Maui.Style.space.medium
 
         Item
         {
-            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: Math.min(parent.width, 200)
             Layout.fillHeight: true
 
             Layout.preferredHeight: 200
-            Layout.preferredWidth: 200
 
             Maui.IconItem
             {
@@ -100,7 +100,8 @@ Item
 
         Maui.ListItemTemplate
         {
-            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: Math.min(parent.width, 200)
             label1.text: String(player.metaData.value(MediaMetaData.Title) || "")
             label1.font.weight: Font.DemiBold
             label1.font.pointSize: Maui.Style.fontSizes.big
