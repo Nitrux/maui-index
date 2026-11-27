@@ -80,7 +80,6 @@ Maui.ApplicationWindow
         Maui.InfoDialog
         {
             id: networkDialog
-            implicitWidth: Math.min(root.width - Maui.Style.contentMargins * 2, Maui.Style.units.gridUnit * 30)
             title: editServer ? i18n("Edit Server") : credentialsOnly ? i18n("Enter Server Credentials") : i18n("Connect to Server")
             standardButtons: Dialog.Ok | Dialog.Cancel
             Component.onCompleted:

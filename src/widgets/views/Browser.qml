@@ -161,33 +161,6 @@ Maui.SplitViewItem
             title: i18n("Remove '%1'", tag)
             standardButtons: Dialog.Discard | Dialog.Cancel
             Component.onCompleted: standardButton(Dialog.Discard).text = i18n("Remove")
-            footer: DialogButtonBox
-            {
-                width: parent.width
-                padding: Maui.Style.contentMargins
-                standardButtons: _removeTagDialog.standardButtons
-
-                delegate: Button
-                {
-                    focus: true
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 1
-                    Maui.Controls.status: {
-                        switch(DialogButtonBox.buttonRole)
-                        {
-                        case DialogButtonBox.AcceptRole:
-                        case DialogButtonBox.ApplyRole:
-                        case DialogButtonBox.YesRole:
-                            return Maui.Controls.Positive
-                        case DialogButtonBox.DestructiveRole:
-                        case DialogButtonBox.DiscardRole:
-                            return Maui.Controls.Negative
-                        default:
-                            return Maui.Controls.Normal
-                        }
-                    }
-                }
-            }
 
             message: i18n("Are you sure you want to remove this tag? This operation can not be undone.")
             onClosed:
